@@ -152,7 +152,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     betBearEth(etherAmount);
   }
 
-  //user decide to create a bear position
+  //user decide to create a bear position using ether parameter
   function betBearEth(uint256 _amount) public whenNotPaused nonReentrant {
     require(
       collateral[ETHER][msg.sender].mul(3) >= _amount,
@@ -176,7 +176,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     betBullEth(etherAmount);
   }
 
-  //user decide to create a bull position
+  //user decide to create a bull position with ether
   function betBullEth(uint256 _amount) public whenNotPaused nonReentrant {
     require(
       collateral[ETHER][msg.sender].mul(3) >= _amount,
@@ -195,6 +195,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //request price from the oracle and save the requrest id
   //should be called befor adjust collateral
+  //It should be called every 24 hour
   function requestPrice() public onlyOwner {
     bytes32 requestId = nftOracle.getFloorPrice(specId, payment, assetAddress, pricingAsset);
     if (requestId != latestRequestId) {
@@ -204,7 +205,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //Admin executive adjust to calculate profit and loss per minute
-  //@notice call the requestPrice() before that
+  //@notice call the requestPrice() per day before that
+  //It should be called every 1 hour
   function adjustCollateral() public whenNotPaused onlyOwner {
     uint256 newPrice = nftOracle.showPrice(latestRequestId);
     uint256 oldPrice = nftOracle.showPrice(lastRequestId);
@@ -217,7 +219,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           uint256 reward;
 
           if (newPrice > oldPrice) {
-            reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice;
+            reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
             if (
               collateral[ETHER][rounds[i].bearAddress] - reward <
               collateral[ETHER][rounds[i].bearAddress] / 2
@@ -232,7 +234,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           }
 
           if (newPrice < oldPrice) {
-            reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice;
+            reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice/24;
             if (
               collateral[ETHER][rounds[i].bullAddress] - reward <
               collateral[ETHER][rounds[i].bullAddress] / 2
