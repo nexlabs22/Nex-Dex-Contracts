@@ -221,6 +221,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           if (newPrice > oldPrice) {
             reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
             if (
+            //see main comment
               collateral[ETHER][rounds[i].bearAddress] - reward <
               collateral[ETHER][rounds[i].bearAddress] / 2
             ) {
