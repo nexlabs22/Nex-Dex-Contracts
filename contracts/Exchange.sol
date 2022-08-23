@@ -158,6 +158,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       collateral[ETHER][msg.sender].mul(3) >= _amount,
       "Your bet amount should be lesset than your collateral"
     );
+    collateral[ETHER][msg.sender] -= _amount;
     rounds[roundNumber].bearAddress = msg.sender;
     rounds[roundNumber].bearAmount += _amount;
     rounds[roundNumber].totalAmount += _amount;
@@ -182,6 +183,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       collateral[ETHER][msg.sender].mul(3) >= _amount,
       "Your bet amount should be lesset than your collateral"
     );
+    collateral[ETHER][msg.sender] -= _amount;
     rounds[roundNumber].bullAddress = msg.sender;
     rounds[roundNumber].bullAmount += _amount;
     rounds[roundNumber].totalAmount += _amount;
@@ -221,14 +223,17 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           if (newPrice > oldPrice) {
             reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
             if (
-              collateral[ETHER][rounds[i].bearAddress] - reward <
-              collateral[ETHER][rounds[i].bearAddress] / 2
+              //check if position amount is lesser than 50% of collater amount start liquidation
+              rounds[i].bearAmount*2/collateral[ETHER][rounds[i].bearAddress] < 1
             ) {
+              collateral[ETHER][rounds[i].bearAddress] += rounds[i].bearAmount;
+              rounds[i].bearAddress = address(0);
+              rounds[i].bearAmount = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {
-              collateral[ETHER][rounds[i].bearAddress] -= reward;
-              collateral[ETHER][rounds[i].bullAddress] += reward;
+              rounds[i].bearAmount -= reward;
+              rounds[i].bullAmount += reward;
               latestPrice = newPrice;
             }
           }
@@ -236,14 +241,17 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           if (newPrice < oldPrice) {
             reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice/24;
             if (
-              collateral[ETHER][rounds[i].bullAddress] - reward <
-              collateral[ETHER][rounds[i].bullAddress] / 2
+              //check if position amount is lesser than 50% of collater amount start liquidation
+              rounds[i].bullAmount*2/collateral[ETHER][rounds[i].bullAddress] < 1
             ) {
+              collateral[ETHER][rounds[i].bullAddress] += rounds[i].bullAmount;
+              rounds[i].bullAddress = address(0);
+              rounds[i].bullAmount = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {
-              collateral[ETHER][rounds[i].bullAddress] -= reward;
-              collateral[ETHER][rounds[i].bearAddress] += reward;
+              rounds[i].bullAmount -= reward;
+              rounds[i].bearAmount += reward;
               latestPrice = newPrice;
             }
           }
