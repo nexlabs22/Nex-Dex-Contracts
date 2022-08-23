@@ -42,7 +42,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   struct Round {
     uint256 startTimestamp;
-    // uint256 price;
+    uint256 price;
     uint256 bullMargin;
     uint256 bullAmount;
     uint256 bearMargin;
@@ -219,12 +219,36 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //get index price of orders
+  function getIndexPrice() public view returns(uint256){
+      uint totalPrice;
+      uint totalTrades;
+    for(uint256 i = 0; i <= roundNumber; i++){
+      if(rounds[i].isActive == true){
+        totalPrice += rounds[i].price;
+        totalTrades ++;
+      }
+    }
+    return totalPrice/totalTrades;
+  }
+
   //Admin executive adjust to calculate profit and loss per minute
   //@notice call the requestPrice() per day before that
   //It should be called every 1 hour
   function adjustCollateral() public whenNotPaused onlyOwner {
-    uint256 newPrice = nftOracle.showPrice(latestRequestId);
-    uint256 oldPrice = nftOracle.showPrice(lastRequestId);
+    uint256 newPrice;
+    uint256 oldPrice;
+    uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
+    uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
+    uint256 indexPrice = getIndexPrice();
+    //if index preice is near the oracle price(lesser than 20%) set the index price as the newPrice
+    if(indexPrice*100/newOraclePrice <= 120 && indexPrice*100/newOraclePrice >= 80){
+      newPrice = indexPrice;
+      oldPrice = oldOraclePrice;
+    }else{
+      newPrice = newOraclePrice;
+      oldPrice = oldOraclePrice;
+    }
 
     if (newPrice != 0 && newPrice / oldPrice < 2 && (newPrice * 10) / oldPrice > 5) {
       for (uint256 i = 0; i <= roundNumber; i++) {

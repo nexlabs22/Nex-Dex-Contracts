@@ -31,6 +31,7 @@ export interface ExchangeInterface extends utils.Interface {
     "betBullUsdc(uint256,uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositEther()": FunctionFragment;
+    "getIndexPrice()": FunctionFragment;
     "lastRequestId()": FunctionFragment;
     "latestPrice()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
@@ -89,6 +90,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "depositEther",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getIndexPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -184,6 +189,10 @@ export interface ExchangeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositEther",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getIndexPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -428,6 +437,8 @@ export interface Exchange extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    getIndexPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     lastRequestId(overrides?: CallOverrides): Promise<[string]>;
 
     latestPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -483,11 +494,13 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
         string,
         string,
         boolean
       ] & {
         startTimestamp: BigNumber;
+        price: BigNumber;
         bullMargin: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
@@ -564,6 +577,8 @@ export interface Exchange extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   lastRequestId(overrides?: CallOverrides): Promise<string>;
 
   latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -619,11 +634,13 @@ export interface Exchange extends BaseContract {
       BigNumber,
       BigNumber,
       BigNumber,
+      BigNumber,
       string,
       string,
       boolean
     ] & {
       startTimestamp: BigNumber;
+      price: BigNumber;
       bullMargin: BigNumber;
       bullAmount: BigNumber;
       bearMargin: BigNumber;
@@ -696,6 +713,8 @@ export interface Exchange extends BaseContract {
 
     depositEther(overrides?: CallOverrides): Promise<void>;
 
+    getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     lastRequestId(overrides?: CallOverrides): Promise<string>;
 
     latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -747,11 +766,13 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
         string,
         string,
         boolean
       ] & {
         startTimestamp: BigNumber;
+        price: BigNumber;
         bullMargin: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
@@ -924,6 +945,8 @@ export interface Exchange extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     lastRequestId(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1029,6 +1052,8 @@ export interface Exchange extends BaseContract {
     depositEther(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    getIndexPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     lastRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
