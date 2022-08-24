@@ -44,8 +44,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 startTimestamp;
     uint256 price;
     uint256 bullMargin;
+    uint256 bullMarginLoan;
     uint256 bullAmount;
     uint256 bearMargin;
+    uint256 bearMarginLoan;
     uint256 bearAmount;
     uint256 totalAmount;
     address bullAddress;
@@ -168,6 +170,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bearAddress = msg.sender;
     rounds[roundNumber].bearMargin = _margin;
+    rounds[roundNumber].bearMarginLoan = _margin*leverageRate - _margin;
     rounds[roundNumber].bearAmount += _margin*leverageRate;
     rounds[roundNumber].totalAmount += _margin*leverageRate;
 
@@ -198,6 +201,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bullAddress = msg.sender;
     rounds[roundNumber].bullMargin = _margin;
+    rounds[roundNumber].bullMarginLoan = _margin*leverageRate - _margin;
     rounds[roundNumber].bullAmount += _margin*leverageRate;
     rounds[roundNumber].totalAmount += _margin*leverageRate;
 
@@ -241,7 +245,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
     uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
     uint256 indexPrice = getIndexPrice();
-    //if index preice is near the oracle price(lesser than 20%) set the index price as the newPrice
+    //if index preice is near the oracle price(lesser than 20% difference) set the index price as the newPrice
     if(indexPrice*100/newOraclePrice <= 120 && indexPrice*100/newOraclePrice >= 80){
       newPrice = indexPrice;
       oldPrice = oldOraclePrice;
@@ -261,13 +265,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
             if (
               //check if position amount is lesser than 50% of collater amount start liquidation
-              rounds[i].bearMargin*2/collateral[ETHER][rounds[i].bearAddress] < 1
+              rounds[i].bearMarginLoan > 0 &&
+              (rounds[i].bearMarginLoan - rounds[i].bearMargin)*100/rounds[i].bearMargin < 50
             ) {
               collateral[ETHER][rounds[i].bearAddress] += rounds[i].bearMargin;
               rounds[i].totalAmount -= rounds[i].bearAmount;
               rounds[i].bearAddress = address(0);
               rounds[i].bearAmount = 0;
               rounds[i].bearMargin = 0;
+              rounds[i].bearMarginLoan = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {
@@ -283,13 +289,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice/24;
             if (
               //check if position amount is lesser than 50% of collater amount start liquidation
-              rounds[i].bullMargin*2/collateral[ETHER][rounds[i].bullAddress] < 1
+              rounds[i].bullMarginLoan > 0 &&
+              (rounds[i].bullMarginLoan - rounds[i].bullMargin)*100/rounds[i].bullMargin < 50
             ) {
               collateral[ETHER][rounds[i].bullAddress] += rounds[i].bullMargin;
               rounds[i].totalAmount -= rounds[i].bullAmount;
               rounds[i].bullAddress = address(0);
               rounds[i].bullAmount = 0;
               rounds[i].bullMargin = 0;
+              rounds[i].bullMarginLoan = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {

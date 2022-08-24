@@ -495,6 +495,8 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
+        BigNumber,
         string,
         string,
         boolean
@@ -502,8 +504,10 @@ export interface Exchange extends BaseContract {
         startTimestamp: BigNumber;
         price: BigNumber;
         bullMargin: BigNumber;
+        bullMarginLoan: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
+        bearMarginLoan: BigNumber;
         bearAmount: BigNumber;
         totalAmount: BigNumber;
         bullAddress: string;
@@ -635,6 +639,8 @@ export interface Exchange extends BaseContract {
       BigNumber,
       BigNumber,
       BigNumber,
+      BigNumber,
+      BigNumber,
       string,
       string,
       boolean
@@ -642,8 +648,10 @@ export interface Exchange extends BaseContract {
       startTimestamp: BigNumber;
       price: BigNumber;
       bullMargin: BigNumber;
+      bullMarginLoan: BigNumber;
       bullAmount: BigNumber;
       bearMargin: BigNumber;
+      bearMarginLoan: BigNumber;
       bearAmount: BigNumber;
       totalAmount: BigNumber;
       bullAddress: string;
@@ -767,6 +775,8 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
+        BigNumber,
         string,
         string,
         boolean
@@ -774,8 +784,10 @@ export interface Exchange extends BaseContract {
         startTimestamp: BigNumber;
         price: BigNumber;
         bullMargin: BigNumber;
+        bullMarginLoan: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
+        bearMarginLoan: BigNumber;
         bearAmount: BigNumber;
         totalAmount: BigNumber;
         bullAddress: string;
