@@ -15,6 +15,7 @@ import {NftOracle} from "./NftOracle.sol";
 // @title Nex Exchange smart contract
 
 contract Exchange is Ownable, Pausable, ReentrancyGuard {
+  
   using SafeMath for uint256;
 
   NftOracle public nftOracle;
