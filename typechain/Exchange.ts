@@ -22,11 +22,12 @@ export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
     "ETHER()": FunctionFragment;
+    "PartialLiquidation(address)": FunctionFragment;
     "adjustCollateral()": FunctionFragment;
     "adminAddress()": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "betBearEth(uint256,uint256)": FunctionFragment;
-    "betBearUsdc(uint256,uint256)": FunctionFragment;
+    "betBearUsd(uint256,uint256)": FunctionFragment;
     "betBullEth(uint256,uint256)": FunctionFragment;
     "betBullUsdc(uint256,uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
@@ -48,7 +49,7 @@ export interface ExchangeInterface extends utils.Interface {
     "requestPrice()": FunctionFragment;
     "roundNumber()": FunctionFragment;
     "rounds(uint256)": FunctionFragment;
-    "showUsdcBalance()": FunctionFragment;
+    "showUsdBalance()": FunctionFragment;
     "specId()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "userRounds(address,uint256)": FunctionFragment;
@@ -56,6 +57,10 @@ export interface ExchangeInterface extends utils.Interface {
   };
 
   encodeFunctionData(functionFragment: "ETHER", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "PartialLiquidation",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "adjustCollateral",
     values?: undefined
@@ -73,7 +78,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "betBearUsdc",
+    functionFragment: "betBearUsd",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -146,7 +151,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "showUsdcBalance",
+    functionFragment: "showUsdBalance",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "specId", values?: undefined): string;
@@ -165,6 +170,10 @@ export interface ExchangeInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "ETHER", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "PartialLiquidation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "adjustCollateral",
     data: BytesLike
   ): Result;
@@ -177,10 +186,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "betBearEth", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "betBearUsdc",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "betBearUsd", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "betBullEth", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "betBullUsdc",
@@ -239,7 +245,7 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "rounds", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "showUsdcBalance",
+    functionFragment: "showUsdBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "specId", data: BytesLike): Result;
@@ -263,7 +269,6 @@ export interface ExchangeInterface extends utils.Interface {
     "OwnershipTransferred(address,address)": EventFragment;
     "Pause(uint256)": EventFragment;
     "Paused(address)": EventFragment;
-    "RewardsCalculated(uint256,uint256,uint256,uint256)": EventFragment;
     "StartRound(uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
     "Withdraw(address,address,uint256,uint256)": EventFragment;
@@ -278,7 +283,6 @@ export interface ExchangeInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Pause"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RewardsCalculated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StartRound"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
@@ -337,19 +341,6 @@ export type PausedEvent = TypedEvent<[string], { account: string }>;
 
 export type PausedEventFilter = TypedEventFilter<PausedEvent>;
 
-export type RewardsCalculatedEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber, BigNumber],
-  {
-    epoch: BigNumber;
-    rewardBaseCalAmount: BigNumber;
-    rewardAmount: BigNumber;
-    treasuryAmount: BigNumber;
-  }
->;
-
-export type RewardsCalculatedEventFilter =
-  TypedEventFilter<RewardsCalculatedEvent>;
-
 export type StartRoundEvent = TypedEvent<[BigNumber], { epoch: BigNumber }>;
 
 export type StartRoundEventFilter = TypedEventFilter<StartRoundEvent>;
@@ -395,6 +386,11 @@ export interface Exchange extends BaseContract {
   functions: {
     ETHER(overrides?: CallOverrides): Promise<[string]>;
 
+    PartialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     adjustCollateral(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -409,7 +405,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    betBearUsdc(
+    betBearUsd(
       _usdMargin: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -504,10 +500,10 @@ export interface Exchange extends BaseContract {
         startTimestamp: BigNumber;
         price: BigNumber;
         bullMargin: BigNumber;
-        bullMarginLoan: BigNumber;
+        bullMarginDebt: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
-        bearMarginLoan: BigNumber;
+        bearMarginDebt: BigNumber;
         bearAmount: BigNumber;
         totalAmount: BigNumber;
         bullAddress: string;
@@ -516,7 +512,7 @@ export interface Exchange extends BaseContract {
       }
     >;
 
-    showUsdcBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+    showUsdBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     specId(overrides?: CallOverrides): Promise<[string]>;
 
@@ -539,6 +535,11 @@ export interface Exchange extends BaseContract {
 
   ETHER(overrides?: CallOverrides): Promise<string>;
 
+  PartialLiquidation(
+    _user: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   adjustCollateral(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -553,7 +554,7 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  betBearUsdc(
+  betBearUsd(
     _usdMargin: BigNumberish,
     leverageRate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -648,10 +649,10 @@ export interface Exchange extends BaseContract {
       startTimestamp: BigNumber;
       price: BigNumber;
       bullMargin: BigNumber;
-      bullMarginLoan: BigNumber;
+      bullMarginDebt: BigNumber;
       bullAmount: BigNumber;
       bearMargin: BigNumber;
-      bearMarginLoan: BigNumber;
+      bearMarginDebt: BigNumber;
       bearAmount: BigNumber;
       totalAmount: BigNumber;
       bullAddress: string;
@@ -660,7 +661,7 @@ export interface Exchange extends BaseContract {
     }
   >;
 
-  showUsdcBalance(overrides?: CallOverrides): Promise<BigNumber>;
+  showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   specId(overrides?: CallOverrides): Promise<string>;
 
@@ -683,6 +684,8 @@ export interface Exchange extends BaseContract {
   callStatic: {
     ETHER(overrides?: CallOverrides): Promise<string>;
 
+    PartialLiquidation(_user: string, overrides?: CallOverrides): Promise<void>;
+
     adjustCollateral(overrides?: CallOverrides): Promise<void>;
 
     adminAddress(overrides?: CallOverrides): Promise<string>;
@@ -695,7 +698,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    betBearUsdc(
+    betBearUsd(
       _usdMargin: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: CallOverrides
@@ -784,10 +787,10 @@ export interface Exchange extends BaseContract {
         startTimestamp: BigNumber;
         price: BigNumber;
         bullMargin: BigNumber;
-        bullMarginLoan: BigNumber;
+        bullMarginDebt: BigNumber;
         bullAmount: BigNumber;
         bearMargin: BigNumber;
-        bearMarginLoan: BigNumber;
+        bearMarginDebt: BigNumber;
         bearAmount: BigNumber;
         totalAmount: BigNumber;
         bullAddress: string;
@@ -796,7 +799,7 @@ export interface Exchange extends BaseContract {
       }
     >;
 
-    showUsdcBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     specId(overrides?: CallOverrides): Promise<string>;
 
@@ -879,19 +882,6 @@ export interface Exchange extends BaseContract {
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
 
-    "RewardsCalculated(uint256,uint256,uint256,uint256)"(
-      epoch?: BigNumberish | null,
-      rewardBaseCalAmount?: null,
-      rewardAmount?: null,
-      treasuryAmount?: null
-    ): RewardsCalculatedEventFilter;
-    RewardsCalculated(
-      epoch?: BigNumberish | null,
-      rewardBaseCalAmount?: null,
-      rewardAmount?: null,
-      treasuryAmount?: null
-    ): RewardsCalculatedEventFilter;
-
     "StartRound(uint256)"(epoch?: BigNumberish | null): StartRoundEventFilter;
     StartRound(epoch?: BigNumberish | null): StartRoundEventFilter;
 
@@ -915,6 +905,11 @@ export interface Exchange extends BaseContract {
   estimateGas: {
     ETHER(overrides?: CallOverrides): Promise<BigNumber>;
 
+    PartialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     adjustCollateral(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -929,7 +924,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    betBearUsdc(
+    betBearUsd(
       _usdMargin: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -999,7 +994,7 @@ export interface Exchange extends BaseContract {
 
     rounds(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    showUsdcBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     specId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1023,6 +1018,11 @@ export interface Exchange extends BaseContract {
   populateTransaction: {
     ETHER(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    PartialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     adjustCollateral(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1037,7 +1037,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    betBearUsdc(
+    betBearUsd(
       _usdMargin: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1112,7 +1112,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    showUsdcBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    showUsdBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     specId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

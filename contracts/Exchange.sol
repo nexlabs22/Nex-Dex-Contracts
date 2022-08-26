@@ -15,7 +15,7 @@ import {NftOracle} from "./NftOracle.sol";
 // @title Nex Exchange smart contract
 
 contract Exchange is Ownable, Pausable, ReentrancyGuard {
-  
+
   using SafeMath for uint256;
 
   NftOracle public nftOracle;
@@ -45,10 +45,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 startTimestamp;
     uint256 price;
     uint256 bullMargin;
-    uint256 bullMarginLoan;
+    uint256 bullMarginDebt;
     uint256 bullAmount;
     uint256 bearMargin;
-    uint256 bearMarginLoan;
+    uint256 bearMarginDebt;
     uint256 bearAmount;
     uint256 totalAmount;
     address bullAddress;
@@ -80,12 +80,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   event NewOracle(address oracle);
 
   event Pause(uint256 indexed epoch);
-  event RewardsCalculated(
-    uint256 indexed epoch,
-    uint256 rewardBaseCalAmount,
-    uint256 rewardAmount,
-    uint256 treasuryAmount
-  );
 
   event StartRound(uint256 indexed epoch);
 
@@ -128,7 +122,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //show collateral balance in usdc
-  function showUsdcBalance() public view returns (uint256) {
+  function showUsdBalance() public view returns (uint256) {
     uint256 ethBalance = collateral[ETHER][msg.sender];
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     return ethBalance.mul(uint256(ethPrice));
@@ -152,7 +146,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //create bear position by usdc input parameter
-  function betBearUsdc(uint256 _usdMargin, uint256 leverageRate) public whenNotPaused nonReentrant {
+  function betBearUsd(uint256 _usdMargin, uint256 leverageRate) public whenNotPaused nonReentrant {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherAmount = _usdMargin / uint256(ethPrice);
     betBearEth(etherAmount, leverageRate);
@@ -171,7 +165,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bearAddress = msg.sender;
     rounds[roundNumber].bearMargin = _margin;
-    rounds[roundNumber].bearMarginLoan = _margin*leverageRate - _margin;
+    rounds[roundNumber].bearMarginDebt = _margin*leverageRate - _margin;
     rounds[roundNumber].bearAmount += _margin*leverageRate;
     rounds[roundNumber].totalAmount += _margin*leverageRate;
 
@@ -202,7 +196,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bullAddress = msg.sender;
     rounds[roundNumber].bullMargin = _margin;
-    rounds[roundNumber].bullMarginLoan = _margin*leverageRate - _margin;
+    rounds[roundNumber].bullMarginDebt = _margin*leverageRate - _margin;
     rounds[roundNumber].bullAmount += _margin*leverageRate;
     rounds[roundNumber].totalAmount += _margin*leverageRate;
 
@@ -237,6 +231,37 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return totalPrice/totalTrades;
   }
 
+//partial liquidation adjust the debt and margin amount to through user back in the safe rate
+//If margin/debt <40 this function should be activate in order to adjust the position and funds
+  function PartialLiquidation(address _user) public onlyOwner{
+    for (uint256 i = 0; i <= roundNumber; i++) {
+
+      if(rounds[i].bullAddress == _user && rounds[i].isActive == true){
+        uint256 margin = rounds[i].bullMargin;
+        uint256 bullAmount = rounds[i].bullAmount;
+        if(bullAmount*100/margin < 40){
+          uint256 partialAmount = (100*bullAmount-60*margin)/40;
+          rounds[i].bullMargin -= partialAmount;
+          rounds[i].bullMarginDebt -= partialAmount;
+          rounds[i].bullAmount -= 2*partialAmount;
+          rounds[i].totalAmount -= 2*partialAmount;
+        }
+      }
+
+      if(rounds[i].bearAddress == _user && rounds[i].isActive == true){
+        uint256 margin = rounds[i].bearMargin;
+        uint256 bearAmount = rounds[i].bearAmount;
+        if(bearAmount*100/margin < 40){
+          uint256 partialAmount = (100*bearAmount-60*margin)/40;
+          rounds[i].bearMargin -= partialAmount;
+          rounds[i].bearMarginDebt -= partialAmount;
+          rounds[i].bearAmount -= 2*partialAmount;
+          rounds[i].totalAmount -= 2*partialAmount;
+        }
+      }
+    }
+  }
+
   //Admin executive adjust to calculate profit and loss per minute
   //@notice call the requestPrice() per day before that
   //It should be called every 1 hour
@@ -266,15 +291,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
             if (
               //check if position amount is lesser than 50% of collater amount start liquidation
-              rounds[i].bearMarginLoan > 0 &&
-              (rounds[i].bearMarginLoan - rounds[i].bearMargin)*100/rounds[i].bearMargin < 50
+              rounds[i].bearMarginDebt > 0 &&
+              (rounds[i].bearMarginDebt - rounds[i].bearMargin)*100/rounds[i].bearMargin < 50
             ) {
               collateral[ETHER][rounds[i].bearAddress] += rounds[i].bearMargin;
               rounds[i].totalAmount -= rounds[i].bearAmount;
               rounds[i].bearAddress = address(0);
               rounds[i].bearAmount = 0;
               rounds[i].bearMargin = 0;
-              rounds[i].bearMarginLoan = 0;
+              rounds[i].bearMarginDebt = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {
@@ -290,15 +315,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice/24;
             if (
               //check if position amount is lesser than 50% of collater amount start liquidation
-              rounds[i].bullMarginLoan > 0 &&
-              (rounds[i].bullMarginLoan - rounds[i].bullMargin)*100/rounds[i].bullMargin < 50
+              rounds[i].bullMarginDebt > 0 &&
+              (rounds[i].bullMarginDebt - rounds[i].bullMargin)*100/rounds[i].bullMargin < 50
             ) {
               collateral[ETHER][rounds[i].bullAddress] += rounds[i].bullMargin;
               rounds[i].totalAmount -= rounds[i].bullAmount;
               rounds[i].bullAddress = address(0);
               rounds[i].bullAmount = 0;
               rounds[i].bullMargin = 0;
-              rounds[i].bullMarginLoan = 0;
+              rounds[i].bullMarginDebt = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
             } else {
