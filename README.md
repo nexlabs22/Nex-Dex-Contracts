@@ -46,9 +46,9 @@ or
 npm i
 ```
 
-2. You can now do stuff!
+2. Change .env.sample file name to .env
 
-First change .env.sample file name to .env and add your private key(if you want deploy contracts)
+3. You can now do stuff!
 
 
 ```
@@ -67,6 +67,9 @@ If you run `yarn hardhat --help` you'll get an output of all the tasks you can r
 
 ## Deploying Contracts
 
+First add your private key(if you want deploy contracts) to .env file
+
+After thet run:
 ```
 yarn hardhat deploy
 ```
