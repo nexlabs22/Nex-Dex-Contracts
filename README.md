@@ -52,7 +52,7 @@ npm i
 
 
 ```
-yarn hardhat test
+yarn test
 ```
 
 or

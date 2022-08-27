@@ -59,7 +59,6 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         let bearAmount = round.bearAmount;
         const isActive = round.isActive;
         console.log('oldBear:', toEther(Account1Collateral))
-        // assert.equal(toEther(bearAmount), '2.0');
         assert.equal(isActive, true);
         
         //get start price with 100

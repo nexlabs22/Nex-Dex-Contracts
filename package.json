@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test ./test/unit/*.spec.ts --network hardhat",
+    "test": "hardhat test",
     "test-staging": "hardhat test ./test/staging/*.spec.ts --network rinkeby",
     "lint": "solhint 'contracts/*.sol'",
     "lint:fix": "solhint 'contracts/**/*.sol' --fix",
