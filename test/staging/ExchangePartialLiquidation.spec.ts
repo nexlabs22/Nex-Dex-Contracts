@@ -46,7 +46,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // console.log("balance:", toEther(await exchange.connect(account1).showUsdcBalance()));
 
         //owner create a bull position
-        await exchange.betBullEth(toWei('1'), toWei('100'), ('1'));
+        await exchange.betBullEth(toWei('1'), toWei('100'), ('3'));
         let roundNumber = await exchange.roundNumber();
         let round = await exchange.rounds(roundNumber);
         let bullMargin = round.bullMargin;
@@ -56,7 +56,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // assert.equal(toEther(bullAmount), '1.0');
 
         //account1 create a bear position
-        await exchange.connect(account1).betBearEth(toWei('1'), toWei('100'), ('3'));
+        await exchange.connect(account1).betBearEth(toWei('10'), toWei('100'), ('2'));
         round = await exchange.rounds(roundNumber);
         let bearMargin = round.bearMargin;
         let bearAmount = round.bearAmount;
@@ -73,7 +73,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         //increase price to 110
         await exchange.requestPrice();
         const newRequestId = await exchange.latestRequestId();
-        const newValue: number = 130;
+        const newValue: number = 180;
         await mockOracle.fulfillOracleRequest(newRequestId, numToBytes32(newValue));
 
         //test old and new price
@@ -82,10 +82,11 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         assert.equal(oldPrice, 100);
         const latestId = await exchange.latestRequestId()
         const newPrice = (await nftOracle.showPrice(latestId)).toNumber()
-        assert.equal(newPrice, 130);
+        assert.equal(newPrice, 180);
         
         //calculate profit and loss
         await exchange.adjustCollateral();
+        await exchange.PartialLiquidation(owner.address);
         round = await exchange.rounds(roundNumber);
         bullMargin = round.bullMargin;
         bullAmount = round.bullAmount;

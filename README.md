@@ -1,7 +1,7 @@
 <br/>
 <p align="center">
-<a href="https://chain.link" target="_blank">
-<img src="https://avatars.githubusercontent.com/u/110898646?s=200&v=4" width="225" alt="Chainlink Hardhat logo">
+<a href="https://github.com/nexlabs22/Nex-Dex-Contracts" target="_blank">
+<img src="https://avatars.githubusercontent.com/u/110898646?s=200&v=4" width="225" alt="Nex logo">
 </a>
 </p>
 <br/>

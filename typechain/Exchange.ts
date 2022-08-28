@@ -26,10 +26,10 @@ export interface ExchangeInterface extends utils.Interface {
     "adjustCollateral()": FunctionFragment;
     "adminAddress()": FunctionFragment;
     "assetAddress()": FunctionFragment;
-    "betBearEth(uint256,uint256)": FunctionFragment;
-    "betBearUsd(uint256,uint256)": FunctionFragment;
-    "betBullEth(uint256,uint256)": FunctionFragment;
-    "betBullUsdc(uint256,uint256)": FunctionFragment;
+    "betBearEth(uint256,uint256,uint256)": FunctionFragment;
+    "betBearUsd(uint256,uint256,uint256)": FunctionFragment;
+    "betBullEth(uint256,uint256,uint256)": FunctionFragment;
+    "betBullUsdc(uint256,uint256,uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositEther()": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
@@ -75,19 +75,19 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "betBearEth",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "betBearUsd",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "betBullEth",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "betBullUsdc",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "collateral",
@@ -401,24 +401,28 @@ export interface Exchange extends BaseContract {
 
     betBearEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     betBearUsd(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     betBullEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     betBullUsdc(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -493,15 +497,19 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
+        BigNumber,
         string,
         string,
         boolean
       ] & {
         startTimestamp: BigNumber;
         price: BigNumber;
+        bullInitialMargin: BigNumber;
         bullMargin: BigNumber;
         bullMarginDebt: BigNumber;
         bullAmount: BigNumber;
+        bearInitialMargin: BigNumber;
         bearMargin: BigNumber;
         bearMarginDebt: BigNumber;
         bearAmount: BigNumber;
@@ -550,24 +558,28 @@ export interface Exchange extends BaseContract {
 
   betBearEth(
     _margin: BigNumberish,
+    _price: BigNumberish,
     leverageRate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   betBearUsd(
     _usdMargin: BigNumberish,
+    _usdPrice: BigNumberish,
     leverageRate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   betBullEth(
     _margin: BigNumberish,
+    _price: BigNumberish,
     leverageRate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   betBullUsdc(
     _usdMargin: BigNumberish,
+    _usdPrice: BigNumberish,
     leverageRate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -642,15 +654,19 @@ export interface Exchange extends BaseContract {
       BigNumber,
       BigNumber,
       BigNumber,
+      BigNumber,
+      BigNumber,
       string,
       string,
       boolean
     ] & {
       startTimestamp: BigNumber;
       price: BigNumber;
+      bullInitialMargin: BigNumber;
       bullMargin: BigNumber;
       bullMarginDebt: BigNumber;
       bullAmount: BigNumber;
+      bearInitialMargin: BigNumber;
       bearMargin: BigNumber;
       bearMarginDebt: BigNumber;
       bearAmount: BigNumber;
@@ -694,24 +710,28 @@ export interface Exchange extends BaseContract {
 
     betBearEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     betBearUsd(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     betBullEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     betBullUsdc(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -780,15 +800,19 @@ export interface Exchange extends BaseContract {
         BigNumber,
         BigNumber,
         BigNumber,
+        BigNumber,
+        BigNumber,
         string,
         string,
         boolean
       ] & {
         startTimestamp: BigNumber;
         price: BigNumber;
+        bullInitialMargin: BigNumber;
         bullMargin: BigNumber;
         bullMarginDebt: BigNumber;
         bullAmount: BigNumber;
+        bearInitialMargin: BigNumber;
         bearMargin: BigNumber;
         bearMarginDebt: BigNumber;
         bearAmount: BigNumber;
@@ -920,24 +944,28 @@ export interface Exchange extends BaseContract {
 
     betBearEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     betBearUsd(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     betBullEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     betBullUsdc(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1033,24 +1061,28 @@ export interface Exchange extends BaseContract {
 
     betBearEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     betBearUsd(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     betBullEth(
       _margin: BigNumberish,
+      _price: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     betBullUsdc(
       _usdMargin: BigNumberish,
+      _usdPrice: BigNumberish,
       leverageRate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

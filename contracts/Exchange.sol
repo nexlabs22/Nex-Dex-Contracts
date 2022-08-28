@@ -44,9 +44,11 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   struct Round {
     uint256 startTimestamp;
     uint256 price;
+    uint256 bullInitialMargin;
     uint256 bullMargin;
     uint256 bullMarginDebt;
     uint256 bullAmount;
+    uint256 bearInitialMargin;
     uint256 bearMargin;
     uint256 bearMarginDebt;
     uint256 bearAmount;
@@ -130,6 +132,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //deposit collateral
   function depositEther() public payable {
+    require(msg.value >= 0, "msg.value should be more than 0");
     collateral[ETHER][msg.sender] = collateral[ETHER][msg.sender].add(msg.value);
     emit Deposit(ETHER, msg.sender, msg.value, collateral[ETHER][msg.sender]);
   }
@@ -146,14 +149,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //create bear position by usdc input parameter
-  function betBearUsd(uint256 _usdMargin, uint256 leverageRate) public whenNotPaused nonReentrant {
+  function betBearUsd(uint256 _usdMargin, uint256 _usdPrice, uint256 leverageRate) public whenNotPaused nonReentrant {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherAmount = _usdMargin / uint256(ethPrice);
-    betBearEth(etherAmount, leverageRate);
+    uint256 toEthPrice = _usdPrice/uint256(ethPrice);
+    betBearEth(etherAmount, toEthPrice, leverageRate);
   }
 
   //user decide to create a bear position using ether parameter
-  function betBearEth(uint256 _margin, uint256 leverageRate) public whenNotPaused nonReentrant {
+  function betBearEth(uint256 _margin, uint256 _price, uint256 leverageRate) public whenNotPaused nonReentrant {
     require(
       3 >= leverageRate,
       "The maximum leverage rate is 3"
@@ -164,7 +168,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     );
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bearAddress = msg.sender;
+    rounds[roundNumber].price = _price;
     rounds[roundNumber].bearMargin = _margin;
+    rounds[roundNumber].bearInitialMargin = _margin;
     rounds[roundNumber].bearMarginDebt = _margin*leverageRate - _margin;
     rounds[roundNumber].bearAmount += _margin*leverageRate;
     rounds[roundNumber].totalAmount += _margin*leverageRate;
@@ -177,14 +183,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //create bull position by usdc input parameter
-  function betBullUsdc(uint256 _usdMargin, uint256 leverageRate) public whenNotPaused nonReentrant {
+  function betBullUsdc(uint256 _usdMargin, uint256 _usdPrice, uint256 leverageRate) public whenNotPaused nonReentrant {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherAmount = _usdMargin / uint256(ethPrice);
-    betBullEth(etherAmount, leverageRate);
+    uint256 toEthPrice = _usdPrice/uint256(ethPrice);
+    betBullEth(etherAmount, toEthPrice, leverageRate);
   }
 
   //user decide to create a bull position with ether
-  function betBullEth(uint256 _margin, uint256 leverageRate) public whenNotPaused nonReentrant {
+  function betBullEth(uint256 _margin, uint256 _price, uint256 leverageRate) public whenNotPaused nonReentrant {
     require(
       3 >= leverageRate,
       "The maximum leverage rate is 3"
@@ -195,6 +202,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     );
     collateral[ETHER][msg.sender] -= _margin;
     rounds[roundNumber].bullAddress = msg.sender;
+    rounds[roundNumber].price = _price;
+    rounds[roundNumber].bullInitialMargin = _margin;
     rounds[roundNumber].bullMargin = _margin;
     rounds[roundNumber].bullMarginDebt = _margin*leverageRate - _margin;
     rounds[roundNumber].bullAmount += _margin*leverageRate;
@@ -230,6 +239,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
     return totalPrice/totalTrades;
   }
+
 
 //partial liquidation adjust the debt and margin amount to through user back in the safe rate
 //If margin/debt <40 this function should be activate in order to adjust the position and funds
@@ -288,17 +298,32 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           uint256 reward;
 
           if (newPrice > oldPrice) {
-            reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice/24;
+            reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice;//every 24
             if (
-              //check if position amount is lesser than 50% of collater amount start liquidation
               rounds[i].bearMarginDebt > 0 &&
-              (rounds[i].bearMarginDebt - rounds[i].bearMargin)*100/rounds[i].bearMargin < 50
-            ) {
+              reward < rounds[i].bearMargin &&
+              rounds[i].bearMargin*100/rounds[i].bearInitialMargin < 50
+              )
+             {
               collateral[ETHER][rounds[i].bearAddress] += rounds[i].bearMargin;
               rounds[i].totalAmount -= rounds[i].bearAmount;
               rounds[i].bearAddress = address(0);
               rounds[i].bearAmount = 0;
               rounds[i].bearMargin = 0;
+              rounds[i].bearInitialMargin = 0;
+              rounds[i].bearMarginDebt = 0;
+              rounds[i].isActive = false;
+              latestPrice = newPrice;
+            } else if(
+              rounds[i].bearMarginDebt > 0 &&
+              reward >= rounds[i].bearMargin
+            ){
+              rounds[i].bullAmount += rounds[i].bearMargin;
+              rounds[i].bullMargin += rounds[i].bearMargin;
+              rounds[i].bearAddress = address(0);
+              rounds[i].bearAmount = 0;
+              rounds[i].bearMargin = 0;
+              rounds[i].bearInitialMargin = 0;
               rounds[i].bearMarginDebt = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
@@ -312,17 +337,32 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           }
 
           if (newPrice < oldPrice) {
-            reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice/24;
+            reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice;//every 24
             if (
               //check if position amount is lesser than 50% of collater amount start liquidation
               rounds[i].bullMarginDebt > 0 &&
-              (rounds[i].bullMarginDebt - rounds[i].bullMargin)*100/rounds[i].bullMargin < 50
+              reward < rounds[i].bullMargin &&
+              (rounds[i].bullMargin)*100/rounds[i].bullInitialMargin < 50
             ) {
               collateral[ETHER][rounds[i].bullAddress] += rounds[i].bullMargin;
               rounds[i].totalAmount -= rounds[i].bullAmount;
               rounds[i].bullAddress = address(0);
               rounds[i].bullAmount = 0;
               rounds[i].bullMargin = 0;
+              rounds[i].bullInitialMargin = 0;
+              rounds[i].bullMarginDebt = 0;
+              rounds[i].isActive = false;
+              latestPrice = newPrice;
+            } else if(
+              rounds[i].bullMarginDebt > 0 &&
+              reward >= rounds[i].bullMargin
+            ){
+              rounds[i].bearAmount += rounds[i].bullMargin;
+              rounds[i].bearMargin += rounds[i].bullMargin;
+              rounds[i].bullAddress = address(0);
+              rounds[i].bullAmount = 0;
+              rounds[i].bullMargin = 0;
+              rounds[i].bullInitialMargin = 0;
               rounds[i].bullMarginDebt = 0;
               rounds[i].isActive = false;
               latestPrice = newPrice;
