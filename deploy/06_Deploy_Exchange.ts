@@ -58,22 +58,22 @@ const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments })
   }
 
   // Checking for funding...
-//   if (
-//     networkConfig[chainId].fundAmount &&
-//     networkConfig[chainId].fundAmount.gt(ethers.constants.Zero)
-//   ) {
-//     log("Funding with LINK...")
-//     if (
-//       await autoFundCheck(exchange.address, network.name, linkTokenAddress!, additionalMessage)
-//     ) {
-//       await run("fund-link", {
-//         contract: exchange.address,
-//         linkaddress: linkTokenAddress,
-//       })
-//     } else {
-//       log("Contract already has LINK!")
-//     }
-//   }
+  if (
+    networkConfig[chainId].fundAmount &&
+    networkConfig[chainId].fundAmount.gt(ethers.constants.Zero)
+  ) {
+    log("Funding with LINK...")
+    if (
+      await autoFundCheck(exchange.address, network.name, linkTokenAddress!, additionalMessage)
+    ) {
+      await run("fund-link", {
+        contract: exchange.address,
+        linkaddress: linkTokenAddress,
+      })
+    } else {
+      log("Contract already has LINK!")
+    }
+  }
 
   log(`Run exchange contract with following command:`)
   const networkName: string = network.name == "hardhat" ? "localhost" : network.name

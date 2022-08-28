@@ -21,8 +21,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   NftOracle public nftOracle;
   AggregatorV3Interface public priceFeed;
 
-  address public adminAddress; // address of the admin
-  address public operatorAddress; // address of the operator
   address public ETHER = address(0);
 
   uint256 public roundNumber; // current epoch for prediction round
@@ -77,8 +75,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   event BetBear(address indexed sender, uint256 indexed epoch, uint256 amount);
   event BetBull(address indexed sender, uint256 indexed epoch, uint256 amount);
 
-  event NewAdminAddress(address admin);
-  event NewOperatorAddress(address operator);
   event NewOracle(address oracle);
 
   event Pause(uint256 indexed epoch);
@@ -100,28 +96,20 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     bytes32 requestId = nftOracle.getFloorPrice(_specId, _payment, _assetAddress, _pricingAsset);
     latestRequestId = requestId;
     priceFeed = AggregatorV3Interface(_priceFeed);
+    specId = _specId;
+    payment = _payment;
+    assetAddress = _assetAddress;
+    pricingAsset = _pricingAsset;
   }
 
-  modifier onlyAdmin() {
-    require(msg.sender == adminAddress, "Not admin");
-    _;
-  }
-
-  modifier onlyAdminOrOperator() {
-    require(msg.sender == adminAddress || msg.sender == operatorAddress, "Not operator/admin");
-    _;
-  }
-
-  modifier onlyOperator() {
-    require(msg.sender == operatorAddress, "Not operator");
-    _;
-  }
 
   modifier notContract() {
     require(!_isContract(msg.sender), "Contract not allowed");
     require(msg.sender == tx.origin, "Proxy contract not allowed");
     _;
   }
+
+  
 
   //show collateral balance in usdc
   function showUsdBalance() public view returns (uint256) {
@@ -132,7 +120,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //deposit collateral
   function depositEther() public payable {
-    require(msg.value >= 0, "msg.value should be more than 0");
     collateral[ETHER][msg.sender] = collateral[ETHER][msg.sender].add(msg.value);
     emit Deposit(ETHER, msg.sender, msg.value, collateral[ETHER][msg.sender]);
   }
@@ -229,8 +216,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //get index price of orders
   function getIndexPrice() public view returns(uint256){
-      uint totalPrice;
-      uint totalTrades;
+      uint totalPrice = 0;
+      uint totalTrades = 0;
     for(uint256 i = 0; i <= roundNumber; i++){
       if(rounds[i].isActive == true){
         totalPrice += rounds[i].price;
@@ -242,7 +229,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
 
 //partial liquidation adjust the debt and margin amount to through user back in the safe rate
-//If margin/debt <40 this function should be activate in order to adjust the position and funds
+//If debt/margin <40 this function should be activate in order to adjust the position and funds
   function PartialLiquidation(address _user) public onlyOwner{
     for (uint256 i = 0; i <= roundNumber; i++) {
 
@@ -250,7 +237,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 margin = rounds[i].bullMargin;
         uint256 bullAmount = rounds[i].bullAmount;
         if(bullAmount*100/margin < 40){
-          uint256 partialAmount = (100*bullAmount-60*margin)/40;
+          uint256 partialAmount = (100*bullAmount)/40-(60*margin)/40;
           rounds[i].bullMargin -= partialAmount;
           rounds[i].bullMarginDebt -= partialAmount;
           rounds[i].bullAmount -= 2*partialAmount;
@@ -262,7 +249,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 margin = rounds[i].bearMargin;
         uint256 bearAmount = rounds[i].bearAmount;
         if(bearAmount*100/margin < 40){
-          uint256 partialAmount = (100*bearAmount-60*margin)/40;
+          uint256 partialAmount = (100*bearAmount)/40-(60*margin)/40;
           rounds[i].bearMargin -= partialAmount;
           rounds[i].bearMarginDebt -= partialAmount;
           rounds[i].bearAmount -= 2*partialAmount;

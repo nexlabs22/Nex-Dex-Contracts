@@ -73,18 +73,18 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         //increase price to 110
         await exchange.requestPrice();
         const newRequestId = await exchange.latestRequestId();
-        const newValue: number = 180;
+        const newValue: number = 140;
         await mockOracle.fulfillOracleRequest(newRequestId, numToBytes32(newValue));
 
         //test old and new price
         const lastId = await exchange.lastRequestId()
         const oldPrice = (await nftOracle.showPrice(lastId)).toNumber()
-        assert.equal(oldPrice, 100);
+        assert.equal(oldPrice, value);
         const latestId = await exchange.latestRequestId()
         const newPrice = (await nftOracle.showPrice(latestId)).toNumber()
-        assert.equal(newPrice, 180);
+        assert.equal(newPrice, newValue);
         
-        //calculate profit and loss
+       
         await exchange.adjustCollateral();
         await exchange.PartialLiquidation(owner.address);
         round = await exchange.rounds(roundNumber);

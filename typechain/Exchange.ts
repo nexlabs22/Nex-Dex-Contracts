@@ -24,7 +24,6 @@ export interface ExchangeInterface extends utils.Interface {
     "ETHER()": FunctionFragment;
     "PartialLiquidation(address)": FunctionFragment;
     "adjustCollateral()": FunctionFragment;
-    "adminAddress()": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "betBearEth(uint256,uint256,uint256)": FunctionFragment;
     "betBearUsd(uint256,uint256,uint256)": FunctionFragment;
@@ -38,7 +37,6 @@ export interface ExchangeInterface extends utils.Interface {
     "latestRequestId()": FunctionFragment;
     "ledger(uint256,address)": FunctionFragment;
     "nftOracle()": FunctionFragment;
-    "operatorAddress()": FunctionFragment;
     "oracleLatestRoundId()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
@@ -63,10 +61,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "adjustCollateral",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "adminAddress",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -118,10 +112,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(functionFragment: "nftOracle", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "operatorAddress",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "oracleLatestRoundId",
     values?: undefined
@@ -178,10 +168,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "adminAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "assetAddress",
     data: BytesLike
   ): Result;
@@ -215,10 +201,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "ledger", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nftOracle", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "operatorAddress",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "oracleLatestRoundId",
     data: BytesLike
@@ -263,8 +245,6 @@ export interface ExchangeInterface extends utils.Interface {
     "BetBear(address,uint256,uint256)": EventFragment;
     "BetBull(address,uint256,uint256)": EventFragment;
     "Deposit(address,address,uint256,uint256)": EventFragment;
-    "NewAdminAddress(address)": EventFragment;
-    "NewOperatorAddress(address)": EventFragment;
     "NewOracle(address)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Pause(uint256)": EventFragment;
@@ -277,8 +257,6 @@ export interface ExchangeInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BetBear"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BetBull"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewAdminAddress"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewOperatorAddress"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewOracle"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Pause"): EventFragment;
@@ -308,18 +286,6 @@ export type DepositEvent = TypedEvent<
 >;
 
 export type DepositEventFilter = TypedEventFilter<DepositEvent>;
-
-export type NewAdminAddressEvent = TypedEvent<[string], { admin: string }>;
-
-export type NewAdminAddressEventFilter = TypedEventFilter<NewAdminAddressEvent>;
-
-export type NewOperatorAddressEvent = TypedEvent<
-  [string],
-  { operator: string }
->;
-
-export type NewOperatorAddressEventFilter =
-  TypedEventFilter<NewOperatorAddressEvent>;
 
 export type NewOracleEvent = TypedEvent<[string], { oracle: string }>;
 
@@ -395,8 +361,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    adminAddress(overrides?: CallOverrides): Promise<[string]>;
-
     assetAddress(overrides?: CallOverrides): Promise<[string]>;
 
     betBearEth(
@@ -458,8 +422,6 @@ export interface Exchange extends BaseContract {
     >;
 
     nftOracle(overrides?: CallOverrides): Promise<[string]>;
-
-    operatorAddress(overrides?: CallOverrides): Promise<[string]>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -552,8 +514,6 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  adminAddress(overrides?: CallOverrides): Promise<string>;
-
   assetAddress(overrides?: CallOverrides): Promise<string>;
 
   betBearEth(
@@ -615,8 +575,6 @@ export interface Exchange extends BaseContract {
   >;
 
   nftOracle(overrides?: CallOverrides): Promise<string>;
-
-  operatorAddress(overrides?: CallOverrides): Promise<string>;
 
   oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -704,8 +662,6 @@ export interface Exchange extends BaseContract {
 
     adjustCollateral(overrides?: CallOverrides): Promise<void>;
 
-    adminAddress(overrides?: CallOverrides): Promise<string>;
-
     assetAddress(overrides?: CallOverrides): Promise<string>;
 
     betBearEth(
@@ -765,8 +721,6 @@ export interface Exchange extends BaseContract {
     >;
 
     nftOracle(overrides?: CallOverrides): Promise<string>;
-
-    operatorAddress(overrides?: CallOverrides): Promise<string>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -880,14 +834,6 @@ export interface Exchange extends BaseContract {
       balance?: null
     ): DepositEventFilter;
 
-    "NewAdminAddress(address)"(admin?: null): NewAdminAddressEventFilter;
-    NewAdminAddress(admin?: null): NewAdminAddressEventFilter;
-
-    "NewOperatorAddress(address)"(
-      operator?: null
-    ): NewOperatorAddressEventFilter;
-    NewOperatorAddress(operator?: null): NewOperatorAddressEventFilter;
-
     "NewOracle(address)"(oracle?: null): NewOracleEventFilter;
     NewOracle(oracle?: null): NewOracleEventFilter;
 
@@ -937,8 +883,6 @@ export interface Exchange extends BaseContract {
     adjustCollateral(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    adminAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -995,8 +939,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     nftOracle(overrides?: CallOverrides): Promise<BigNumber>;
-
-    operatorAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1055,8 +997,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    adminAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     betBearEth(
@@ -1112,8 +1052,6 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     nftOracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    operatorAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oracleLatestRoundId(
       overrides?: CallOverrides
