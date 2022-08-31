@@ -236,7 +236,14 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       if(rounds[i].bullAddress == _user && rounds[i].isActive == true){
         uint256 margin = rounds[i].bullMargin;
         uint256 bullAmount = rounds[i].bullAmount;
+        
+       // incorrect try to imagine what would happen with some actual examples: if the position gets too large relative to the margin is when there is a problem.
+       // if collateral/position size<0.4,  add this address to liquidatable adresses, then calculate the amount that can be liquidated. Dont emmediately liquidate.
+       //Lets say collateral (z) = 300 and pos (y) = 180 , then liquidation amount: x = 1/3 (5 y - 2 z) and y!=z 
+       //  https://www.wolframalpha.com/input?i2d=true&i=Divide%5By-x%2Cz-x%5D%3D+0.4%5C%2844%29+solve+for+x
+       
         if(bullAmount*100/margin < 40){
+         //= (100*180)/40-(60*300)/40=0 if I plug this in it gives me zero.
           uint256 partialAmount = (100*bullAmount)/40-(60*margin)/40;
           rounds[i].bullMargin -= partialAmount;
           rounds[i].bullMarginDebt -= partialAmount;
@@ -268,6 +275,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
     uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
     uint256 indexPrice = getIndexPrice();
+    
+    // you can comment out the 20% difference for testing for now, othewise we cannot see the tool in action. so line 281 to 289 can be commented out.
+    
     //if index preice is near the oracle price(lesser than 20% difference) set the index price as the newPrice
     if(indexPrice*100/newOraclePrice <= 120 && indexPrice*100/newOraclePrice >= 80){
       newPrice = indexPrice;
