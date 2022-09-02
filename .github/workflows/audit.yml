@@ -18,7 +18,7 @@ jobs:
       - name: Setup NodeJS 16
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 16
           
       - name: Show NodeJS version
         run: npm --version
