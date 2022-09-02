@@ -46,6 +46,10 @@
     "babel-eslint": "^10.1.0",
     "dotenv": "^10.0.0"
   },
+  "overrides": {
+    "@nomiclabs/hardhat-waffle": {
+      "@nomiclabs/hardhat-ethers": "$@nomiclabs/hardhat-ethers"
+    }},
   "mocha": {
     "timeout": 10000000
   }
