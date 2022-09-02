@@ -1,0 +1,42 @@
+name: Hardhat Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup NodeJS 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Show NodeJS version
+        run: npm --version
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Run hardhat Test
+        run: npx hardhat compile; npx hardhat test
+
+      - name: slither-action
+        uses: crytic/slither-action@v0.1.1
+        continue-on-error: true
+        id: slither
+        with:
+          sarif: results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
