@@ -36,6 +36,7 @@ export interface ExchangeInterface extends utils.Interface {
     "latestPrice()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
     "ledger(uint256,address)": FunctionFragment;
+    "liquidation(address)": FunctionFragment;
     "nftOracle()": FunctionFragment;
     "oracleLatestRoundId()": FunctionFragment;
     "owner()": FunctionFragment;
@@ -111,6 +112,7 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "ledger",
     values: [BigNumberish, string]
   ): string;
+  encodeFunctionData(functionFragment: "liquidation", values: [string]): string;
   encodeFunctionData(functionFragment: "nftOracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "oracleLatestRoundId",
@@ -200,6 +202,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "ledger", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "liquidation",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "nftOracle", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "oracleLatestRoundId",
@@ -421,6 +427,11 @@ export interface Exchange extends BaseContract {
       }
     >;
 
+    liquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     nftOracle(overrides?: CallOverrides): Promise<[string]>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -574,6 +585,11 @@ export interface Exchange extends BaseContract {
     }
   >;
 
+  liquidation(
+    _user: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   nftOracle(overrides?: CallOverrides): Promise<string>;
 
   oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -719,6 +735,8 @@ export interface Exchange extends BaseContract {
         claimed: boolean;
       }
     >;
+
+    liquidation(_user: string, overrides?: CallOverrides): Promise<void>;
 
     nftOracle(overrides?: CallOverrides): Promise<string>;
 
@@ -938,6 +956,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    liquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     nftOracle(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1049,6 +1072,11 @@ export interface Exchange extends BaseContract {
       arg0: BigNumberish,
       arg1: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    liquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     nftOracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;

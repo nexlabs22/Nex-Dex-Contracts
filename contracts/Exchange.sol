@@ -34,6 +34,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   address public assetAddress; //nft address
   string public pricingAsset; // ETH or USD
 
+  address[] liquidateList;
+
   enum Position {
     Bull,
     Bear
@@ -109,7 +111,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     _;
   }
 
-  
+
 
   //show collateral balance in usdc
   function showUsdBalance() public view returns (uint256) {
@@ -135,6 +137,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     emit Withdraw(ETHER, msg.sender, _amount, collateral[ETHER][msg.sender]);
   }
 
+  
   //create bear position by usdc input parameter
   function betBearUsd(uint256 _usdMargin, uint256 _usdPrice, uint256 leverageRate) public whenNotPaused nonReentrant {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
@@ -225,6 +228,22 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       }
     }
     return totalPrice/totalTrades;
+  }
+
+  function liquidation(address _user) public onlyOwner {
+    for (uint256 i = 0; i <= roundNumber; i++) {
+     uint totalPositionValue;
+      if(rounds[i].bullAddress == _user){
+        totalPositionValue = rounds[i].bullAmount;
+      }
+      if(rounds[i].bullAddress == _user){
+        totalPositionValue = rounds[i].bearAmount;
+      }
+
+      if(100*collateral[ETHER][_user]/totalPositionValue < 5){
+        liquidateList.push(_user);
+      }
+    }
   }
 
 
