@@ -166,6 +166,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     emit Deposit(ETHER, msg.sender, msg.value, collateral[ETHER][msg.sender]);
   }
 
+//this function requires the inclusion that you cannot withdraw collateral if you are below the 0.6 margin lvl, otherwize you force yourself into liquidation.
 
   //withdraw collateral
   function withdrawEther(uint256 _amount) public {
@@ -254,7 +255,19 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         }
     }
   }
-
+  
+  //Instead of keeping track of the pnl function in the memory, I think it is easier to keep track of position notional and the totalpositionamount[#], because
+  // the PNL is a resultant of these variables.
+  // Then everytime the smartcontract is invoked, the pnl is calculated based on the current oracle price and the weighted average purchase/open price
+  // Formula something like this: 
+  
+  // totalPositionAmount[#] += tradeAmount
+  // Position notional = totalPositionAmount * oraclePrice
+  
+  // (weighted average): Openprice = Position notional/abs(totalPositionamount) (assuming the amount is negative for short)
+  // PNL = (oracleprice - openPrice) * totalPositionAmount 
+  
+  
   //this function should be done in adjustPositions function
   function _increasePNL(address _user, uint _amount) public {
     PNL memory pnl = userPNL[_user];
@@ -310,7 +323,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return indexPrice;
   }
 
-  //calculate profit or lost for users pnl
+  //calculate profit or loss for users pnl
   function adjustPositions() public onlyOwner {
     uint256 newPrice;
     uint256 oldPrice;
@@ -348,7 +361,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   
 
-  //request price from the oracle and save the requrest id
+  //request price from the oracle and save the request id
   //should be called befor adjust collateral
   //It should be called every 24 hour
   function requestPrice() public onlyOwner {
