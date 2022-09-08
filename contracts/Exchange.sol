@@ -262,9 +262,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   // Formula something like this: 
   
   // totalPositionAmount[#] += tradeAmount
-  // Position notional = totalPositionAmount * oraclePrice
+  tradeValue = tradeAmount * tradePrice (the NexLabs dex price that was traded upon, not the oracle price)
+  // PositionOpenValue += tradeValue
   
-  // (weighted average): Openprice = Position notional/abs(totalPositionamount) (assuming the amount is negative for short)
+  // (weighted average): Openprice = PositionOpenValue /abs(totalPositionamount) (assuming the amount is negative for short)
   // PNL = (oracleprice - openPrice) * totalPositionAmount 
   
   
