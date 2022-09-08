@@ -15,7 +15,6 @@ import {NftOracle} from "./NftOracle.sol";
 // @title Nex Exchange smart contract
 
 contract Exchange is Ownable, Pausable, ReentrancyGuard {
-
   using SafeMath for uint256;
 
   NftOracle public nftOracle;
@@ -23,7 +22,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   address public ETHER = address(0);
 
-  uint256 public roundNumber; // current epoch for prediction round
   uint256 public oracleLatestRoundId; // price oracle (Chainlink)
   uint256 public latestPrice; // price oracle (Chainlink)
   bytes32 public latestRequestId; // latest oracle request id (Chainlink)
@@ -34,57 +32,58 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   address public assetAddress; //nft address
   string public pricingAsset; // ETH or USD
 
+  uint8 public discountRate = 20; //20%
+  uint8 public saveLevelMargin = 60; //60%
+  uint8 public maintenanceMargin = 50; //50%
+  uint8 public AutoCloseMargin = 40; //40%
+
   address[] liquidateList;
 
-  enum Position {
-    Bull,
-    Bear
-  }
 
-  struct Round {
+  struct Position {
     uint256 startTimestamp;
     uint256 price;
-    uint256 bullInitialMargin;
-    uint256 bullMargin;
-    uint256 bullMarginDebt;
-    uint256 bullAmount;
-    uint256 bearInitialMargin;
-    uint256 bearMargin;
-    uint256 bearMarginDebt;
-    uint256 bearAmount;
-    uint256 totalAmount;
-    address bullAddress;
-    address bearAddress;
+    uint256 positionSize;
+    address longAddress;
+    address shortAddress;
     bool isActive;
   }
 
-  struct BetInfo {
-    Position position;
-    uint256 amount;
-    bool claimed; // default false
+  struct LongOrder {
+    uint256 price;
+    uint256 assetSize;
+    address owner;
+    bool filled;
   }
 
-  struct DateAndPrice {
-    uint128 date;
-    uint128 price;
+  struct ShortOrder {
+    uint256 price;
+    uint256 assetSize;
+    address owner;
+    bool filled;
   }
 
-  mapping(uint256 => Round) public rounds;
-  mapping(address => uint256[]) public userRounds;
-  mapping(uint256 => mapping(address => BetInfo)) public ledger;
+  struct PNL {
+    uint256 pnlAmount;//default zero
+    bool isPositve; // default false
+  }
+
+  Position[] public positions;
+  LongOrder[] public longOrders;
+  ShortOrder[] public shortOrders;
+
+
+
+  mapping(address => PNL) public userPNL;
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
+  mapping(address => uint) public insuranceFund;
 
-  event BetBear(address indexed sender, uint256 indexed epoch, uint256 amount);
-  event BetBull(address indexed sender, uint256 indexed epoch, uint256 amount);
 
   event NewOracle(address oracle);
-
-  event Pause(uint256 indexed epoch);
-
-  event StartRound(uint256 indexed epoch);
-
   event Deposit(address token, address user, uint256 amount, uint256 balance);
   event Withdraw(address token, address user, uint256 amount, uint256 balance);
+
+ 
 
   constructor(
     address _nftOracleAddress,
@@ -104,7 +103,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     pricingAsset = _pricingAsset;
   }
 
-
   modifier notContract() {
     require(!_isContract(msg.sender), "Contract not allowed");
     require(msg.sender == tx.origin, "Proxy contract not allowed");
@@ -112,19 +110,62 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-
-  //show collateral balance in usdc
-  function showUsdBalance() public view returns (uint256) {
-    uint256 ethBalance = collateral[ETHER][msg.sender];
+  //show collateral balance in usd
+  function collateralUsdValue(address _user) public view returns (uint256) {
+    uint256 ethBalance = collateral[ETHER][_user];
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     return ethBalance.mul(uint256(ethPrice));
   }
+
+  //user usd collateral value + (or -) pnl value
+  function totalAccountValue(address _user) public view returns (uint256) {
+    uint collateralUsdValue = collateralUsdValue(_user);
+    PNL memory pnl = userPNL[_user];
+    uint totalValue;
+    if(pnl.isPositve == true){
+      totalValue = collateralUsdValue + pnl.pnlAmount;
+    }else{
+      totalValue = collateralUsdValue - pnl.pnlAmount;
+    }
+  }
+
+  //Total of user long and short positions
+  function totalPositionNotional(address _user) public view returns (uint256) {
+    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
+    uint totalPositionsvalue;
+    for(uint i=0; i < positions.length; i++){
+      if(positions[i].longAddress == _user || positions[i].shortAddress == _user){
+        totalPositionsvalue += positions[i].positionSize*latestPrice;
+      }
+      return totalPositionsvalue;
+    }
+  }
+
+  //user margin is between 0 and 100 percent
+  function getUserMargin(address _user) public view returns(uint){
+    uint totalAccountValue = totalAccountValue(_user);
+    uint totalPositionNotional = totalPositionNotional(_user);
+    uint marginRate = 100*totalAccountValue/totalPositionNotional;
+    return marginRate;
+  }
+
+  //return true if margin rate of user is lower than 40 percent
+  function isHardLiquidatable(address _user) public view returns(bool) {
+    uint userMargin = getUserMargin(_user);
+    if(userMargin <= 40){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
 
   //deposit collateral
   function depositEther() public payable {
     collateral[ETHER][msg.sender] = collateral[ETHER][msg.sender].add(msg.value);
     emit Deposit(ETHER, msg.sender, msg.value, collateral[ETHER][msg.sender]);
   }
+
 
   //withdraw collateral
   function withdrawEther(uint256 _amount) public {
@@ -138,73 +179,174 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   
-  //create bear position by usdc input parameter
-  function betBearUsd(uint256 _usdMargin, uint256 _usdPrice, uint256 leverageRate) public whenNotPaused nonReentrant {
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    uint256 etherAmount = _usdMargin / uint256(ethPrice);
-    uint256 toEthPrice = _usdPrice/uint256(ethPrice);
-    betBearEth(etherAmount, toEthPrice, leverageRate);
+  //put order by usd value
+  function openLongOrderUsd(uint _usdAmount, uint _price) public {
+    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
+    uint assetSize = _usdAmount/latestPrice;
+    openLongOrder(assetSize, _price);
   }
 
-  //user decide to create a bear position using ether parameter
-  function betBearEth(uint256 _margin, uint256 _price, uint256 leverageRate) public whenNotPaused nonReentrant {
-    require(
-      3 >= leverageRate,
-      "The maximum leverage rate is 3"
-    );
-    require(
-      collateral[ETHER][msg.sender] >= _margin,
-      "Your bet margin should be lesser than your collateral"
-    );
-    collateral[ETHER][msg.sender] -= _margin;
-    rounds[roundNumber].bearAddress = msg.sender;
-    rounds[roundNumber].price = _price;
-    rounds[roundNumber].bearMargin = _margin;
-    rounds[roundNumber].bearInitialMargin = _margin;
-    rounds[roundNumber].bearMarginDebt = _margin*leverageRate - _margin;
-    rounds[roundNumber].bearAmount += _margin*leverageRate;
-    rounds[roundNumber].totalAmount += _margin*leverageRate;
+  //put order by by asset amount (for example 1 ape nft)
+  function openLongOrder(uint _assetSize, uint _price) public {
+    longOrders.push(LongOrder(
+      _price,
+      _assetSize,
+      msg.sender,
+      false
+    ));
 
-    if (rounds[roundNumber].bullAmount > 0 && rounds[roundNumber].isActive == false) {
-      rounds[roundNumber].isActive = true;
-      rounds[roundNumber].startTimestamp = block.timestamp;
-      roundNumber += 1;
+    for (uint256 i = 0; i < shortOrders.length; i++) {
+      if(shortOrders[i].assetSize == _assetSize &&
+        shortOrders[i].price == _price &&
+        shortOrders[i].filled == false
+        ){
+          positions.push(Position(
+            block.timestamp,
+            _price,
+            _assetSize,
+            msg.sender,
+            shortOrders[i].owner,
+            true
+          ));
+        delete shortOrders[i];
+        delete longOrders[longOrders.length - 1];
+        return;
+        }
     }
   }
 
-  //create bull position by usdc input parameter
-  function betBullUsdc(uint256 _usdMargin, uint256 _usdPrice, uint256 leverageRate) public whenNotPaused nonReentrant {
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    uint256 etherAmount = _usdMargin / uint256(ethPrice);
-    uint256 toEthPrice = _usdPrice/uint256(ethPrice);
-    betBullEth(etherAmount, toEthPrice, leverageRate);
+  //put order by usd value
+  function openShortOrderUsd(uint _usdAmount, uint _price) public {
+    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
+    uint assetSize = _usdAmount/latestPrice;
+    openShortOrder(assetSize, _price);
   }
 
-  //user decide to create a bull position with ether
-  function betBullEth(uint256 _margin, uint256 _price, uint256 leverageRate) public whenNotPaused nonReentrant {
-    require(
-      3 >= leverageRate,
-      "The maximum leverage rate is 3"
-    );
-    require(
-      collateral[ETHER][msg.sender] >= _margin,
-      "Your bet amount should be lesset than your collateral"
-    );
-    collateral[ETHER][msg.sender] -= _margin;
-    rounds[roundNumber].bullAddress = msg.sender;
-    rounds[roundNumber].price = _price;
-    rounds[roundNumber].bullInitialMargin = _margin;
-    rounds[roundNumber].bullMargin = _margin;
-    rounds[roundNumber].bullMarginDebt = _margin*leverageRate - _margin;
-    rounds[roundNumber].bullAmount += _margin*leverageRate;
-    rounds[roundNumber].totalAmount += _margin*leverageRate;
+  //put order by by asset amount (for example 1 ape nft
+  function openShortOrder(uint _assetSize, uint _price) public {
 
-    if (rounds[roundNumber].bearAmount > 0 && rounds[roundNumber].isActive == false) {
-      rounds[roundNumber].isActive = true;
-      rounds[roundNumber].startTimestamp = block.timestamp;
-      roundNumber += 1;
+    shortOrders.push(ShortOrder(
+      _price,
+      _assetSize,
+      msg.sender,
+      false
+    ));
+
+
+    for (uint256 i = 0; i <= longOrders.length; i++) {
+      if(longOrders[i].assetSize == _assetSize &&
+        longOrders[i].price == _price &&
+        longOrders[i].filled == false
+        ){
+
+          positions.push(Position(
+            block.timestamp,
+            _price,
+            _assetSize,
+            longOrders[i].owner,
+            msg.sender,
+            true
+          ));
+
+        delete longOrders[i];
+        delete shortOrders[shortOrders.length - 1];
+        return;
+        }
     }
   }
+
+  //this function should be done in adjustPositions function
+  function _increasePNL(address _user, uint _amount) public {
+    PNL memory pnl = userPNL[_user];
+    if(pnl.isPositve == true || pnl.pnlAmount ==0){
+      userPNL[_user].pnlAmount += _amount;
+    }
+    if(pnl.isPositve == false && pnl.pnlAmount > _amount){
+      userPNL[_user].pnlAmount -= _amount;
+    }
+    if(pnl.isPositve == false && pnl.pnlAmount <= _amount){
+      userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
+      pnl.isPositve = true;
+    }
+  }
+
+  //this function should be done in adjustPositions function
+  function _decreasePNL(address _user, uint _amount) public {
+    PNL memory pnl = userPNL[_user];
+    if(pnl.isPositve == false){
+      userPNL[_user].pnlAmount += _amount;
+    }
+    if(pnl.isPositve == true && pnl.pnlAmount > _amount){
+      userPNL[_user].pnlAmount -= _amount;
+    }
+    if(pnl.isPositve == true && pnl.pnlAmount <= _amount){
+      userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
+      pnl.isPositve = false;
+    }
+  }
+
+  //calculate the index price of the asset
+  function getIndexPrice() public view returns(uint256){
+    uint highestLongOrderPrice = longOrders[longOrders.length - 1].price;
+    uint lowestShortPrice= shortOrders[shortOrders.length - 1].price;
+    for(uint i; i < longOrders.length; i++){
+      if(longOrders[i].price > highestLongOrderPrice){
+        highestLongOrderPrice = longOrders[i].price;
+      }
+    }
+    for(uint i; i < shortOrders.length; i++){
+      if(shortOrders[i].price < lowestShortPrice){
+        lowestShortPrice = shortOrders[i].price;
+      }
+    }
+
+     uint indexPrice;
+    if(lowestShortPrice < highestLongOrderPrice){
+    indexPrice = (highestLongOrderPrice - lowestShortPrice)/2;
+    }
+    if(lowestShortPrice > highestLongOrderPrice){
+    indexPrice = (lowestShortPrice - highestLongOrderPrice)/2;
+    }
+    return indexPrice;
+  }
+
+  //calculate profit or lost for users pnl
+  function adjustPositions() public onlyOwner {
+    uint256 newPrice;
+    uint256 oldPrice;
+    uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
+    uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
+    uint256 indexPrice = getIndexPrice();
+
+    if(indexPrice*100/newOraclePrice <= 120 && indexPrice*100/newOraclePrice >= 80){
+      newPrice = indexPrice;
+      oldPrice = oldOraclePrice;
+    }else{
+      newPrice = newOraclePrice;
+      oldPrice = oldOraclePrice;
+    }
+
+    for (uint256 i = 0; i < positions.length; i++) {
+      uint assetSize = positions[i].positionSize;
+      address longAddress = positions[i].longAddress;
+      address shortAddress = positions[i].shortAddress;
+      if(newPrice > oldPrice){
+        uint reward = assetSize*(newPrice - oldPrice);
+        _increasePNL(longAddress, reward);
+        _decreasePNL(shortAddress, reward);
+      }
+      if(newPrice < oldPrice){
+        uint reward = assetSize*(newPrice - oldPrice);
+        _increasePNL(shortAddress, reward);
+        _decreasePNL(longAddress, reward);
+      }
+    }
+    
+
+  }
+
+
+  
 
   //request price from the oracle and save the requrest id
   //should be called befor adjust collateral
@@ -217,174 +359,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  //get index price of orders
-  function getIndexPrice() public view returns(uint256){
-      uint totalPrice = 0;
-      uint totalTrades = 0;
-    for(uint256 i = 0; i <= roundNumber; i++){
-      if(rounds[i].isActive == true){
-        totalPrice += rounds[i].price;
-        totalTrades ++;
-      }
-    }
-    return totalPrice/totalTrades;
-  }
-
-  function liquidation(address _user) public onlyOwner {
-    for (uint256 i = 0; i <= roundNumber; i++) {
-     uint totalPositionValue;
-      if(rounds[i].bullAddress == _user){
-        totalPositionValue = rounds[i].bullAmount;
-      }
-      if(rounds[i].bullAddress == _user){
-        totalPositionValue = rounds[i].bearAmount;
-      }
-
-      if(100*collateral[ETHER][_user]/totalPositionValue < 5){
-        liquidateList.push(_user);
-      }
-    }
-  }
 
 
-//partial liquidation adjust the debt and margin amount to through user back in the safe rate
-//If debt/margin <40 this function should be activate in order to adjust the position and funds
-  function PartialLiquidation(address _user) public onlyOwner{
-    for (uint256 i = 0; i <= roundNumber; i++) {
-
-      if(rounds[i].bullAddress == _user && rounds[i].isActive == true){
-        uint256 margin = rounds[i].bullMargin;
-        uint256 bullAmount = rounds[i].bullAmount;
-        if(bullAmount*100/margin < 40){
-          uint256 partialAmount = (100*bullAmount)/40-(60*margin)/40;
-          rounds[i].bullMargin -= partialAmount;
-          rounds[i].bullMarginDebt -= partialAmount;
-          rounds[i].bullAmount -= 2*partialAmount;
-          rounds[i].totalAmount -= 2*partialAmount;
-        }
-      }
-
-      if(rounds[i].bearAddress == _user && rounds[i].isActive == true){
-        uint256 margin = rounds[i].bearMargin;
-        uint256 bearAmount = rounds[i].bearAmount;
-        if(bearAmount*100/margin < 40){
-          uint256 partialAmount = (100*bearAmount)/40-(60*margin)/40;
-          rounds[i].bearMargin -= partialAmount;
-          rounds[i].bearMarginDebt -= partialAmount;
-          rounds[i].bearAmount -= 2*partialAmount;
-          rounds[i].totalAmount -= 2*partialAmount;
-        }
-      }
-    }
-  }
-
-  //Admin executive adjust to calculate profit and loss per minute
-  //@notice call the requestPrice() per day before that
-  //It should be called every 1 hour
-  function adjustCollateral() public whenNotPaused onlyOwner {
-    uint256 newPrice;
-    uint256 oldPrice;
-    uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
-    uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
-    uint256 indexPrice = getIndexPrice();
-    //if index preice is near the oracle price(lesser than 20% difference) set the index price as the newPrice
-    if(indexPrice*100/newOraclePrice <= 120 && indexPrice*100/newOraclePrice >= 80){
-      newPrice = indexPrice;
-      oldPrice = oldOraclePrice;
-    }else{
-      newPrice = newOraclePrice;
-      oldPrice = oldOraclePrice;
-    }
-
-    if (newPrice != 0 && newPrice / oldPrice < 2 && (newPrice * 10) / oldPrice > 5) {
-      for (uint256 i = 0; i <= roundNumber; i++) {
-        Round storage round = rounds[i];
-
-        if (round.isActive == true) {
-          uint256 reward;
-
-          if (newPrice > oldPrice) {
-            reward = (rounds[i].bearAmount * (newPrice - oldPrice)) / oldPrice;//every 24
-            if (
-              rounds[i].bearMarginDebt > 0 &&
-              reward < rounds[i].bearMargin &&
-              rounds[i].bearMargin*100/rounds[i].bearInitialMargin < 50
-              )
-             {
-              collateral[ETHER][rounds[i].bearAddress] += rounds[i].bearMargin;
-              rounds[i].totalAmount -= rounds[i].bearAmount;
-              rounds[i].bearAddress = address(0);
-              rounds[i].bearAmount = 0;
-              rounds[i].bearMargin = 0;
-              rounds[i].bearInitialMargin = 0;
-              rounds[i].bearMarginDebt = 0;
-              rounds[i].isActive = false;
-              latestPrice = newPrice;
-            } else if(
-              rounds[i].bearMarginDebt > 0 &&
-              reward >= rounds[i].bearMargin
-            ){
-              rounds[i].bullAmount += rounds[i].bearMargin;
-              rounds[i].bullMargin += rounds[i].bearMargin;
-              rounds[i].bearAddress = address(0);
-              rounds[i].bearAmount = 0;
-              rounds[i].bearMargin = 0;
-              rounds[i].bearInitialMargin = 0;
-              rounds[i].bearMarginDebt = 0;
-              rounds[i].isActive = false;
-              latestPrice = newPrice;
-            } else {
-              rounds[i].bearAmount -= reward;
-              rounds[i].bearMargin -= reward;
-              rounds[i].bullAmount += reward;
-              rounds[i].bullMargin += reward;
-              latestPrice = newPrice;
-            }
-          }
-
-          if (newPrice < oldPrice) {
-            reward = (rounds[i].bullAmount * (oldPrice - newPrice)) / newPrice;//every 24
-            if (
-              //check if position amount is lesser than 50% of collater amount start liquidation
-              rounds[i].bullMarginDebt > 0 &&
-              reward < rounds[i].bullMargin &&
-              (rounds[i].bullMargin)*100/rounds[i].bullInitialMargin < 50
-            ) {
-              collateral[ETHER][rounds[i].bullAddress] += rounds[i].bullMargin;
-              rounds[i].totalAmount -= rounds[i].bullAmount;
-              rounds[i].bullAddress = address(0);
-              rounds[i].bullAmount = 0;
-              rounds[i].bullMargin = 0;
-              rounds[i].bullInitialMargin = 0;
-              rounds[i].bullMarginDebt = 0;
-              rounds[i].isActive = false;
-              latestPrice = newPrice;
-            } else if(
-              rounds[i].bullMarginDebt > 0 &&
-              reward >= rounds[i].bullMargin
-            ){
-              rounds[i].bearAmount += rounds[i].bullMargin;
-              rounds[i].bearMargin += rounds[i].bullMargin;
-              rounds[i].bullAddress = address(0);
-              rounds[i].bullAmount = 0;
-              rounds[i].bullMargin = 0;
-              rounds[i].bullInitialMargin = 0;
-              rounds[i].bullMarginDebt = 0;
-              rounds[i].isActive = false;
-              latestPrice = newPrice;
-            } else {
-              rounds[i].bullAmount -= reward;
-              rounds[i].bullMargin -= reward;
-              rounds[i].bearAmount += reward;
-              rounds[i].bearMargin += reward;
-              latestPrice = newPrice;
-            }
-          }
-
-        }
-      }
-    }
-  }
   
 
   function _isContract(address account) internal view returns (bool) {

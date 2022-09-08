@@ -21,47 +21,65 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
+    "AutoCloseMargin()": FunctionFragment;
     "ETHER()": FunctionFragment;
-    "PartialLiquidation(address)": FunctionFragment;
-    "adjustCollateral()": FunctionFragment;
+    "_decreasePNL(address,uint256)": FunctionFragment;
+    "_increasePNL(address,uint256)": FunctionFragment;
+    "adjustPositions()": FunctionFragment;
     "assetAddress()": FunctionFragment;
-    "betBearEth(uint256,uint256,uint256)": FunctionFragment;
-    "betBearUsd(uint256,uint256,uint256)": FunctionFragment;
-    "betBullEth(uint256,uint256,uint256)": FunctionFragment;
-    "betBullUsdc(uint256,uint256,uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
+    "collateralUsdValue(address)": FunctionFragment;
     "depositEther()": FunctionFragment;
+    "discountRate()": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
+    "getUserMargin(address)": FunctionFragment;
+    "insuranceFund(address)": FunctionFragment;
+    "isHardLiquidatable(address)": FunctionFragment;
     "lastRequestId()": FunctionFragment;
     "latestPrice()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
-    "ledger(uint256,address)": FunctionFragment;
     "liquidation(address)": FunctionFragment;
+    "longOrders(uint256)": FunctionFragment;
+    "maintenanceMargin()": FunctionFragment;
     "nftOracle()": FunctionFragment;
+    "openLongOrder(uint256,uint256)": FunctionFragment;
+    "openLongOrderUsd(uint256,uint256)": FunctionFragment;
+    "openShortOrder(uint256,uint256)": FunctionFragment;
+    "openShortOrderUsd(uint256,uint256)": FunctionFragment;
     "oracleLatestRoundId()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
     "payment()": FunctionFragment;
+    "positions(uint256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
     "pricingAsset()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestPrice()": FunctionFragment;
-    "roundNumber()": FunctionFragment;
-    "rounds(uint256)": FunctionFragment;
-    "showUsdBalance()": FunctionFragment;
+    "saveLevelMargin()": FunctionFragment;
+    "shortOrders(uint256)": FunctionFragment;
     "specId()": FunctionFragment;
+    "totalAccountValue(address)": FunctionFragment;
+    "totalPositionNotional(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "userRounds(address,uint256)": FunctionFragment;
+    "userPNL(address)": FunctionFragment;
     "withdrawEther(uint256)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "AutoCloseMargin",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "ETHER", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "PartialLiquidation",
-    values: [string]
+    functionFragment: "_decreasePNL",
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "adjustCollateral",
+    functionFragment: "_increasePNL",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "adjustPositions",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -69,32 +87,36 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "betBearEth",
-    values: [BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "betBearUsd",
-    values: [BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "betBullEth",
-    values: [BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "betBullUsdc",
-    values: [BigNumberish, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "collateral",
     values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "collateralUsdValue",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "depositEther",
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "discountRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getIndexPrice",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUserMargin",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "insuranceFund",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isHardLiquidatable",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "lastRequestId",
@@ -108,12 +130,32 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "latestRequestId",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "ledger",
-    values: [BigNumberish, string]
-  ): string;
   encodeFunctionData(functionFragment: "liquidation", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "longOrders",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maintenanceMargin",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "nftOracle", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "openLongOrder",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "openLongOrderUsd",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "openShortOrder",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "openShortOrderUsd",
+    values: [BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "oracleLatestRoundId",
     values?: undefined
@@ -121,6 +163,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(functionFragment: "payment", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "positions",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "priceFeed", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pricingAsset",
@@ -135,58 +181,80 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "roundNumber",
+    functionFragment: "saveLevelMargin",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "rounds",
+    functionFragment: "shortOrders",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "showUsdBalance",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "specId", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "totalAccountValue",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalPositionNotional",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "userRounds",
-    values: [string, BigNumberish]
-  ): string;
+  encodeFunctionData(functionFragment: "userPNL", values: [string]): string;
   encodeFunctionData(
     functionFragment: "withdrawEther",
     values: [BigNumberish]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "AutoCloseMargin",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "ETHER", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "PartialLiquidation",
+    functionFragment: "_decreasePNL",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "adjustCollateral",
+    functionFragment: "_increasePNL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "adjustPositions",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "assetAddress",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "betBearEth", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "betBearUsd", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "betBullEth", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "betBullUsdc",
+    functionFragment: "collateralUsdValue",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositEther",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "discountRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getIndexPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUserMargin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "insuranceFund",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isHardLiquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -201,12 +269,32 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "latestRequestId",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "ledger", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "liquidation",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "longOrders", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "maintenanceMargin",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "nftOracle", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "openLongOrder",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "openLongOrderUsd",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "openShortOrder",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "openShortOrderUsd",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "oracleLatestRoundId",
     data: BytesLike
@@ -214,6 +302,7 @@ export interface ExchangeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "payment", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "positions", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "priceFeed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pricingAsset",
@@ -228,63 +317,48 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "roundNumber",
+    functionFragment: "saveLevelMargin",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "rounds", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "showUsdBalance",
+    functionFragment: "shortOrders",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "specId", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "totalAccountValue",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalPositionNotional",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "userRounds", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "userPNL", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawEther",
     data: BytesLike
   ): Result;
 
   events: {
-    "BetBear(address,uint256,uint256)": EventFragment;
-    "BetBull(address,uint256,uint256)": EventFragment;
     "Deposit(address,address,uint256,uint256)": EventFragment;
     "NewOracle(address)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "Pause(uint256)": EventFragment;
     "Paused(address)": EventFragment;
-    "StartRound(uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
     "Withdraw(address,address,uint256,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "BetBear"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BetBull"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewOracle"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Pause"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StartRound"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
-
-export type BetBearEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  { sender: string; epoch: BigNumber; amount: BigNumber }
->;
-
-export type BetBearEventFilter = TypedEventFilter<BetBearEvent>;
-
-export type BetBullEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  { sender: string; epoch: BigNumber; amount: BigNumber }
->;
-
-export type BetBullEventFilter = TypedEventFilter<BetBullEvent>;
 
 export type DepositEvent = TypedEvent<
   [string, string, BigNumber, BigNumber],
@@ -305,17 +379,9 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export type PauseEvent = TypedEvent<[BigNumber], { epoch: BigNumber }>;
-
-export type PauseEventFilter = TypedEventFilter<PauseEvent>;
-
 export type PausedEvent = TypedEvent<[string], { account: string }>;
 
 export type PausedEventFilter = TypedEventFilter<PausedEvent>;
-
-export type StartRoundEvent = TypedEvent<[BigNumber], { epoch: BigNumber }>;
-
-export type StartRoundEventFilter = TypedEventFilter<StartRoundEvent>;
 
 export type UnpausedEvent = TypedEvent<[string], { account: string }>;
 
@@ -356,46 +422,27 @@ export interface Exchange extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
+
     ETHER(overrides?: CallOverrides): Promise<[string]>;
 
-    PartialLiquidation(
+    _decreasePNL(
       _user: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    adjustCollateral(
+    _increasePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    betBearEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    betBearUsd(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    betBullEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    betBullUsdc(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     collateral(
       arg0: string,
@@ -403,11 +450,33 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    collateralUsdValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     depositEther(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    discountRate(overrides?: CallOverrides): Promise<[number]>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getUserMargin(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    insuranceFund(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     lastRequestId(overrides?: CallOverrides): Promise<[string]>;
 
@@ -415,24 +484,50 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<[string]>;
 
-    ledger(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [number, BigNumber, boolean] & {
-        position: number;
-        amount: BigNumber;
-        claimed: boolean;
-      }
-    >;
-
     liquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    longOrders(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, string, boolean] & {
+        price: BigNumber;
+        assetSize: BigNumber;
+        owner: string;
+        filled: boolean;
+      }
+    >;
+
+    maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
+
     nftOracle(overrides?: CallOverrides): Promise<[string]>;
+
+    openLongOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    openLongOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    openShortOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    openShortOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -441,6 +536,20 @@ export interface Exchange extends BaseContract {
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
     payment(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    positions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+        startTimestamp: BigNumber;
+        price: BigNumber;
+        positionSize: BigNumber;
+        longAddress: string;
+        shortAddress: string;
+        isActive: boolean;
+      }
+    >;
 
     priceFeed(overrides?: CallOverrides): Promise<[string]>;
 
@@ -454,59 +563,43 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    roundNumber(overrides?: CallOverrides): Promise<[BigNumber]>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<[number]>;
 
-    rounds(
+    shortOrders(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        string,
-        string,
-        boolean
-      ] & {
-        startTimestamp: BigNumber;
+      [BigNumber, BigNumber, string, boolean] & {
         price: BigNumber;
-        bullInitialMargin: BigNumber;
-        bullMargin: BigNumber;
-        bullMarginDebt: BigNumber;
-        bullAmount: BigNumber;
-        bearInitialMargin: BigNumber;
-        bearMargin: BigNumber;
-        bearMarginDebt: BigNumber;
-        bearAmount: BigNumber;
-        totalAmount: BigNumber;
-        bullAddress: string;
-        bearAddress: string;
-        isActive: boolean;
+        assetSize: BigNumber;
+        owner: string;
+        filled: boolean;
       }
     >;
 
-    showUsdBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     specId(overrides?: CallOverrides): Promise<[string]>;
+
+    totalAccountValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    totalPositionNotional(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    userRounds(
+    userPNL(
       arg0: string,
-      arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<
+      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+    >;
 
     withdrawEther(
       _amount: BigNumberish,
@@ -514,46 +607,27 @@ export interface Exchange extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
+  AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
+
   ETHER(overrides?: CallOverrides): Promise<string>;
 
-  PartialLiquidation(
+  _decreasePNL(
     _user: string,
+    _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  adjustCollateral(
+  _increasePNL(
+    _user: string,
+    _amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  adjustPositions(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   assetAddress(overrides?: CallOverrides): Promise<string>;
-
-  betBearEth(
-    _margin: BigNumberish,
-    _price: BigNumberish,
-    leverageRate: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  betBearUsd(
-    _usdMargin: BigNumberish,
-    _usdPrice: BigNumberish,
-    leverageRate: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  betBullEth(
-    _margin: BigNumberish,
-    _price: BigNumberish,
-    leverageRate: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  betBullUsdc(
-    _usdMargin: BigNumberish,
-    _usdPrice: BigNumberish,
-    leverageRate: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   collateral(
     arg0: string,
@@ -561,11 +635,27 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  collateralUsdValue(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   depositEther(
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  discountRate(overrides?: CallOverrides): Promise<number>;
+
   getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  isHardLiquidatable(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   lastRequestId(overrides?: CallOverrides): Promise<string>;
 
@@ -573,24 +663,50 @@ export interface Exchange extends BaseContract {
 
   latestRequestId(overrides?: CallOverrides): Promise<string>;
 
-  ledger(
-    arg0: BigNumberish,
-    arg1: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [number, BigNumber, boolean] & {
-      position: number;
-      amount: BigNumber;
-      claimed: boolean;
-    }
-  >;
-
   liquidation(
     _user: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  longOrders(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, string, boolean] & {
+      price: BigNumber;
+      assetSize: BigNumber;
+      owner: string;
+      filled: boolean;
+    }
+  >;
+
+  maintenanceMargin(overrides?: CallOverrides): Promise<number>;
+
   nftOracle(overrides?: CallOverrides): Promise<string>;
+
+  openLongOrder(
+    _assetSize: BigNumberish,
+    _price: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  openLongOrderUsd(
+    _usdAmount: BigNumberish,
+    _price: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  openShortOrder(
+    _assetSize: BigNumberish,
+    _price: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  openShortOrderUsd(
+    _usdAmount: BigNumberish,
+    _price: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -599,6 +715,20 @@ export interface Exchange extends BaseContract {
   paused(overrides?: CallOverrides): Promise<boolean>;
 
   payment(overrides?: CallOverrides): Promise<BigNumber>;
+
+  positions(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+      startTimestamp: BigNumber;
+      price: BigNumber;
+      positionSize: BigNumber;
+      longAddress: string;
+      shortAddress: string;
+      isActive: boolean;
+    }
+  >;
 
   priceFeed(overrides?: CallOverrides): Promise<string>;
 
@@ -612,59 +742,43 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  roundNumber(overrides?: CallOverrides): Promise<BigNumber>;
+  saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
-  rounds(
+  shortOrders(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      string,
-      string,
-      boolean
-    ] & {
-      startTimestamp: BigNumber;
+    [BigNumber, BigNumber, string, boolean] & {
       price: BigNumber;
-      bullInitialMargin: BigNumber;
-      bullMargin: BigNumber;
-      bullMarginDebt: BigNumber;
-      bullAmount: BigNumber;
-      bearInitialMargin: BigNumber;
-      bearMargin: BigNumber;
-      bearMarginDebt: BigNumber;
-      bearAmount: BigNumber;
-      totalAmount: BigNumber;
-      bullAddress: string;
-      bearAddress: string;
-      isActive: boolean;
+      assetSize: BigNumber;
+      owner: string;
+      filled: boolean;
     }
   >;
 
-  showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
   specId(overrides?: CallOverrides): Promise<string>;
+
+  totalAccountValue(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  totalPositionNotional(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  userRounds(
+  userPNL(
     arg0: string,
-    arg1: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  ): Promise<
+    [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+  >;
 
   withdrawEther(
     _amount: BigNumberish,
@@ -672,41 +786,25 @@ export interface Exchange extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
+
     ETHER(overrides?: CallOverrides): Promise<string>;
 
-    PartialLiquidation(_user: string, overrides?: CallOverrides): Promise<void>;
+    _decreasePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    adjustCollateral(overrides?: CallOverrides): Promise<void>;
+    _increasePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    adjustPositions(overrides?: CallOverrides): Promise<void>;
 
     assetAddress(overrides?: CallOverrides): Promise<string>;
-
-    betBearEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    betBearUsd(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    betBullEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    betBullUsdc(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     collateral(
       arg0: string,
@@ -714,9 +812,25 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    collateralUsdValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     depositEther(overrides?: CallOverrides): Promise<void>;
 
+    discountRate(overrides?: CallOverrides): Promise<number>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     lastRequestId(overrides?: CallOverrides): Promise<string>;
 
@@ -724,21 +838,47 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<string>;
 
-    ledger(
+    liquidation(_user: string, overrides?: CallOverrides): Promise<void>;
+
+    longOrders(
       arg0: BigNumberish,
-      arg1: string,
       overrides?: CallOverrides
     ): Promise<
-      [number, BigNumber, boolean] & {
-        position: number;
-        amount: BigNumber;
-        claimed: boolean;
+      [BigNumber, BigNumber, string, boolean] & {
+        price: BigNumber;
+        assetSize: BigNumber;
+        owner: string;
+        filled: boolean;
       }
     >;
 
-    liquidation(_user: string, overrides?: CallOverrides): Promise<void>;
+    maintenanceMargin(overrides?: CallOverrides): Promise<number>;
 
     nftOracle(overrides?: CallOverrides): Promise<string>;
+
+    openLongOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    openLongOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    openShortOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    openShortOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -748,6 +888,20 @@ export interface Exchange extends BaseContract {
 
     payment(overrides?: CallOverrides): Promise<BigNumber>;
 
+    positions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+        startTimestamp: BigNumber;
+        price: BigNumber;
+        positionSize: BigNumber;
+        longAddress: string;
+        shortAddress: string;
+        isActive: boolean;
+      }
+    >;
+
     priceFeed(overrides?: CallOverrides): Promise<string>;
 
     pricingAsset(overrides?: CallOverrides): Promise<string>;
@@ -756,59 +910,43 @@ export interface Exchange extends BaseContract {
 
     requestPrice(overrides?: CallOverrides): Promise<void>;
 
-    roundNumber(overrides?: CallOverrides): Promise<BigNumber>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
-    rounds(
+    shortOrders(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        string,
-        string,
-        boolean
-      ] & {
-        startTimestamp: BigNumber;
+      [BigNumber, BigNumber, string, boolean] & {
         price: BigNumber;
-        bullInitialMargin: BigNumber;
-        bullMargin: BigNumber;
-        bullMarginDebt: BigNumber;
-        bullAmount: BigNumber;
-        bearInitialMargin: BigNumber;
-        bearMargin: BigNumber;
-        bearMarginDebt: BigNumber;
-        bearAmount: BigNumber;
-        totalAmount: BigNumber;
-        bullAddress: string;
-        bearAddress: string;
-        isActive: boolean;
+        assetSize: BigNumber;
+        owner: string;
+        filled: boolean;
       }
     >;
 
-    showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
     specId(overrides?: CallOverrides): Promise<string>;
+
+    totalAccountValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    totalPositionNotional(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    userRounds(
+    userPNL(
       arg0: string,
-      arg1: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<
+      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+    >;
 
     withdrawEther(
       _amount: BigNumberish,
@@ -817,28 +955,6 @@ export interface Exchange extends BaseContract {
   };
 
   filters: {
-    "BetBear(address,uint256,uint256)"(
-      sender?: string | null,
-      epoch?: BigNumberish | null,
-      amount?: null
-    ): BetBearEventFilter;
-    BetBear(
-      sender?: string | null,
-      epoch?: BigNumberish | null,
-      amount?: null
-    ): BetBearEventFilter;
-
-    "BetBull(address,uint256,uint256)"(
-      sender?: string | null,
-      epoch?: BigNumberish | null,
-      amount?: null
-    ): BetBullEventFilter;
-    BetBull(
-      sender?: string | null,
-      epoch?: BigNumberish | null,
-      amount?: null
-    ): BetBullEventFilter;
-
     "Deposit(address,address,uint256,uint256)"(
       token?: null,
       user?: null,
@@ -864,14 +980,8 @@ export interface Exchange extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "Pause(uint256)"(epoch?: BigNumberish | null): PauseEventFilter;
-    Pause(epoch?: BigNumberish | null): PauseEventFilter;
-
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
-
-    "StartRound(uint256)"(epoch?: BigNumberish | null): StartRoundEventFilter;
-    StartRound(epoch?: BigNumberish | null): StartRoundEventFilter;
 
     "Unpaused(address)"(account?: null): UnpausedEventFilter;
     Unpaused(account?: null): UnpausedEventFilter;
@@ -891,46 +1001,27 @@ export interface Exchange extends BaseContract {
   };
 
   estimateGas: {
+    AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
+
     ETHER(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PartialLiquidation(
+    _decreasePNL(
       _user: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    adjustCollateral(
+    _increasePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    betBearEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    betBearUsd(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    betBullEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    betBullUsdc(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     collateral(
       arg0: string,
@@ -938,11 +1029,27 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    collateralUsdValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     depositEther(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    discountRate(overrides?: CallOverrides): Promise<BigNumber>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     lastRequestId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -950,18 +1057,43 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ledger(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     liquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    longOrders(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
+
     nftOracle(overrides?: CallOverrides): Promise<BigNumber>;
+
+    openLongOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    openLongOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    openShortOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    openShortOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     oracleLatestRoundId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -970,6 +1102,11 @@ export interface Exchange extends BaseContract {
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
     payment(overrides?: CallOverrides): Promise<BigNumber>;
+
+    positions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     priceFeed(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -983,24 +1120,31 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    roundNumber(overrides?: CallOverrides): Promise<BigNumber>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    rounds(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    showUsdBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    shortOrders(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     specId(overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalAccountValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    totalPositionNotional(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    userRounds(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    userPNL(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawEther(
       _amount: BigNumberish,
@@ -1009,46 +1153,27 @@ export interface Exchange extends BaseContract {
   };
 
   populateTransaction: {
+    AutoCloseMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     ETHER(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    PartialLiquidation(
+    _decreasePNL(
       _user: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    adjustCollateral(
+    _increasePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    betBearEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    betBearUsd(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    betBullEth(
-      _margin: BigNumberish,
-      _price: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    betBullUsdc(
-      _usdMargin: BigNumberish,
-      _usdPrice: BigNumberish,
-      leverageRate: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     collateral(
       arg0: string,
@@ -1056,11 +1181,33 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    collateralUsdValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     depositEther(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    discountRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getUserMargin(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    insuranceFund(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     lastRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1068,18 +1215,43 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    ledger(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     liquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    longOrders(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     nftOracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    openLongOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    openLongOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    openShortOrder(
+      _assetSize: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    openShortOrderUsd(
+      _usdAmount: BigNumberish,
+      _price: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     oracleLatestRoundId(
       overrides?: CallOverrides
@@ -1090,6 +1262,11 @@ export interface Exchange extends BaseContract {
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     payment(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    positions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     priceFeed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1103,25 +1280,32 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    roundNumber(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    rounds(
+    shortOrders(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    showUsdBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     specId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    totalAccountValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalPositionNotional(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    userRounds(
+    userPNL(
       arg0: string,
-      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
