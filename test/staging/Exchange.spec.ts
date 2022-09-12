@@ -62,6 +62,6 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         const etherAddress = exchange.ETHER();
         let ownerCollateral = await exchange.collateral(etherAddress, owner.address);
         assert.equal(toEther(ownerCollateral), '10.0');
-
+        
       })
     })

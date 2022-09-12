@@ -23,7 +23,13 @@ export interface ExchangeInterface extends utils.Interface {
   functions: {
     "AutoCloseMargin()": FunctionFragment;
     "ETHER()": FunctionFragment;
+    "_closeLongPositionMarket(address,uint256,uint256)": FunctionFragment;
+    "_closeShortPositionMarket(address,uint256,uint256)": FunctionFragment;
+    "_decreaseCollateral(address,uint256)": FunctionFragment;
     "_decreasePNL(address,uint256)": FunctionFragment;
+    "_getFundingRate(uint256,uint256)": FunctionFragment;
+    "_hardLiquidate(address)": FunctionFragment;
+    "_increaseCollateral(address,uint256)": FunctionFragment;
     "_increasePNL(address,uint256)": FunctionFragment;
     "adjustPositions()": FunctionFragment;
     "assetAddress()": FunctionFragment;
@@ -33,19 +39,18 @@ export interface ExchangeInterface extends utils.Interface {
     "discountRate()": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
     "getUserMargin(address)": FunctionFragment;
-    "insuranceFund(address)": FunctionFragment;
+    "insuranceFunds()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
     "lastRequestId()": FunctionFragment;
     "latestPrice()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
-    "liquidation(address)": FunctionFragment;
     "longOrders(uint256)": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "nftOracle()": FunctionFragment;
-    "openLongOrder(uint256,uint256)": FunctionFragment;
-    "openLongOrderUsd(uint256,uint256)": FunctionFragment;
-    "openShortOrder(uint256,uint256)": FunctionFragment;
-    "openShortOrderUsd(uint256,uint256)": FunctionFragment;
+    "openLongOrder(address,uint256,uint256)": FunctionFragment;
+    "openLongOrderUsd(address,uint256,uint256)": FunctionFragment;
+    "openShortOrder(address,uint256,uint256)": FunctionFragment;
+    "openShortOrderUsd(address,uint256,uint256)": FunctionFragment;
     "oracleLatestRoundId()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
@@ -71,7 +76,31 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "ETHER", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "_closeLongPositionMarket",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_closeShortPositionMarket",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_decreaseCollateral",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "_decreasePNL",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_getFundingRate",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_hardLiquidate",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_increaseCollateral",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -111,8 +140,8 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "insuranceFund",
-    values: [string]
+    functionFragment: "insuranceFunds",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "isHardLiquidatable",
@@ -130,7 +159,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "latestRequestId",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "liquidation", values: [string]): string;
   encodeFunctionData(
     functionFragment: "longOrders",
     values: [BigNumberish]
@@ -142,19 +170,19 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "nftOracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "openLongOrder",
-    values: [BigNumberish, BigNumberish]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "openLongOrderUsd",
-    values: [BigNumberish, BigNumberish]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "openShortOrder",
-    values: [BigNumberish, BigNumberish]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "openShortOrderUsd",
-    values: [BigNumberish, BigNumberish]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "oracleLatestRoundId",
@@ -213,7 +241,31 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "ETHER", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "_closeLongPositionMarket",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_closeShortPositionMarket",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_decreaseCollateral",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "_decreasePNL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_getFundingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_hardLiquidate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_increaseCollateral",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -250,7 +302,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "insuranceFund",
+    functionFragment: "insuranceFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -267,10 +319,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "latestRequestId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "liquidation",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "longOrders", data: BytesLike): Result;
@@ -426,9 +474,46 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<[string]>;
 
+    _closeLongPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _closeShortPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _decreaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _getFundingRate(
+      indexPrice: BigNumberish,
+      oraclePrice: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _hardLiquidate(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _increaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -468,10 +553,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    insuranceFund(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isHardLiquidatable(
       _user: string,
@@ -483,11 +565,6 @@ export interface Exchange extends BaseContract {
     latestPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     latestRequestId(overrides?: CallOverrides): Promise<[string]>;
-
-    liquidation(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     longOrders(
       arg0: BigNumberish,
@@ -506,24 +583,28 @@ export interface Exchange extends BaseContract {
     nftOracle(overrides?: CallOverrides): Promise<[string]>;
 
     openLongOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openLongOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -611,9 +692,46 @@ export interface Exchange extends BaseContract {
 
   ETHER(overrides?: CallOverrides): Promise<string>;
 
+  _closeLongPositionMarket(
+    _user: string,
+    _assetSize: BigNumberish,
+    _positionId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _closeShortPositionMarket(
+    _user: string,
+    _assetSize: BigNumberish,
+    _positionId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _decreaseCollateral(
+    _user: string,
+    _usdValue: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   _decreasePNL(
     _user: string,
     _amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _getFundingRate(
+    indexPrice: BigNumberish,
+    oraclePrice: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _hardLiquidate(
+    _user: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _increaseCollateral(
+    _user: string,
+    _usdValue: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -650,7 +768,7 @@ export interface Exchange extends BaseContract {
 
   getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
   isHardLiquidatable(
     _user: string,
@@ -662,11 +780,6 @@ export interface Exchange extends BaseContract {
   latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   latestRequestId(overrides?: CallOverrides): Promise<string>;
-
-  liquidation(
-    _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   longOrders(
     arg0: BigNumberish,
@@ -685,24 +798,28 @@ export interface Exchange extends BaseContract {
   nftOracle(overrides?: CallOverrides): Promise<string>;
 
   openLongOrder(
+    _user: string,
     _assetSize: BigNumberish,
     _price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openLongOrderUsd(
+    _user: string,
     _usdAmount: BigNumberish,
     _price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortOrder(
+    _user: string,
     _assetSize: BigNumberish,
     _price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortOrderUsd(
+    _user: string,
     _usdAmount: BigNumberish,
     _price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -790,9 +907,43 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<string>;
 
+    _closeLongPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    _closeShortPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    _decreaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    _getFundingRate(
+      indexPrice: BigNumberish,
+      oraclePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    _hardLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
+
+    _increaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -825,7 +976,7 @@ export interface Exchange extends BaseContract {
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -837,8 +988,6 @@ export interface Exchange extends BaseContract {
     latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestRequestId(overrides?: CallOverrides): Promise<string>;
-
-    liquidation(_user: string, overrides?: CallOverrides): Promise<void>;
 
     longOrders(
       arg0: BigNumberish,
@@ -857,24 +1006,28 @@ export interface Exchange extends BaseContract {
     nftOracle(overrides?: CallOverrides): Promise<string>;
 
     openLongOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     openLongOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: CallOverrides
@@ -1005,9 +1158,46 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<BigNumber>;
 
+    _closeLongPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _closeShortPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _decreaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _getFundingRate(
+      indexPrice: BigNumberish,
+      oraclePrice: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _hardLiquidate(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _increaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1044,7 +1234,7 @@ export interface Exchange extends BaseContract {
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    insuranceFund(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -1057,11 +1247,6 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
 
-    liquidation(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     longOrders(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1072,24 +1257,28 @@ export interface Exchange extends BaseContract {
     nftOracle(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openLongOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1157,9 +1346,46 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    _closeLongPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _closeShortPositionMarket(
+      _user: string,
+      _assetSize: BigNumberish,
+      _positionId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _decreaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _getFundingRate(
+      indexPrice: BigNumberish,
+      oraclePrice: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _hardLiquidate(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _increaseCollateral(
+      _user: string,
+      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1199,10 +1425,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    insuranceFund(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isHardLiquidatable(
       _user: string,
@@ -1215,11 +1438,6 @@ export interface Exchange extends BaseContract {
 
     latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    liquidation(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     longOrders(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1230,24 +1448,28 @@ export interface Exchange extends BaseContract {
     nftOracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     openLongOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openLongOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortOrder(
+      _user: string,
       _assetSize: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortOrderUsd(
+      _user: string,
       _usdAmount: BigNumberish,
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
