@@ -23,6 +23,7 @@ export interface ExchangeInterface extends utils.Interface {
   functions: {
     "AutoCloseMargin()": FunctionFragment;
     "ETHER()": FunctionFragment;
+    "_addToLiquidateList(address)": FunctionFragment;
     "_closeLongPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_closeShortPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_decreaseCollateral(address,uint256)": FunctionFragment;
@@ -31,16 +32,21 @@ export interface ExchangeInterface extends utils.Interface {
     "_hardLiquidate(address)": FunctionFragment;
     "_increaseCollateral(address,uint256)": FunctionFragment;
     "_increasePNL(address,uint256)": FunctionFragment;
+    "_partialLiquidation(address)": FunctionFragment;
+    "_realizePNL(address,uint256)": FunctionFragment;
     "adjustPositions()": FunctionFragment;
     "assetAddress()": FunctionFragment;
+    "calculatePartialLiquidateValue(address)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "collateralUsdValue(address)": FunctionFragment;
     "depositEther()": FunctionFragment;
     "discountRate()": FunctionFragment;
+    "executePartialLiquidation()": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
     "getUserMargin(address)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
+    "isPartialLiquidatable(address)": FunctionFragment;
     "lastRequestId()": FunctionFragment;
     "latestPrice()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
@@ -76,6 +82,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "ETHER", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "_addToLiquidateList",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "_closeLongPositionMarket",
     values: [string, BigNumberish, BigNumberish]
   ): string;
@@ -108,12 +118,24 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "_partialLiquidation",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_realizePNL",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "adjustPositions",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "assetAddress",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "calculatePartialLiquidateValue",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "collateral",
@@ -132,6 +154,10 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "executePartialLiquidation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getIndexPrice",
     values?: undefined
   ): string;
@@ -145,6 +171,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "isHardLiquidatable",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isPartialLiquidatable",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -241,6 +271,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "ETHER", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "_addToLiquidateList",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "_closeLongPositionMarket",
     data: BytesLike
   ): Result;
@@ -273,11 +307,23 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "_partialLiquidation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_realizePNL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "adjustPositions",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "assetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "calculatePartialLiquidateValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
@@ -294,6 +340,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "executePartialLiquidation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getIndexPrice",
     data: BytesLike
   ): Result;
@@ -307,6 +357,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isHardLiquidatable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isPartialLiquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -474,6 +528,11 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<[string]>;
 
+    _addToLiquidateList(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     _closeLongPositionMarket(
       _user: string,
       _assetSize: BigNumberish,
@@ -523,11 +582,27 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    _partialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    _realizePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    calculatePartialLiquidateValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { x: BigNumber }>;
 
     collateral(
       arg0: string,
@@ -546,6 +621,10 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<[number]>;
 
+    executePartialLiquidation(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getUserMargin(
@@ -556,6 +635,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -692,6 +776,11 @@ export interface Exchange extends BaseContract {
 
   ETHER(overrides?: CallOverrides): Promise<string>;
 
+  _addToLiquidateList(
+    _user: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   _closeLongPositionMarket(
     _user: string,
     _assetSize: BigNumberish,
@@ -741,11 +830,27 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  _partialLiquidation(
+    _user: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  _realizePNL(
+    _user: string,
+    _amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   adjustPositions(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   assetAddress(overrides?: CallOverrides): Promise<string>;
+
+  calculatePartialLiquidateValue(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   collateral(
     arg0: string,
@@ -764,6 +869,10 @@ export interface Exchange extends BaseContract {
 
   discountRate(overrides?: CallOverrides): Promise<number>;
 
+  executePartialLiquidation(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -771,6 +880,11 @@ export interface Exchange extends BaseContract {
   insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
   isHardLiquidatable(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isPartialLiquidatable(
     _user: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -907,6 +1021,11 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<string>;
 
+    _addToLiquidateList(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     _closeLongPositionMarket(
       _user: string,
       _assetSize: BigNumberish,
@@ -953,9 +1072,25 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    _partialLiquidation(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    _realizePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     adjustPositions(overrides?: CallOverrides): Promise<void>;
 
     assetAddress(overrides?: CallOverrides): Promise<string>;
+
+    calculatePartialLiquidateValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     collateral(
       arg0: string,
@@ -972,6 +1107,8 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<number>;
 
+    executePartialLiquidation(overrides?: CallOverrides): Promise<void>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -979,6 +1116,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1158,6 +1300,11 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<BigNumber>;
 
+    _addToLiquidateList(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     _closeLongPositionMarket(
       _user: string,
       _assetSize: BigNumberish,
@@ -1207,11 +1354,27 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    _partialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    _realizePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    calculatePartialLiquidateValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     collateral(
       arg0: string,
@@ -1230,6 +1393,10 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<BigNumber>;
 
+    executePartialLiquidation(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -1237,6 +1404,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1346,6 +1518,11 @@ export interface Exchange extends BaseContract {
 
     ETHER(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    _addToLiquidateList(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     _closeLongPositionMarket(
       _user: string,
       _assetSize: BigNumberish,
@@ -1395,11 +1572,27 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    _partialLiquidation(
+      _user: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _realizePNL(
+      _user: string,
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     adjustPositions(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    calculatePartialLiquidateValue(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     collateral(
       arg0: string,
@@ -1418,6 +1611,10 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    executePartialLiquidation(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     getIndexPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getUserMargin(
@@ -1428,6 +1625,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isHardLiquidatable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
