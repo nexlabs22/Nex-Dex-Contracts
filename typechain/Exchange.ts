@@ -26,11 +26,9 @@ export interface ExchangeInterface extends utils.Interface {
     "_addToLiquidateList(address)": FunctionFragment;
     "_closeLongPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_closeShortPositionMarket(address,uint256,uint256)": FunctionFragment;
-    "_decreaseCollateral(address,uint256)": FunctionFragment;
     "_decreasePNL(address,uint256)": FunctionFragment;
     "_getFundingRate(uint256,uint256)": FunctionFragment;
     "_hardLiquidate(address)": FunctionFragment;
-    "_increaseCollateral(address,uint256)": FunctionFragment;
     "_increasePNL(address,uint256)": FunctionFragment;
     "_partialLiquidation(address)": FunctionFragment;
     "_realizePNL(address,uint256)": FunctionFragment;
@@ -94,10 +92,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "_decreaseCollateral",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "_decreasePNL",
     values: [string, BigNumberish]
   ): string;
@@ -108,10 +102,6 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "_hardLiquidate",
     values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "_increaseCollateral",
-    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "_increasePNL",
@@ -283,10 +273,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "_decreaseCollateral",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "_decreasePNL",
     data: BytesLike
   ): Result;
@@ -296,10 +282,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "_hardLiquidate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "_increaseCollateral",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -547,12 +529,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    _decreaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
@@ -567,12 +543,6 @@ export interface Exchange extends BaseContract {
 
     _hardLiquidate(
       _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    _increaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -763,7 +733,7 @@ export interface Exchange extends BaseContract {
       arg0: string,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
     >;
 
     withdrawEther(
@@ -795,12 +765,6 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  _decreaseCollateral(
-    _user: string,
-    _usdValue: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   _decreasePNL(
     _user: string,
     _amount: BigNumberish,
@@ -815,12 +779,6 @@ export interface Exchange extends BaseContract {
 
   _hardLiquidate(
     _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  _increaseCollateral(
-    _user: string,
-    _usdValue: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1008,7 +966,7 @@ export interface Exchange extends BaseContract {
     arg0: string,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+    [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
   >;
 
   withdrawEther(
@@ -1040,12 +998,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    _decreaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
@@ -1059,12 +1011,6 @@ export interface Exchange extends BaseContract {
     ): Promise<void>;
 
     _hardLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
-
-    _increaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     _increasePNL(
       _user: string,
@@ -1240,7 +1186,7 @@ export interface Exchange extends BaseContract {
       arg0: string,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositve: boolean }
+      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
     >;
 
     withdrawEther(
@@ -1319,12 +1265,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    _decreaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
@@ -1339,12 +1279,6 @@ export interface Exchange extends BaseContract {
 
     _hardLiquidate(
       _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    _increaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1537,12 +1471,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    _decreaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     _decreasePNL(
       _user: string,
       _amount: BigNumberish,
@@ -1557,12 +1485,6 @@ export interface Exchange extends BaseContract {
 
     _hardLiquidate(
       _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    _increaseCollateral(
-      _user: string,
-      _usdValue: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

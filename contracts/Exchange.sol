@@ -65,7 +65,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   struct PNL {
     uint256 pnlAmount; //default zero
-    bool isPositve; // default false
+    bool isPositive; // default false
   }
 
   Position[] public positions;
@@ -115,7 +115,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 collateralUsdValue = collateralUsdValue(_user);
     PNL memory pnl = userPNL[_user];
     uint256 totalValue;
-    if (pnl.isPositve == true) {
+    if (pnl.isPositive == true) {
       totalValue = collateralUsdValue + pnl.pnlAmount;
     } else {
       totalValue = collateralUsdValue - pnl.pnlAmount;
@@ -169,8 +169,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function calculatePartialLiquidateValue(address _user) public view returns (uint256 x) {
     uint256 totalAccountValue = totalAccountValue(_user);
     uint256 totalPositionNotional = totalPositionNotional(_user);
-    uint256 numerator = (saveLevelMargin * totalPositionNotional) / 100 - totalAccountValue;
-    uint256 denominator = (saveLevelMargin - discountRate) / 100;
+    uint256 numerator = totalPositionNotional*saveLevelMargin/100 - totalAccountValue;
+    uint256 denominator = saveLevelMargin/100 - discountRate/100; 
     x = numerator / denominator;
   }
 
@@ -182,6 +182,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //withdraw collateral
   function withdrawEther(uint256 _amount) public {
+    uint256 userMargin = getUserMargin(msg.sender);
+    require(userMargin > 60, "You cannot withdraw because your margin rate is the lower than saveMargin level");
     require(
       collateral[ETHER][msg.sender] >= _amount,
       "Desire amount is more than collateral balance"
@@ -192,14 +194,16 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //increase collateral when positive pnl is realized
-  function _increaseCollateral(address _user, uint256 _usdValue) public {
+  //this function can not be called diractely by user only pnl function can call
+  //so the negative or positive are checked by the increase/decrease pnl functions 
+  function _increaseCollateral(address _user, uint256 _usdValue) internal {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherValue = _usdValue * uint256(ethPrice);
     collateral[ETHER][_user] += etherValue;
   }
 
   //increase collateral when negative pnl is realized
-  function _decreaseCollateral(address _user, uint256 _usdValue) public {
+  function _decreaseCollateral(address _user, uint256 _usdValue) internal {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherValue = _usdValue * uint256(ethPrice);
     collateral[ETHER][_user] -= etherValue;
@@ -284,7 +288,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 positionPrice = positions[_positionId].price;
     require(
       assetSize >= _assetSize,
-      "asset size of positoin is not equal to your desire assetSize"
+      "asset size of position is not equal to your desire assetSize"
     );
     require(longAddress == _user, "user is not the longAddress address of this position");
     for (uint256 i = 0; i <= longOrders.length; i++) {
@@ -310,7 +314,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 positionPrice = positions[_positionId].price;
     require(
       assetSize >= _assetSize,
-      "asset size of positoin is not equal to your desire assetSize"
+      "asset size of position is not equal to your desire assetSize"
     );
     require(shortAddress == _user, "user is not the short address of this position");
     for (uint256 i = 0; i <= shortOrders.length; i++) {
@@ -325,33 +329,35 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  
+
   //this function should be done in adjustPositions function
   function _increasePNL(address _user, uint256 _amount) public {
     PNL memory pnl = userPNL[_user];
-    if (pnl.isPositve == true || pnl.pnlAmount == 0) {
+    if (pnl.isPositive == true || pnl.pnlAmount == 0) {
       userPNL[_user].pnlAmount += _amount;
     }
-    if (pnl.isPositve == false && pnl.pnlAmount > _amount) {
+    if (pnl.isPositive == false && pnl.pnlAmount > _amount) {
       userPNL[_user].pnlAmount -= _amount;
     }
-    if (pnl.isPositve == false && pnl.pnlAmount <= _amount) {
+    if (pnl.isPositive == false && pnl.pnlAmount <= _amount) {
       userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
-      pnl.isPositve = true;
+      pnl.isPositive = true;
     }
   }
 
   //this function should be done in adjustPositions function
   function _decreasePNL(address _user, uint256 _amount) public {
     PNL memory pnl = userPNL[_user];
-    if (pnl.isPositve == false) {
+    if (pnl.isPositive == false) {
       userPNL[_user].pnlAmount += _amount;
     }
-    if (pnl.isPositve == true && pnl.pnlAmount > _amount) {
+    if (pnl.isPositive == true && pnl.pnlAmount > _amount) {
       userPNL[_user].pnlAmount -= _amount;
     }
-    if (pnl.isPositve == true && pnl.pnlAmount <= _amount) {
+    if (pnl.isPositive == true && pnl.pnlAmount <= _amount) {
       userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
-      pnl.isPositve = false;
+      pnl.isPositive = false;
     }
   }
 
@@ -360,15 +366,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function _realizePNL(address _user, uint256 _amount) public {
     PNL memory pnl = userPNL[_user];
     require(_amount <= userPNL[_user].pnlAmount, "the amount is greater that pnlAmount");
-    if (pnl.isPositve == false) {
+    if (pnl.isPositive == false) {
       userPNL[_user].pnlAmount -= _amount;
       _decreaseCollateral(_user, _amount);
     }
-    if (pnl.isPositve == true) {
+    if (pnl.isPositive == true) {
       userPNL[_user].pnlAmount -= _amount;
       _increaseCollateral(_user, _amount);
       if (userPNL[_user].pnlAmount == 0) {
-        pnl.isPositve = false;
+        pnl.isPositive = false;
       }
     }
   }
@@ -390,10 +396,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
     uint256 indexPrice = 0;
     if (lowestShortPrice < highestLongOrderPrice) {
-      indexPrice = (highestLongOrderPrice - lowestShortPrice) / 2;
+      indexPrice = (highestLongOrderPrice - lowestShortPrice)/2 + lowestShortPrice;
     }
     if (lowestShortPrice > highestLongOrderPrice) {
-      indexPrice = (lowestShortPrice - highestLongOrderPrice) / 2;
+      indexPrice = (lowestShortPrice - highestLongOrderPrice)/2 + highestLongOrderPrice;
     }
     return indexPrice;
   }
@@ -406,13 +412,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       address shortAddress = positions[i].shortAddress;
       if (indexPrice > oraclePrice) {
         uint256 fundingFee = assetSize * (indexPrice - oraclePrice);
-        _increasePNL(shortAddress, fundingFee);
-        _decreasePNL(longAddress, fundingFee);
+        _increaseCollateral(shortAddress, fundingFee);
+        _decreaseCollateral(longAddress, fundingFee);
       }
       if (indexPrice < oraclePrice) {
         uint256 fundingFee = assetSize * (indexPrice - oraclePrice);
-        _increasePNL(longAddress, fundingFee);
-        _decreasePNL(shortAddress, fundingFee);
+        _increaseCollateral(longAddress, fundingFee);
+        _decreaseCollateral(shortAddress, fundingFee);
       }
     }
   }
@@ -434,7 +440,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //liquidate part of user position to turn it back to the save level
   function _partialLiquidation(address _user) public {
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
-    uint256 realizeAmout = (liquidateAmount * discountRate) / 100;
+    uint256 realizeAmout = liquidateAmount*discountRate/100;
     _realizePNL(_user, realizeAmout);
     for (uint256 i = 0; i < positions.length; i++) {
       if (positions[i].longAddress == _user && positions[i].positionSize >= liquidateAmount) {
@@ -449,22 +455,22 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  //hard liquidate(aouto liquidate) happen when user margen fall below 0.4
+  //hard liquidate(auto liquidate) happen when user margen fall below 0.4
   function _hardLiquidate(address _user) public onlyOwner {
     bool liquidatable = isHardLiquidatable(_user);
-    require(liquidatable == true, "user can not be liquidated");
+    require(liquidatable == true, "user cannot be liquidated");
     for (uint256 i = 0; i < positions.length; i++) {
       if (positions[i].longAddress == _user) {
-        uint256 positoinSize = positions[i].positionSize;
-        _closeLongPositionMarket(_user, positoinSize, i);
+        uint256 positionSize = positions[i].positionSize;
+        _closeLongPositionMarket(_user, positionSize, i);
       }
       if (positions[i].shortAddress == _user) {
-        uint256 positoinSize = positions[i].positionSize;
-        _closeShortPositionMarket(_user, positoinSize, i);
+        uint256 positionSize = positions[i].positionSize;
+        _closeShortPositionMarket(_user, positionSize, i);
       }
     }
 
-    if (userPNL[_user].isPositve == true) {
+    if (userPNL[_user].isPositive == true) {
       _increaseCollateral(_user, userPNL[_user].pnlAmount);
       userPNL[_user].pnlAmount = 0;
     } else {
@@ -485,7 +491,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  //calculate profit or lost for users pnl
+  //calculate profit or loss for users pnl
   function adjustPositions() public onlyOwner {
     uint256 newPrice;
     uint256 oldPrice;
@@ -537,7 +543,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //request price from the oracle and save the requrest id
   //should be called befor adjust collateral
-  //It should be called every 24 hour
+  //It should be called every hour
   function requestPrice() public onlyOwner {
     bytes32 requestId = nftOracle.getFloorPrice(specId, payment, assetAddress, pricingAsset);
     if (requestId != latestRequestId) {
