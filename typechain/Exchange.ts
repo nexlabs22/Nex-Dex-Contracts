@@ -18,6 +18,71 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
+export declare namespace Exchange {
+  export type LongOrderStruct = {
+    price: BigNumberish;
+    assetSize: BigNumberish;
+    owner: string;
+    filled: boolean;
+  };
+
+  export type LongOrderStructOutput = [
+    BigNumber,
+    BigNumber,
+    string,
+    boolean
+  ] & {
+    price: BigNumber;
+    assetSize: BigNumber;
+    owner: string;
+    filled: boolean;
+  };
+
+  export type PositionStruct = {
+    startTimestamp: BigNumberish;
+    price: BigNumberish;
+    positionSize: BigNumberish;
+    longAddress: string;
+    shortAddress: string;
+    isActive: boolean;
+  };
+
+  export type PositionStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    boolean
+  ] & {
+    startTimestamp: BigNumber;
+    price: BigNumber;
+    positionSize: BigNumber;
+    longAddress: string;
+    shortAddress: string;
+    isActive: boolean;
+  };
+
+  export type ShortOrderStruct = {
+    price: BigNumberish;
+    assetSize: BigNumberish;
+    owner: string;
+    filled: boolean;
+  };
+
+  export type ShortOrderStructOutput = [
+    BigNumber,
+    BigNumber,
+    string,
+    boolean
+  ] & {
+    price: BigNumber;
+    assetSize: BigNumber;
+    owner: string;
+    filled: boolean;
+  };
+}
+
 export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
@@ -27,19 +92,25 @@ export interface ExchangeInterface extends utils.Interface {
     "_closeLongPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_closeShortPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_decreasePNL(address,uint256)": FunctionFragment;
+    "_getFreeCollateral(address)": FunctionFragment;
     "_getFundingRate(uint256,uint256)": FunctionFragment;
     "_hardLiquidate(address)": FunctionFragment;
     "_increasePNL(address,uint256)": FunctionFragment;
     "_partialLiquidation(address)": FunctionFragment;
     "_realizePNL(address,uint256)": FunctionFragment;
     "adjustPositions()": FunctionFragment;
+    "allLongOrders()": FunctionFragment;
+    "allPositions()": FunctionFragment;
+    "allShortOrders()": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "collateralUsdValue(address)": FunctionFragment;
     "depositEther()": FunctionFragment;
     "discountRate()": FunctionFragment;
+    "ethPrice()": FunctionFragment;
     "executePartialLiquidation()": FunctionFragment;
+    "getAverageEntryPrice(address)": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
     "getUserMargin(address)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
@@ -68,6 +139,8 @@ export interface ExchangeInterface extends utils.Interface {
     "shortOrders(uint256)": FunctionFragment;
     "specId()": FunctionFragment;
     "totalAccountValue(address)": FunctionFragment;
+    "totalAssetSize(address)": FunctionFragment;
+    "totalInvestedValue(address)": FunctionFragment;
     "totalPositionNotional(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "userPNL(address)": FunctionFragment;
@@ -96,6 +169,10 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "_getFreeCollateral",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "_getFundingRate",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -117,6 +194,18 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "adjustPositions",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allLongOrders",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allPositions",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allShortOrders",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -143,9 +232,14 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "discountRate",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "ethPrice", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "executePartialLiquidation",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAverageEntryPrice",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getIndexPrice",
@@ -242,6 +336,14 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "totalAssetSize",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalInvestedValue",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "totalPositionNotional",
     values: [string]
   ): string;
@@ -277,6 +379,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "_getFreeCollateral",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "_getFundingRate",
     data: BytesLike
   ): Result;
@@ -301,6 +407,18 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "allLongOrders",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allPositions",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allShortOrders",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "assetAddress",
     data: BytesLike
   ): Result;
@@ -321,8 +439,13 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "discountRate",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "ethPrice", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "executePartialLiquidation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAverageEntryPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -411,6 +534,14 @@ export interface ExchangeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "specId", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalAccountValue",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalAssetSize",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalInvestedValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -535,6 +666,11 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    _getFreeCollateral(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     _getFundingRate(
       indexPrice: BigNumberish,
       oraclePrice: BigNumberish,
@@ -567,6 +703,18 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    allLongOrders(
+      overrides?: CallOverrides
+    ): Promise<[Exchange.LongOrderStructOutput[]]>;
+
+    allPositions(
+      overrides?: CallOverrides
+    ): Promise<[Exchange.PositionStructOutput[]]>;
+
+    allShortOrders(
+      overrides?: CallOverrides
+    ): Promise<[Exchange.ShortOrderStructOutput[]]>;
+
     assetAddress(overrides?: CallOverrides): Promise<[string]>;
 
     calculatePartialLiquidateValue(
@@ -591,9 +739,16 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<[number]>;
 
+    ethPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     executePartialLiquidation(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    getAverageEntryPrice(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     getIndexPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -719,6 +874,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    totalAssetSize(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    totalInvestedValue(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     totalPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -771,6 +936,11 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  _getFreeCollateral(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   _getFundingRate(
     indexPrice: BigNumberish,
     oraclePrice: BigNumberish,
@@ -803,6 +973,18 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  allLongOrders(
+    overrides?: CallOverrides
+  ): Promise<Exchange.LongOrderStructOutput[]>;
+
+  allPositions(
+    overrides?: CallOverrides
+  ): Promise<Exchange.PositionStructOutput[]>;
+
+  allShortOrders(
+    overrides?: CallOverrides
+  ): Promise<Exchange.ShortOrderStructOutput[]>;
+
   assetAddress(overrides?: CallOverrides): Promise<string>;
 
   calculatePartialLiquidateValue(
@@ -827,9 +1009,16 @@ export interface Exchange extends BaseContract {
 
   discountRate(overrides?: CallOverrides): Promise<number>;
 
+  ethPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   executePartialLiquidation(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  getAverageEntryPrice(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -952,6 +1141,13 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  totalAssetSize(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  totalInvestedValue(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   totalPositionNotional(
     _user: string,
     overrides?: CallOverrides
@@ -1004,6 +1200,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    _getFreeCollateral(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     _getFundingRate(
       indexPrice: BigNumberish,
       oraclePrice: BigNumberish,
@@ -1031,6 +1232,18 @@ export interface Exchange extends BaseContract {
 
     adjustPositions(overrides?: CallOverrides): Promise<void>;
 
+    allLongOrders(
+      overrides?: CallOverrides
+    ): Promise<Exchange.LongOrderStructOutput[]>;
+
+    allPositions(
+      overrides?: CallOverrides
+    ): Promise<Exchange.PositionStructOutput[]>;
+
+    allShortOrders(
+      overrides?: CallOverrides
+    ): Promise<Exchange.ShortOrderStructOutput[]>;
+
     assetAddress(overrides?: CallOverrides): Promise<string>;
 
     calculatePartialLiquidateValue(
@@ -1053,7 +1266,14 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<number>;
 
+    ethPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     executePartialLiquidation(overrides?: CallOverrides): Promise<void>;
+
+    getAverageEntryPrice(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1172,6 +1392,13 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    totalAssetSize(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalInvestedValue(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     totalPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -1271,6 +1498,11 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    _getFreeCollateral(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     _getFundingRate(
       indexPrice: BigNumberish,
       oraclePrice: BigNumberish,
@@ -1303,6 +1535,12 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    allLongOrders(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allPositions(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allShortOrders(overrides?: CallOverrides): Promise<BigNumber>;
+
     assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     calculatePartialLiquidateValue(
@@ -1327,8 +1565,15 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<BigNumber>;
 
+    ethPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     executePartialLiquidation(
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    getAverageEntryPrice(
+      _user: string,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getIndexPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1429,6 +1674,13 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    totalAssetSize(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalInvestedValue(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     totalPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -1477,6 +1729,11 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    _getFreeCollateral(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     _getFundingRate(
       indexPrice: BigNumberish,
       oraclePrice: BigNumberish,
@@ -1509,6 +1766,12 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    allLongOrders(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    allPositions(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    allShortOrders(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     calculatePartialLiquidateValue(
@@ -1533,8 +1796,15 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    ethPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     executePartialLiquidation(
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    getAverageEntryPrice(
+      _user: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getIndexPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1637,6 +1907,16 @@ export interface Exchange extends BaseContract {
 
     totalAccountValue(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalAssetSize(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalInvestedValue(
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

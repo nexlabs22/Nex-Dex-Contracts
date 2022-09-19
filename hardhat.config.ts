@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
         url: MAINNET_RPC_URL,
         // url: KOVAN_RPC_URL,
         // blockNumber: Number(FORKING_BLOCK_NUMBER),
-        enabled: true,
+        enabled: false,
       },
       chainId: 31337,
     },

@@ -59,9 +59,27 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         
         //owner deposit collateral
         await exchange.depositEther({value: toWei('10')});
+        await exchange.connect(account1).depositEther({value: toWei('10')});
+        await exchange.connect(account2).depositEther({value: toWei('10')});
         const etherAddress = exchange.ETHER();
         let ownerCollateral = await exchange.collateral(etherAddress, owner.address);
         assert.equal(toEther(ownerCollateral), '10.0');
         
+        // console.log(toEther(await exchange.collateralUsdValue(owner.address)));
+        await exchange.openLongOrder(owner.address, toWei('0.1'), toWei('1000'));
+        await exchange.connect(account2).openLongOrder(owner.address, toWei('0.1'), toWei('1000'));
+        let longOrders = await exchange.allLongOrders();
+        let shortOrders = await exchange.allShortOrders();
+        let positions = await exchange.allPositions();
+        console.log('l1',longOrders.length)
+        console.log('s1',shortOrders.length)
+        console.log('p1',positions.length)
+        await exchange.connect(account1).openShortOrder(account1.address, toWei('0.1'), toWei('1000'));
+        longOrders = await exchange.allLongOrders();
+        shortOrders = await exchange.allShortOrders();
+        positions = await exchange.allPositions();
+        console.log('l2',longOrders.length)
+        console.log('s2',shortOrders.length)
+        console.log('p2',positions.length)
       })
     })

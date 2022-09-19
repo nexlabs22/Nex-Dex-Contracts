@@ -11,6 +11,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {NftOracle} from "./NftOracle.sol";
+import "hardhat/console.sol";
 
 // @title Nex Exchange smart contract
 
@@ -75,6 +76,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   mapping(address => PNL) public userPNL; //unrealizedPNL of user
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
 
+  mapping(address => uint256) public totalInvestedValue;// sum of (assetSize*startPrice) of each user;
+  mapping(address => uint256) public totalAssetSize;//som of assetSize of each user
+
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
   event Withdraw(address token, address user, uint256 amount, uint256 balance);
@@ -103,11 +107,18 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     _;
   }
 
+  function ethPrice() public view returns (uint256) {
+    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
+    uint8 quoteDecimals = priceFeed.decimals();
+    // return quoteDecimals;
+    return uint256(ethPrice * int256(10**uint256(18 - quoteDecimals)));
+  }
+
   //show collateral balance in usd
   function collateralUsdValue(address _user) public view returns (uint256) {
     uint256 ethBalance = collateral[ETHER][_user];
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    return ethBalance.mul(uint256(ethPrice));
+    uint256 ethPrice = ethPrice();
+    return ethBalance.mul(ethPrice).div(1e18);
   }
 
   //user usd collateral value + (or -) pnl value
@@ -141,7 +152,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function getUserMargin(address _user) public view returns (uint256) {
     uint256 totalAccountValue = totalAccountValue(_user);
     uint256 totalPositionNotional = totalPositionNotional(_user);
-    uint256 marginRate = (100 * totalAccountValue) / totalPositionNotional;
+    uint256 marginRate;
+    if (totalAccountValue > 0 && totalPositionNotional > 0) {
+      marginRate = (100 * totalAccountValue) / totalPositionNotional;
+    }
     return marginRate;
   }
 
@@ -169,8 +183,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function calculatePartialLiquidateValue(address _user) public view returns (uint256 x) {
     uint256 totalAccountValue = totalAccountValue(_user);
     uint256 totalPositionNotional = totalPositionNotional(_user);
-    uint256 numerator = totalPositionNotional*saveLevelMargin/100 - totalAccountValue;
-    uint256 denominator = saveLevelMargin/100 - discountRate/100; 
+    uint256 numerator = (totalPositionNotional * saveLevelMargin) / 100 - totalAccountValue;
+    uint256 denominator = saveLevelMargin / 100 - discountRate / 100;
     x = numerator / denominator;
   }
 
@@ -183,7 +197,11 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //withdraw collateral
   function withdrawEther(uint256 _amount) public {
     uint256 userMargin = getUserMargin(msg.sender);
-    require(userMargin > 60, "You cannot withdraw because your margin rate is the lower than saveMargin level");
+    uint256 totalPositionNotional = totalPositionNotional(msg.sender);
+    require(
+      totalPositionNotional == 0 || userMargin > 60,
+      "You cannot withdraw because your margin rate is the lower than saveMargin level"
+    );
     require(
       collateral[ETHER][msg.sender] >= _amount,
       "Desire amount is more than collateral balance"
@@ -195,7 +213,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //increase collateral when positive pnl is realized
   //this function can not be called diractely by user only pnl function can call
-  //so the negative or positive are checked by the increase/decrease pnl functions 
+  //so the negative or positive are checked by the increase/decrease pnl functions
   function _increaseCollateral(address _user, uint256 _usdValue) internal {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherValue = _usdValue * uint256(ethPrice);
@@ -207,6 +225,36 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherValue = _usdValue * uint256(ethPrice);
     collateral[ETHER][_user] -= etherValue;
+  }
+
+  function _getFreeCollateral(address _user) public view returns (uint256) {
+    uint256 totalAccountValue = totalAccountValue(_user);
+    uint256 totalPositionNotional = totalPositionNotional(_user);
+    uint256 requireMarginAmount = (totalPositionNotional * maintenanceMargin) / 100;
+    uint256 freeCollateral = totalAccountValue - requireMarginAmount;
+    return freeCollateral;
+  }
+
+  //averagePrice = totalInvestedValue/assetSize
+  function getAverageEntryPrice(address _user) public view returns(uint256){
+    uint totalInvestedValue = totalInvestedValue[_user];
+    uint totalAssetSize = totalAssetSize[_user];
+    if(totalAssetSize>0 && totalInvestedValue>0){
+      return totalInvestedValue/totalAssetSize;
+    }
+  }
+
+
+  function allLongOrders() public view returns (LongOrder[] memory) {
+    return longOrders;
+  }
+
+  function allShortOrders() public view returns (ShortOrder[] memory) {
+    return shortOrders;
+  }
+
+  function allPositions() public view returns (Position[] memory) {
+    return positions;
   }
 
   //put order by usd value
@@ -234,9 +282,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           Position(block.timestamp, _price, _assetSize, _user, shortOrders[i].owner, true)
         );
         shortOrders[i].assetSize -= _assetSize;
+        totalInvestedValue[shortOrders[i].owner] += _assetSize*_price;
+        totalAssetSize[shortOrders[i].owner] += _assetSize;
         if (shortOrders[i].assetSize == 0) {
           delete shortOrders[i];
         }
+        totalInvestedValue[longOrders[longOrders.length - 1].owner] += _assetSize*_price;
+        totalAssetSize[longOrders[longOrders.length - 1].owner] += _assetSize;
         delete longOrders[longOrders.length - 1];
         return;
       }
@@ -262,17 +314,21 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) public {
     shortOrders.push(ShortOrder(_price, _assetSize, _user, false));
 
-    for (uint256 i = 0; i <= longOrders.length; i++) {
+    for (uint256 i = 0; i < longOrders.length; i++) {
       if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == _price) {
         positions.push(
           Position(block.timestamp, _price, _assetSize, longOrders[i].owner, _user, true)
         );
         longOrders[i].assetSize -= _assetSize;
+        totalInvestedValue[longOrders[i].owner] += _assetSize*_price;
+        totalAssetSize[longOrders[i].owner] += _assetSize;
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
+        totalInvestedValue[shortOrders[shortOrders.length - 1].owner] += _assetSize*_price;
+        totalAssetSize[shortOrders[shortOrders.length - 1].owner] += _assetSize;
         delete shortOrders[shortOrders.length - 1];
-        return;
+        break;
       }
     }
   }
@@ -298,6 +354,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
+        totalAssetSize[_user] -= _assetSize;
         return;
       }
     }
@@ -321,15 +378,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == positionPrice) {
         positions[_positionId].shortAddress = shortOrders[i].owner;
         shortOrders[i].assetSize -= _assetSize;
+        totalAssetSize[_user] -= _assetSize;
         if (shortOrders[i].assetSize == 0) {
           delete shortOrders[i];
         }
+
         return;
       }
     }
   }
-
-  
 
   //this function should be done in adjustPositions function
   function _increasePNL(address _user, uint256 _amount) public {
@@ -396,10 +453,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
     uint256 indexPrice = 0;
     if (lowestShortPrice < highestLongOrderPrice) {
-      indexPrice = (highestLongOrderPrice - lowestShortPrice)/2 + lowestShortPrice;
+      indexPrice = (highestLongOrderPrice - lowestShortPrice) / 2 + lowestShortPrice;
     }
     if (lowestShortPrice > highestLongOrderPrice) {
-      indexPrice = (lowestShortPrice - highestLongOrderPrice)/2 + highestLongOrderPrice;
+      indexPrice = (lowestShortPrice - highestLongOrderPrice) / 2 + highestLongOrderPrice;
     }
     return indexPrice;
   }
@@ -440,7 +497,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //liquidate part of user position to turn it back to the save level
   function _partialLiquidation(address _user) public {
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
-    uint256 realizeAmout = liquidateAmount*discountRate/100;
+    uint256 realizeAmout = (liquidateAmount * discountRate) / 100;
     _realizePNL(_user, realizeAmout);
     for (uint256 i = 0; i < positions.length; i++) {
       if (positions[i].longAddress == _user && positions[i].positionSize >= liquidateAmount) {
