@@ -76,8 +76,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   mapping(address => PNL) public userPNL; //unrealizedPNL of user
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
 
-  mapping(address => uint256) public totalInvestedValue;// sum of (assetSize*startPrice) of each user;
-  mapping(address => uint256) public totalAssetSize;//som of assetSize of each user
+  mapping(address => uint256) public totalInvestedValue;// sum of (assetSize*filledOrderPrice) of each user;
+  mapping(address => uint256) public totalAssetSize;//sum of assetSize of each user
 
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
