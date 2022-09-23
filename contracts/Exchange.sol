@@ -44,6 +44,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   struct Position {
     uint256 startTimestamp;
     uint256 price;
+    uint256 longStartPrice;
+    uint256 shortStartPrice;
     uint256 positionSize;
     address longAddress;
     address shortAddress;
@@ -279,7 +281,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     for (uint256 i = 0; i < shortOrders.length; i++) {
       if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == _price) {
         positions.push(
-          Position(block.timestamp, _price, _assetSize, _user, shortOrders[i].owner, true)
+          Position(block.timestamp, _price, _price, _price, _assetSize, _user, shortOrders[i].owner, true)
         );
         shortOrders[i].assetSize -= _assetSize;
         totalInvestedValue[shortOrders[i].owner] += _assetSize*_price;
@@ -317,7 +319,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     for (uint256 i = 0; i < longOrders.length; i++) {
       if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == _price) {
         positions.push(
-          Position(block.timestamp, _price, _assetSize, longOrders[i].owner, _user, true)
+          Position(block.timestamp, _price, _price, _price, _assetSize, longOrders[i].owner, _user, true)
         );
         longOrders[i].assetSize -= _assetSize;
         totalInvestedValue[longOrders[i].owner] += _assetSize*_price;
@@ -349,12 +351,20 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     require(longAddress == _user, "user is not the longAddress address of this position");
     for (uint256 i = 0; i <= longOrders.length; i++) {
       if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == positionPrice) {
+
+        totalAssetSize[_user] -= _assetSize;
+        totalAccountValue[_user] -= _assetSize*positions[_positionId].longStartPrice;
+
         positions[_positionId].longAddress = longOrders[i].owner;
+        positions[_positionId].longStartPrice = longOrders[i].price;
+        totalInvestedValue[longOrders[i].owner] += longOrders[i].price*_assetSize;
+        totalAssetSize[longOrders[i].owner] += _assetSize;
         longOrders[i].assetSize -= _assetSize;
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
         totalAssetSize[_user] -= _assetSize;
+        totalAccountValue[_user] -= _assetSize*positions[_positionId].longStartPrice;
         return;
       }
     }
@@ -376,13 +386,19 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     require(shortAddress == _user, "user is not the short address of this position");
     for (uint256 i = 0; i <= shortOrders.length; i++) {
       if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == positionPrice) {
+
+        totalAssetSize[_user] -= _assetSize;
+        totalAccountValue[_user] -= _assetSize*positions[_positionId].shortStartPrice;
+
         positions[_positionId].shortAddress = shortOrders[i].owner;
+        positions[_positionId].shortStartPrice = shortOrders[i].price;
+        totalInvestedValue[shortOrders[i].owner] += shortOrders[i].price*_assetSize;
+        totalAssetSize[shortOrders[i].owner] += _assetSize;
         shortOrders[i].assetSize -= _assetSize;
         totalAssetSize[_user] -= _assetSize;
         if (shortOrders[i].assetSize == 0) {
           delete shortOrders[i];
         }
-
         return;
       }
     }
