@@ -403,8 +403,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
-        totalAssetSize[_user] -= _assetSize;
-        totalInvestedValue[_user] -= _assetSize * positions[_positionId].longStartPrice;
         return;
       }
     }
