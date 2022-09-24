@@ -204,12 +204,14 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 userMargin = getUserMargin(msg.sender);
     uint256 totalPositionNotional = totalPositionNotional(msg.sender);
     uint256 totalAccountValue = totalAccountValue(msg.sender);
+    if(totalPositionNotional > 0){
     uint newAccountValue = totalAccountValue - usdAmount;
     uint newMargin = 100*newAccountValue/totalPositionNotional;
     require(
       newMargin > 60,
       "You cannot withdraw because your margin rate is the lower than saveMargin level"
     );
+    }
     require(
       collateral[ETHER][msg.sender] >= _amount,
       "Desire amount is more than collateral balance"
