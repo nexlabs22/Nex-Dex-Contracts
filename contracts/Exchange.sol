@@ -66,20 +66,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     bool filled;
   }
 
-  struct PNL {
-    uint256 pnlAmount; //default zero
-    bool isPositive; // default false
-  }
 
   Position[] public positions;
   LongOrder[] public longOrders;
   ShortOrder[] public shortOrders;
 
-  mapping(address => PNL) public userPNL; //unrealizedPNL of user
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
 
-  mapping(address => uint256) public totalInvestedValue;// sum of (assetSize*filledOrderPrice) of each user;
-  mapping(address => uint256) public totalAssetSize;//sum of assetSize of each user
+  mapping(address => uint256) public totalInvestedValue; // sum of (assetSize*filledOrderPrice) of each user;
+  mapping(address => uint256) public totalAssetSize; //sum of assetSize of each user
 
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -103,11 +98,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     pricingAsset = _pricingAsset;
   }
 
-  modifier notContract() {
-    require(!_isContract(msg.sender), "Contract not allowed");
-    require(msg.sender == tx.origin, "Proxy contract not allowed");
-    _;
-  }
 
   function ethPrice() public view returns (uint256) {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
@@ -116,6 +106,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return uint256(ethPrice * int256(10**uint256(18 - quoteDecimals)));
   }
 
+
   //show collateral balance in usd
   function collateralUsdValue(address _user) public view returns (uint256) {
     uint256 ethBalance = collateral[ETHER][_user];
@@ -123,16 +114,24 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return ethBalance.mul(ethPrice).div(1e18);
   }
 
-  //user usd collateral value + (or -) pnl value
+  //totalAccountValue =  collateralUsdValue +(-) unrealizedPNL
   function totalAccountValue(address _user) public view returns (uint256) {
+    uint256 totalAccountValue;
     uint256 collateralUsdValue = collateralUsdValue(_user);
-    PNL memory pnl = userPNL[_user];
-    uint256 totalValue;
-    if (pnl.isPositive == true) {
-      totalValue = collateralUsdValue + pnl.pnlAmount;
-    } else {
-      totalValue = collateralUsdValue - pnl.pnlAmount;
+    uint totalInvestedValue = totalInvestedValue[_user];
+    uint totalPositionNotional = totalPositionNotional(_user);
+
+    //calculate pnl = totalPositionNotional - totalInvestedValue
+    if (totalPositionNotional > totalInvestedValue) {
+      uint256 unrealizedPNL = totalPositionNotional - collateralUsdValue;
+      totalAccountValue = collateralUsdValue + unrealizedPNL;
     }
+    if (totalPositionNotional < totalInvestedValue) {
+      uint256 unrealizedPNL = totalInvestedValue - totalPositionNotional;
+      totalAccountValue = collateralUsdValue - unrealizedPNL;
+    }
+
+    return totalAccountValue;
   }
 
   //Total of user long and short positions
@@ -151,12 +150,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //user margin is between 0 and 100 percent
+  // margin = totalAccountValue/totalPositionNotional
   function getUserMargin(address _user) public view returns (uint256) {
     uint256 totalAccountValue = totalAccountValue(_user);
     uint256 totalPositionNotional = totalPositionNotional(_user);
     uint256 marginRate;
     if (totalAccountValue > 0 && totalPositionNotional > 0) {
-      marginRate = (100 * totalAccountValue) / totalPositionNotional;
+      marginRate = 100 * totalAccountValue/ totalPositionNotional;
     }
     return marginRate;
   }
@@ -198,10 +198,16 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //withdraw collateral
   function withdrawEther(uint256 _amount) public {
+    uint256 ethPrice = ethPrice();
+    uint usdAmount = _amount*ethPrice/1e18;
+
     uint256 userMargin = getUserMargin(msg.sender);
     uint256 totalPositionNotional = totalPositionNotional(msg.sender);
+    uint256 totalAccountValue = totalAccountValue(msg.sender);
+    uint newAccountValue = totalAccountValue - usdAmount;
+    uint newMargin = 100*newAccountValue/totalPositionNotional;
     require(
-      totalPositionNotional == 0 || userMargin > 60,
+      newMargin > 60,
       "You cannot withdraw because your margin rate is the lower than saveMargin level"
     );
     require(
@@ -214,8 +220,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //increase collateral when positive pnl is realized
-  //this function can not be called diractely by user only pnl function can call
-  //so the negative or positive are checked by the increase/decrease pnl functions
   function _increaseCollateral(address _user, uint256 _usdValue) internal {
     (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
     uint256 etherValue = _usdValue * uint256(ethPrice);
@@ -229,6 +233,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     collateral[ETHER][_user] -= etherValue;
   }
 
+  //get free collateral amount that user can withdraw
   function _getFreeCollateral(address _user) public view returns (uint256) {
     uint256 totalAccountValue = totalAccountValue(_user);
     uint256 totalPositionNotional = totalPositionNotional(_user);
@@ -238,14 +243,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //averagePrice = totalInvestedValue/assetSize
-  function getAverageEntryPrice(address _user) public view returns(uint256){
-    uint totalInvestedValue = totalInvestedValue[_user];
-    uint totalAssetSize = totalAssetSize[_user];
-    if(totalAssetSize>0 && totalInvestedValue>0){
-      return totalInvestedValue/totalAssetSize;
+  function getAverageEntryPrice(address _user) public view returns (uint256) {
+    uint256 totalInvestedValue = totalInvestedValue[_user];
+    uint256 totalAssetSize = totalAssetSize[_user];
+    if (totalAssetSize > 0 && totalInvestedValue > 0) {
+      return totalInvestedValue / totalAssetSize;
     }
   }
-
 
   function allLongOrders() public view returns (LongOrder[] memory) {
     return longOrders;
@@ -259,7 +263,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return positions;
   }
 
-  //put order by usd value
+  //put long order by usd value
+  //convert usd value to the asset size according to the asset price (assetSize = _usdAmount/oraclePrice)
+  //if the short order with the same price exist the position will be created
   function openLongOrderUsd(
     address _user,
     uint256 _usdAmount,
@@ -271,6 +277,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //put order by by asset amount (for example 1 ape nft)
+  //if a short order with the same price exist the position will be created
   function openLongOrder(
     address _user,
     uint256 _assetSize,
@@ -281,15 +288,24 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     for (uint256 i = 0; i < shortOrders.length; i++) {
       if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == _price) {
         positions.push(
-          Position(block.timestamp, _price, _price, _price, _assetSize, _user, shortOrders[i].owner, true)
+          Position(
+            block.timestamp,//position start time 
+            _price,// position price
+            _price,//long start price
+            _price,//short start price
+            _assetSize,//assetSize
+            _user,//longAddress
+            shortOrders[i].owner,//shortAddress
+            true//is acitve
+          )
         );
         shortOrders[i].assetSize -= _assetSize;
-        totalInvestedValue[shortOrders[i].owner] += _assetSize*_price;
+        totalInvestedValue[shortOrders[i].owner] += _assetSize * _price;
         totalAssetSize[shortOrders[i].owner] += _assetSize;
         if (shortOrders[i].assetSize == 0) {
           delete shortOrders[i];
         }
-        totalInvestedValue[longOrders[longOrders.length - 1].owner] += _assetSize*_price;
+        totalInvestedValue[longOrders[longOrders.length - 1].owner] += _assetSize * _price;
         totalAssetSize[longOrders[longOrders.length - 1].owner] += _assetSize;
         delete longOrders[longOrders.length - 1];
         return;
@@ -297,7 +313,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  //put order by usd value
+  //cancel the long order
+  function cancelLongOrder(uint _longOrderId) public {
+    require(longOrders[_longOrderId].owner == msg.sender, "Your order id is not true");
+    delete longOrders[_longOrderId];
+  }
+
+  //put long order by usd value
+  //convert usd value to the asset size according to the asset price (assetSize = _usdAmount/oraclePrice)
+  //if the long order with the same price exist the position will be created
   function openShortOrderUsd(
     address _user,
     uint256 _usdAmount,
@@ -308,7 +332,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     openShortOrder(_user, assetSize, _price);
   }
 
-  //put order by by asset amount (for example 1 ape nft
+  //put order by by asset amount (for example 1 ape nft)
+  //if the long order with the same price exist the position will be created
   function openShortOrder(
     address _user,
     uint256 _assetSize,
@@ -319,15 +344,24 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     for (uint256 i = 0; i < longOrders.length; i++) {
       if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == _price) {
         positions.push(
-          Position(block.timestamp, _price, _price, _price, _assetSize, longOrders[i].owner, _user, true)
+          Position(
+            block.timestamp,
+            _price,
+            _price,
+            _price,
+            _assetSize,
+            longOrders[i].owner,
+            _user,
+            true
+          )
         );
         longOrders[i].assetSize -= _assetSize;
-        totalInvestedValue[longOrders[i].owner] += _assetSize*_price;
+        totalInvestedValue[longOrders[i].owner] += _assetSize * _price;
         totalAssetSize[longOrders[i].owner] += _assetSize;
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
-        totalInvestedValue[shortOrders[shortOrders.length - 1].owner] += _assetSize*_price;
+        totalInvestedValue[shortOrders[shortOrders.length - 1].owner] += _assetSize * _price;
         totalAssetSize[shortOrders[shortOrders.length - 1].owner] += _assetSize;
         delete shortOrders[shortOrders.length - 1];
         break;
@@ -335,7 +369,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  //close the order by current orders
+  //cancel short order
+  function cancelShortOrder(uint _shortOrderId) public {
+    require(shortOrders[_shortOrderId].owner == msg.sender, "Your order id is not true");
+    delete shortOrders[_shortOrderId];
+  }
+
+  //close the position by current orders
   function _closeLongPositionMarket(
     address _user,
     uint256 _assetSize,
@@ -351,26 +391,26 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     require(longAddress == _user, "user is not the longAddress address of this position");
     for (uint256 i = 0; i <= longOrders.length; i++) {
       if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == positionPrice) {
-
         totalAssetSize[_user] -= _assetSize;
-        totalAccountValue[_user] -= _assetSize*positions[_positionId].longStartPrice;
+        totalInvestedValue[_user] -= _assetSize * positions[_positionId].longStartPrice;
+        _realizePNL(_user, positions[_positionId].longStartPrice, longOrders[i].price, _assetSize);
 
         positions[_positionId].longAddress = longOrders[i].owner;
         positions[_positionId].longStartPrice = longOrders[i].price;
-        totalInvestedValue[longOrders[i].owner] += longOrders[i].price*_assetSize;
+        totalInvestedValue[longOrders[i].owner] += longOrders[i].price * _assetSize;
         totalAssetSize[longOrders[i].owner] += _assetSize;
         longOrders[i].assetSize -= _assetSize;
         if (longOrders[i].assetSize == 0) {
           delete longOrders[i];
         }
         totalAssetSize[_user] -= _assetSize;
-        totalAccountValue[_user] -= _assetSize*positions[_positionId].longStartPrice;
+        totalInvestedValue[_user] -= _assetSize * positions[_positionId].longStartPrice;
         return;
       }
     }
   }
 
-  //close the order by current orders
+  //close the position by current orders
   function _closeShortPositionMarket(
     address _user,
     uint256 _assetSize,
@@ -388,11 +428,12 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == positionPrice) {
 
         totalAssetSize[_user] -= _assetSize;
-        totalAccountValue[_user] -= _assetSize*positions[_positionId].shortStartPrice;
+        totalInvestedValue[_user] -= _assetSize * positions[_positionId].shortStartPrice;
+        _realizePNL(_user, positions[_positionId].shortStartPrice, shortOrders[i].price, _assetSize);
 
         positions[_positionId].shortAddress = shortOrders[i].owner;
         positions[_positionId].shortStartPrice = shortOrders[i].price;
-        totalInvestedValue[shortOrders[i].owner] += shortOrders[i].price*_assetSize;
+        totalInvestedValue[shortOrders[i].owner] += shortOrders[i].price * _assetSize;
         totalAssetSize[shortOrders[i].owner] += _assetSize;
         shortOrders[i].assetSize -= _assetSize;
         totalAssetSize[_user] -= _assetSize;
@@ -405,75 +446,41 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //this function should be done in adjustPositions function
-  function _increasePNL(address _user, uint256 _amount) public {
-    PNL memory pnl = userPNL[_user];
-    if (pnl.isPositive == true || pnl.pnlAmount == 0) {
-      userPNL[_user].pnlAmount += _amount;
+  //we use this function only in close position for realize the reward of user
+  function _realizePNL(
+    address _user,
+    uint256 _startPrice,
+    uint256 _currentPrice,
+    uint256 _assetSize
+  ) public {
+    uint256 usdReward;
+    if (_startPrice < _currentPrice) {
+      usdReward = (_currentPrice - _startPrice) * _assetSize;
+      _increaseCollateral(_user, usdReward);
     }
-    if (pnl.isPositive == false && pnl.pnlAmount > _amount) {
-      userPNL[_user].pnlAmount -= _amount;
-    }
-    if (pnl.isPositive == false && pnl.pnlAmount <= _amount) {
-      userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
-      pnl.isPositive = true;
-    }
-  }
-
-  //this function should be done in adjustPositions function
-  function _decreasePNL(address _user, uint256 _amount) public {
-    PNL memory pnl = userPNL[_user];
-    if (pnl.isPositive == false) {
-      userPNL[_user].pnlAmount += _amount;
-    }
-    if (pnl.isPositive == true && pnl.pnlAmount > _amount) {
-      userPNL[_user].pnlAmount -= _amount;
-    }
-    if (pnl.isPositive == true && pnl.pnlAmount <= _amount) {
-      userPNL[_user].pnlAmount = (_amount - pnl.pnlAmount);
-      pnl.isPositive = false;
-    }
-  }
-
-  //realized pnl : when pnl is positve we increase the collateral
-  //realized pnl : when pnl is negative we decrease the collateral
-  function _realizePNL(address _user, uint256 _amount) public {
-    PNL memory pnl = userPNL[_user];
-    require(_amount <= userPNL[_user].pnlAmount, "the amount is greater that pnlAmount");
-    if (pnl.isPositive == false) {
-      userPNL[_user].pnlAmount -= _amount;
-      _decreaseCollateral(_user, _amount);
-    }
-    if (pnl.isPositive == true) {
-      userPNL[_user].pnlAmount -= _amount;
-      _increaseCollateral(_user, _amount);
-      if (userPNL[_user].pnlAmount == 0) {
-        pnl.isPositive = false;
-      }
+    if (_currentPrice < _startPrice) {
+      usdReward = (_startPrice - _currentPrice) * _assetSize;
+      _decreaseCollateral(_user, usdReward);
     }
   }
 
   //calculate the index price of the asset
   function getIndexPrice() public view returns (uint256) {
     uint256 highestLongOrderPrice = longOrders[longOrders.length - 1].price;
-    uint256 lowestShortPrice = shortOrders[shortOrders.length - 1].price;
+    uint256 lowestShortOrderPrice = shortOrders[shortOrders.length - 1].price;
     for (uint256 i; i < longOrders.length; i++) {
       if (longOrders[i].price > highestLongOrderPrice) {
         highestLongOrderPrice = longOrders[i].price;
       }
     }
     for (uint256 i; i < shortOrders.length; i++) {
-      if (shortOrders[i].price < lowestShortPrice) {
-        lowestShortPrice = shortOrders[i].price;
+      if (shortOrders[i].price < lowestShortOrderPrice) {
+        lowestShortOrderPrice = shortOrders[i].price;
       }
     }
 
     uint256 indexPrice = 0;
-    if (lowestShortPrice < highestLongOrderPrice) {
-      indexPrice = (highestLongOrderPrice - lowestShortPrice) / 2 + lowestShortPrice;
-    }
-    if (lowestShortPrice > highestLongOrderPrice) {
-      indexPrice = (lowestShortPrice - highestLongOrderPrice) / 2 + highestLongOrderPrice;
-    }
+    indexPrice = (highestLongOrderPrice + lowestShortOrderPrice) / 2;
     return indexPrice;
   }
 
@@ -484,12 +491,12 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       address longAddress = positions[i].longAddress;
       address shortAddress = positions[i].shortAddress;
       if (indexPrice > oraclePrice) {
-        uint256 fundingFee = assetSize * (indexPrice - oraclePrice);
+        uint256 fundingFee = assetSize * (indexPrice - oraclePrice)/24;
         _increaseCollateral(shortAddress, fundingFee);
         _decreaseCollateral(longAddress, fundingFee);
       }
       if (indexPrice < oraclePrice) {
-        uint256 fundingFee = assetSize * (indexPrice - oraclePrice);
+        uint256 fundingFee = assetSize * (indexPrice - oraclePrice)/24;
         _increaseCollateral(longAddress, fundingFee);
         _decreaseCollateral(shortAddress, fundingFee);
       }
@@ -513,16 +520,19 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //liquidate part of user position to turn it back to the save level
   function _partialLiquidation(address _user) public {
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
-    uint256 realizeAmout = (liquidateAmount * discountRate) / 100;
-    _realizePNL(_user, realizeAmout);
+    uint256 discountAmount = liquidateAmount*discountRate/100;
     for (uint256 i = 0; i < positions.length; i++) {
       if (positions[i].longAddress == _user && positions[i].positionSize >= liquidateAmount) {
         _closeLongPositionMarket(_user, liquidateAmount, i);
+        _decreaseCollateral(_user, discountAmount);
+        insuranceFunds += discountAmount;
         return;
       } else if (
         positions[i].shortAddress == _user && positions[i].positionSize >= liquidateAmount
       ) {
         _closeShortPositionMarket(_user, liquidateAmount, i);
+        _decreaseCollateral(_user, discountAmount);
+        insuranceFunds += discountAmount;
         return;
       }
     }
@@ -542,19 +552,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         _closeShortPositionMarket(_user, positionSize, i);
       }
     }
-
-    if (userPNL[_user].isPositive == true) {
-      _increaseCollateral(_user, userPNL[_user].pnlAmount);
-      userPNL[_user].pnlAmount = 0;
-    } else {
-      _decreaseCollateral(_user, userPNL[_user].pnlAmount);
-      userPNL[_user].pnlAmount = 0;
-    }
-
     uint256 collateralValue = collateralUsdValue(_user);
-    uint256 discountAmount = (discountRate * collateralValue) / 100;
+    uint256 discountAmount = discountRate*collateralValue/100;
     _decreaseCollateral(_user, discountAmount);
-    insuranceFunds;
+    insuranceFunds += discountAmount;
   }
 
   function executePartialLiquidation() public onlyOwner {
@@ -582,13 +583,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
 
     for (uint256 i = 0; i < positions.length; i++) {
-      uint256 assetSize = positions[i].positionSize;
       address longAddress = positions[i].longAddress;
       address shortAddress = positions[i].shortAddress;
       if (newPrice > oldPrice) {
-        uint256 reward = assetSize * (newPrice - oldPrice);
-        _increasePNL(longAddress, reward);
-        _decreasePNL(shortAddress, reward);
         bool isHardLiquidatable = isHardLiquidatable(shortAddress);
         bool isPartialLiquidatable = isPartialLiquidatable(shortAddress);
         if (isHardLiquidatable == true) {
@@ -599,9 +596,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         }
       }
       if (newPrice < oldPrice) {
-        uint256 reward = assetSize * (newPrice - oldPrice);
-        _increasePNL(shortAddress, reward);
-        _decreasePNL(longAddress, reward);
         bool isHardLiquidatable = isHardLiquidatable(longAddress);
         bool isPartialLiquidatable = isPartialLiquidatable(shortAddress);
         if (isHardLiquidatable == true) {

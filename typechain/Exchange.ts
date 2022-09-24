@@ -41,6 +41,8 @@ export declare namespace Exchange {
   export type PositionStruct = {
     startTimestamp: BigNumberish;
     price: BigNumberish;
+    longStartPrice: BigNumberish;
+    shortStartPrice: BigNumberish;
     positionSize: BigNumberish;
     longAddress: string;
     shortAddress: string;
@@ -51,12 +53,16 @@ export declare namespace Exchange {
     BigNumber,
     BigNumber,
     BigNumber,
+    BigNumber,
+    BigNumber,
     string,
     string,
     boolean
   ] & {
     startTimestamp: BigNumber;
     price: BigNumber;
+    longStartPrice: BigNumber;
+    shortStartPrice: BigNumber;
     positionSize: BigNumber;
     longAddress: string;
     shortAddress: string;
@@ -91,19 +97,19 @@ export interface ExchangeInterface extends utils.Interface {
     "_addToLiquidateList(address)": FunctionFragment;
     "_closeLongPositionMarket(address,uint256,uint256)": FunctionFragment;
     "_closeShortPositionMarket(address,uint256,uint256)": FunctionFragment;
-    "_decreasePNL(address,uint256)": FunctionFragment;
     "_getFreeCollateral(address)": FunctionFragment;
     "_getFundingRate(uint256,uint256)": FunctionFragment;
     "_hardLiquidate(address)": FunctionFragment;
-    "_increasePNL(address,uint256)": FunctionFragment;
     "_partialLiquidation(address)": FunctionFragment;
-    "_realizePNL(address,uint256)": FunctionFragment;
+    "_realizePNL(address,uint256,uint256,uint256)": FunctionFragment;
     "adjustPositions()": FunctionFragment;
     "allLongOrders()": FunctionFragment;
     "allPositions()": FunctionFragment;
     "allShortOrders()": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
+    "cancelLongOrder(uint256)": FunctionFragment;
+    "cancelShortOrder(uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "collateralUsdValue(address)": FunctionFragment;
     "depositEther()": FunctionFragment;
@@ -143,7 +149,6 @@ export interface ExchangeInterface extends utils.Interface {
     "totalInvestedValue(address)": FunctionFragment;
     "totalPositionNotional(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "userPNL(address)": FunctionFragment;
     "withdrawEther(uint256)": FunctionFragment;
   };
 
@@ -165,10 +170,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "_decreasePNL",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "_getFreeCollateral",
     values: [string]
   ): string;
@@ -181,16 +182,12 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "_increasePNL",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "_partialLiquidation",
     values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "_realizePNL",
-    values: [string, BigNumberish]
+    values: [string, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "adjustPositions",
@@ -215,6 +212,14 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "calculatePartialLiquidateValue",
     values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "cancelLongOrder",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "cancelShortOrder",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "collateral",
@@ -351,7 +356,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "userPNL", values: [string]): string;
   encodeFunctionData(
     functionFragment: "withdrawEther",
     values: [BigNumberish]
@@ -375,10 +379,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "_decreasePNL",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "_getFreeCollateral",
     data: BytesLike
   ): Result;
@@ -388,10 +388,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "_hardLiquidate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "_increasePNL",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -424,6 +420,14 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "calculatePartialLiquidateValue",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "cancelLongOrder",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "cancelShortOrder",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
@@ -552,7 +556,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "userPNL", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawEther",
     data: BytesLike
@@ -660,12 +663,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    _decreasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     _getFreeCollateral(
       _user: string,
       overrides?: CallOverrides
@@ -682,12 +679,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    _increasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     _partialLiquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -695,7 +686,9 @@ export interface Exchange extends BaseContract {
 
     _realizePNL(
       _user: string,
-      _amount: BigNumberish,
+      _startPrice: BigNumberish,
+      _currentPrice: BigNumberish,
+      _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -721,6 +714,16 @@ export interface Exchange extends BaseContract {
       _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { x: BigNumber }>;
+
+    cancelLongOrder(
+      _longOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    cancelShortOrder(
+      _shortOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     collateral(
       arg0: string,
@@ -831,9 +834,20 @@ export interface Exchange extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+      [
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        string,
+        string,
+        boolean
+      ] & {
         startTimestamp: BigNumber;
         price: BigNumber;
+        longStartPrice: BigNumber;
+        shortStartPrice: BigNumber;
         positionSize: BigNumber;
         longAddress: string;
         shortAddress: string;
@@ -894,13 +908,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    userPNL(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
-    >;
-
     withdrawEther(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -930,12 +937,6 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  _decreasePNL(
-    _user: string,
-    _amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   _getFreeCollateral(
     _user: string,
     overrides?: CallOverrides
@@ -952,12 +953,6 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  _increasePNL(
-    _user: string,
-    _amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   _partialLiquidation(
     _user: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -965,7 +960,9 @@ export interface Exchange extends BaseContract {
 
   _realizePNL(
     _user: string,
-    _amount: BigNumberish,
+    _startPrice: BigNumberish,
+    _currentPrice: BigNumberish,
+    _assetSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -991,6 +988,16 @@ export interface Exchange extends BaseContract {
     _user: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  cancelLongOrder(
+    _longOrderId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  cancelShortOrder(
+    _shortOrderId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   collateral(
     arg0: string,
@@ -1098,9 +1105,20 @@ export interface Exchange extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+    [
+      BigNumber,
+      BigNumber,
+      BigNumber,
+      BigNumber,
+      BigNumber,
+      string,
+      string,
+      boolean
+    ] & {
       startTimestamp: BigNumber;
       price: BigNumber;
+      longStartPrice: BigNumber;
+      shortStartPrice: BigNumber;
       positionSize: BigNumber;
       longAddress: string;
       shortAddress: string;
@@ -1158,13 +1176,6 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  userPNL(
-    arg0: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
-  >;
-
   withdrawEther(
     _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1194,12 +1205,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    _decreasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     _getFreeCollateral(
       _user: string,
       overrides?: CallOverrides
@@ -1213,12 +1218,6 @@ export interface Exchange extends BaseContract {
 
     _hardLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
 
-    _increasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     _partialLiquidation(
       _user: string,
       overrides?: CallOverrides
@@ -1226,7 +1225,9 @@ export interface Exchange extends BaseContract {
 
     _realizePNL(
       _user: string,
-      _amount: BigNumberish,
+      _startPrice: BigNumberish,
+      _currentPrice: BigNumberish,
+      _assetSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1250,6 +1251,16 @@ export interface Exchange extends BaseContract {
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    cancelLongOrder(
+      _longOrderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    cancelShortOrder(
+      _shortOrderId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     collateral(
       arg0: string,
@@ -1353,9 +1364,20 @@ export interface Exchange extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber, BigNumber, string, string, boolean] & {
+      [
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        BigNumber,
+        string,
+        string,
+        boolean
+      ] & {
         startTimestamp: BigNumber;
         price: BigNumber;
+        longStartPrice: BigNumber;
+        shortStartPrice: BigNumber;
         positionSize: BigNumber;
         longAddress: string;
         shortAddress: string;
@@ -1408,13 +1430,6 @@ export interface Exchange extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    userPNL(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, boolean] & { pnlAmount: BigNumber; isPositive: boolean }
-    >;
 
     withdrawEther(
       _amount: BigNumberish,
@@ -1492,12 +1507,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    _decreasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     _getFreeCollateral(
       _user: string,
       overrides?: CallOverrides
@@ -1514,12 +1523,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    _increasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     _partialLiquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1527,7 +1530,9 @@ export interface Exchange extends BaseContract {
 
     _realizePNL(
       _user: string,
-      _amount: BigNumberish,
+      _startPrice: BigNumberish,
+      _currentPrice: BigNumberish,
+      _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1546,6 +1551,16 @@ export interface Exchange extends BaseContract {
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    cancelLongOrder(
+      _longOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    cancelShortOrder(
+      _shortOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     collateral(
@@ -1691,8 +1706,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    userPNL(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     withdrawEther(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1723,12 +1736,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    _decreasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     _getFreeCollateral(
       _user: string,
       overrides?: CallOverrides
@@ -1745,12 +1752,6 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    _increasePNL(
-      _user: string,
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     _partialLiquidation(
       _user: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1758,7 +1759,9 @@ export interface Exchange extends BaseContract {
 
     _realizePNL(
       _user: string,
-      _amount: BigNumberish,
+      _startPrice: BigNumberish,
+      _currentPrice: BigNumberish,
+      _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1777,6 +1780,16 @@ export interface Exchange extends BaseContract {
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    cancelLongOrder(
+      _longOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    cancelShortOrder(
+      _shortOrderId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     collateral(
@@ -1928,11 +1941,6 @@ export interface Exchange extends BaseContract {
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    userPNL(
-      arg0: string,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdrawEther(
