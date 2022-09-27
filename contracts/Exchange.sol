@@ -139,10 +139,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 latestPrice = nftOracle.showPrice(latestRequestId);
     uint256 totalPositionsvalue = 0;
     for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].longAddress == _user) {
-        totalPositionsvalue += positions[i].positionSize * latestPrice;
-      }
-      if (positions[i].shortAddress == _user) {
+      if (positions[i].longAddress == _user || positions[i].shortAddress == _user) {
         totalPositionsvalue += positions[i].positionSize * latestPrice;
       }
     }
