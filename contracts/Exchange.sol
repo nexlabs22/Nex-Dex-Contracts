@@ -21,12 +21,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   NftOracle public nftOracle;
   AggregatorV3Interface public priceFeed;
 
-  address public ETHER = address(0);
+  address public usdc;
 
-  uint256 public oracleLatestRoundId; // price oracle (Chainlink)
-  uint256 public latestPrice; // price oracle (Chainlink)
   bytes32 public latestRequestId; // latest oracle request id (Chainlink)
-  bytes32 public lastRequestId; // last oracle request id (Chainlink)
 
   bytes32 public specId; //bytes32 jobId
   uint256 public payment; //link amount for call oracle in wei 10000000000000000
@@ -38,43 +35,19 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   uint8 public saveLevelMargin = 60; //60%
   uint8 public maintenanceMargin = 50; //50%
   uint8 public AutoCloseMargin = 40; //40%
+  uint8 public swapFee = 1; //1%
 
   address[] liquidateList;
 
-  struct Position {
-    uint256 startTimestamp;
-    uint256 price;
-    uint256 longStartPrice;
-    uint256 shortStartPrice;
-    uint256 positionSize;
-    address longAddress;
-    address shortAddress;
-    bool isActive;
-  }
+  uint256 public vBaycPoolSize;
+  uint256 public vUsdPoolSize;
 
-  struct LongOrder {
-    uint256 price;
-    uint256 assetSize;
-    address owner;
-    bool filled;
-  }
-
-  struct ShortOrder {
-    uint256 price;
-    uint256 assetSize;
-    address owner;
-    bool filled;
-  }
-
-
-  Position[] public positions;
-  LongOrder[] public longOrders;
-  ShortOrder[] public shortOrders;
+  address[] public activeUsers;
 
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
 
-  mapping(address => uint256) public totalInvestedValue; // sum of (assetSize*filledOrderPrice) of each user;
-  mapping(address => uint256) public totalAssetSize; //sum of assetSize of each user
+  mapping(address => int256) public uservUsdBalance; // virtual usd balance of each user;
+  mapping(address => int256) public uservBaycBalance; // virtual nft balance of each user;
 
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -86,7 +59,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _payment,
     address _assetAddress,
     string memory _pricingAsset,
-    address _priceFeed
+    address _priceFeed,
+    address _usdc
   ) {
     nftOracle = NftOracle(_nftOracleAddress);
     bytes32 requestId = nftOracle.getFloorPrice(_specId, _payment, _assetAddress, _pricingAsset);
@@ -96,81 +70,332 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     payment = _payment;
     assetAddress = _assetAddress;
     pricingAsset = _pricingAsset;
+    usdc = _usdc;
   }
 
-
-  function ethPrice() public view returns (uint256) {
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    uint8 quoteDecimals = priceFeed.decimals();
-    // return quoteDecimals;
-    return uint256(ethPrice * int256(10**uint256(18 - quoteDecimals)));
-  }
-
-
-  //show collateral balance in usd
-  function collateralUsdValue(address _user) public view returns (uint256) {
-    uint256 ethBalance = collateral[ETHER][_user];
-    uint256 ethPrice = ethPrice();
-    return ethBalance.mul(ethPrice).div(1e18);
-  }
-
-  //totalAccountValue =  collateralUsdValue +(-) unrealizedPNL
-  function totalAccountValue(address _user) public view returns (uint256) {
-    uint256 totalAccountValue;
-    uint256 collateralUsdValue = collateralUsdValue(_user);
-    uint totalInvestedValue = totalInvestedValue[_user];
-    uint totalPositionNotional = totalPositionNotional(_user);
-
-    //calculate pnl = totalPositionNotional - totalInvestedValue
-    if (totalPositionNotional > totalInvestedValue) {
-      uint256 unrealizedPNL = totalPositionNotional - collateralUsdValue;
-      totalAccountValue = collateralUsdValue + unrealizedPNL;
-    }
-    if (totalPositionNotional < totalInvestedValue) {
-      uint256 unrealizedPNL = totalInvestedValue - totalPositionNotional;
-      totalAccountValue = collateralUsdValue - unrealizedPNL;
-    }
-
-    return totalAccountValue;
-  }
-
-  //Total of user long and short positions
-  function totalPositionNotional(address _user) public view returns (uint256) {
-    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
-    uint256 totalPositionsvalue = 0;
-    for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].longAddress == _user || positions[i].shortAddress == _user) {
-        totalPositionsvalue += positions[i].positionSize * latestPrice;
+  //check is user exist in activeUsers array
+  function isUserExist(address _user) public view returns (bool) {
+    for (uint256 i; i < activeUsers.length; i++) {
+      if (activeUsers[i] == _user) {
+        return true;
       }
     }
-    return totalPositionsvalue;
+    return false;
   }
 
-  //user margin is between 0 and 100 percent
-  // margin = totalAccountValue/totalPositionNotional
-  function getUserMargin(address _user) public view returns (uint256) {
-    uint256 totalAccountValue = totalAccountValue(_user);
-    uint256 totalPositionNotional = totalPositionNotional(_user);
-    uint256 marginRate;
-    if (totalAccountValue > 0 && totalPositionNotional > 0) {
-      marginRate = 100 * totalAccountValue/ totalPositionNotional;
+  //add user to the active user list (first check if its not)
+  function addActiveUser(address _user) public {
+    bool isExist = isUserExist(_user);
+    if (isExist == false) {
+      activeUsers.push(_user);
     }
-    return marginRate;
   }
 
-  //return true if margin rate of user is lower than 40 percent
-  function isHardLiquidatable(address _user) public view returns (bool) {
-    uint256 userMargin = getUserMargin(_user);
-    if (userMargin <= 40) {
+  //remove user from active users list
+  function removeActiveUser(address _user) public {
+    bool isExist = isUserExist(_user);
+    if (isExist == true) {
+      for (uint256 i; i < activeUsers.length; i++) {
+        if (activeUsers[i] == _user) {
+          delete activeUsers[i];
+        }
+      }
+    }
+  }
+
+  //return all active users in one array
+  function getAllActiveUsers() public view returns (address[] memory) {
+    return activeUsers;
+  }
+
+  //create the pool
+  //for this time owner can do it
+  function initialVirtualPool(uint256 _assetSize, uint256 _usdSize) public onlyOwner {
+    vBaycPoolSize = _assetSize;
+    vUsdPoolSize = _usdSize;
+  }
+
+  function setSwapFee(uint8 _newFee) public onlyOwner {
+    swapFee = _newFee;
+  }
+
+  //deposit collateral
+  function depositCollateral(uint256 _amount) public {
+    IERC20(usdc).transferFrom(msg.sender, address(this), _amount);
+    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].add(_amount);
+    emit Deposit(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
+  }
+
+  //withdraw collateral
+  //befor that the function check user margin
+  function withdrawCollateral(uint256 _amount) public {
+    //check new margin
+    uint256 totalPositionNotional = getPositionNotional(msg.sender);
+    uint256 totalAccountValue = getAccountValue(msg.sender);
+    if (totalPositionNotional > 0) {
+      uint256 newAccountValue = totalAccountValue - _amount;
+      uint256 newMargin = (100 * newAccountValue) / totalPositionNotional;
+      require(
+        newMargin > 60,
+        "You cannot withdraw because your margin rate is the lower than saveMargin level"
+      );
+    }
+
+    //check user has enough collateral
+    require(
+      collateral[usdc][msg.sender] >= _amount,
+      "Desire amount is more than collateral balance"
+    );
+    //transfer tokens to the user
+    IERC20(usdc).transfer(msg.sender, _amount);
+    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].sub(_amount);
+    emit Withdraw(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
+  }
+
+  //get output Bayc by usd input amount if we want to buy(long)
+  //how much Bayc we will get by paying usd for long
+  function getLongBaycAmountOut(uint256 _vUsdAmount) public view returns (uint256) {
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize + _vUsdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
+    return userBayc;
+  }
+
+  //get output usd amount by Bayc input amount if we want to buy(long)
+  function getLongUsdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvBaycPoolSize = vBaycPoolSize - _vBaycAmount;
+    uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+    uint256 uservUsd = newvUsdPoolSize - vUsdPoolSize;
+    return uservUsd;
+  }
+
+  //get output Bayc by usd input amount if we want to sell(short)
+  function getShortBaycAmountOut(uint256 _vUsdAmount) public view returns (uint256) {
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize - _vUsdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    uint256 userBayc = newvBaycPoolSize - vBaycPoolSize;
+    return userBayc;
+  }
+
+  //get output usd by Bayc input amount if we want to sell(short)
+  function getShortUsdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvBaycPoolSize = vBaycPoolSize + _vBaycAmount;
+    uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+    uint256 uservUsd = vUsdPoolSize - newvUsdPoolSize;
+    return uservUsd;
+  }
+
+  //I use int for negative/positve numbers for user bayc and usd balance(wich might be negative)
+  //so for some point we need to convert them to uint so they should be positive
+  //f.e positive(-1)=1
+  function positive(int256 _amount) public view returns (uint256) {
+    if (_amount < 0) {
+      int256 posAmount = -(_amount);
+      return uint256(posAmount);
+    } else {
+      return uint256(_amount);
+    }
+  }
+
+  function openLongPosition(uint256 _usdAmount) public {
+    //first we run liquidation functions
+    liquidateUsers();
+    partialLiquidateUsers();
+
+    //calculate the new pool size and user bayc amount
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize + _usdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
+    //update bayc and usd balance of user
+    uservBaycBalance[msg.sender] += int256(userBayc);
+    uservUsdBalance[msg.sender] -= int256(_usdAmount);
+    //update pool
+    vBaycPoolSize = newvBaycPoolSize;
+    vUsdPoolSize = newvUsdPoolSize;
+  }
+
+  function openShortPosition(uint256 _usdAmount) public {
+    //first we run liquidation functions
+    liquidateUsers();
+    partialLiquidateUsers();
+
+    //calculate the new pool size and user bayc amount
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize - _usdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    uint256 userBayc = newvBaycPoolSize - vBaycPoolSize;
+    //update bayc and usd balance of user
+    uservBaycBalance[msg.sender] -= int256(userBayc);
+    uservUsdBalance[msg.sender] += int256(_usdAmount);
+    //update pool
+    vBaycPoolSize = newvBaycPoolSize;
+    vUsdPoolSize = newvUsdPoolSize;
+  }
+
+  function _closeLongPostito(address _user, uint256 _assetSize) public {
+    require(
+      _assetSize <= positive(uservBaycBalance[_user]),
+      "You dont have enough asset size to close the position"
+    );
+    //first we run liquidation functions
+    liquidateUsers();
+    partialLiquidateUsers();
+
+    //get the output usd of closing position
+    //f.e 1Bayc -> 2000$
+    uint256 usdBaycValue = getShortUsdAmountOut(_assetSize);
+    /*
+    1 bayc value = 2000$
+    total vBayc balance = 2Bayc
+    total vUsd balance = -3000$
+    for 1 Bayc -> partialVusdBalance = -3000*1/2 = -1500$
+
+    pnl = 1 bayc balue - partial usd balance = 2000 - positive(-1500) = +500$
+    */
+    int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /
+      uservBaycBalance[_user];
+
+    //increase or decrease the user pnl for this function
+    if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
+      uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
+      collateral[usdc][_user] += pnl;
+    } else if (usdBaycValue < uint256(positive(userPartialvUsdBalance))) {
+      uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
+      collateral[usdc][_user] -= pnl;
+    }
+    //update user balance
+    uservBaycBalance[_user] -= int256(_assetSize);
+    uservUsdBalance[_user] += userPartialvUsdBalance;
+
+    //update the pool
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    vBaycPoolSize += _assetSize;
+    vUsdPoolSize = k / vBaycPoolSize;
+  }
+
+  function _closeShortPosition(address _user, uint256 _assetSize) public {
+    require(
+      _assetSize <= positive(uservBaycBalance[_user]),
+      "You dont have enough asset size to close the position"
+    );
+
+    //first we run liquidation functions
+    liquidateUsers();
+    partialLiquidateUsers();
+    //get the output usd of closing position
+    uint256 usdBaycValue = getLongUsdAmountOut(_assetSize);
+    int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /
+      uservBaycBalance[_user];
+
+    /*
+    1 bayc value = 2000$
+    total vBayc balance = -2Bayc
+    total vUsd balance = +3000$
+    for 1 Bayc -> partialVusdBalance = 3000*1/2 = 1500$
+
+    pnl =  partial usd balance - 1 bayc value = 1500 - 2000 = -500$
+    */
+
+    //increase or decrease pnl of the user
+    if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
+      uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
+      collateral[usdc][msg.sender] -= pnl;
+    }
+    if (usdBaycValue < uint256(positive(userPartialvUsdBalance))) {
+      uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
+      collateral[usdc][msg.sender] += pnl;
+    }
+    //update user balance
+    uservBaycBalance[msg.sender] += int256(_assetSize);
+    uservUsdBalance[msg.sender] -= userPartialvUsdBalance;
+    //update pool
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    vBaycPoolSize -= _assetSize;
+    vUsdPoolSize = k / vBaycPoolSize;
+  }
+
+  function closePosition(uint256 _assetSize) public {
+    require(
+      _assetSize <= positive(uservBaycBalance[msg.sender]),
+      "You dont have enough asset size to close the position"
+    );
+    //if user has positive vBayc balance so he/she has longPosition
+    //if user has negative vBayc balance so he/she has shortPosition
+    if (uservBaycBalance[msg.sender] > 0) {
+      _closeLongPostito(msg.sender, _assetSize);
+    } else if (uservBaycBalance[msg.sender] < 0) {
+      _closeShortPosition(msg.sender, _assetSize);
+    }
+  }
+
+  //return the pnl of user
+  /*
+  user vBayc balance = 2Bayc
+  user vUsd balance = -3000
+  currnent 2 vBayc value =  4000
+  user pnl = 4000 - positive(-3000) = 1000$
+  */
+  function getPNL(address _user) public view returns (int256) {
+    if (uservBaycBalance[_user] > 0) {
+      uint256 currentBaycValue = getShortUsdAmountOut(uint256(uservBaycBalance[_user]));
+      int256 pnl = int256(currentBaycValue) - (-uservUsdBalance[_user]);
+      return pnl;
+    } else if (uservBaycBalance[_user] < 0) {
+      uint256 currentBaycValue = getLongUsdAmountOut(uint256(uservBaycBalance[_user]));
+      int256 pnl = uservUsdBalance[_user] - int256(currentBaycValue);
+      return pnl;
+    }
+  }
+
+  function getAccountValue(address _user) public view returns (uint256) {
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    int256 pnl = getPNL(_user);
+    if (pnl < 0) {
+      uint256 accountValue = collateralValue - uint256(pnl);
+      return accountValue;
+    } else {
+      uint256 accountValue = collateralValue + uint256(pnl);
+      return accountValue;
+    }
+  }
+
+  function getPositionNotional(address _user) public view returns (uint256) {
+    if (uservBaycBalance[_user] > 0) {
+      uint256 positionNotionalValue = getShortUsdAmountOut(uint256(uservBaycBalance[_user]));
+      return positionNotionalValue;
+    } else if (uservBaycBalance[_user] < 0) {
+      uint256 positionNotionalValue = getLongUsdAmountOut(positive(uservBaycBalance[_user]));
+      return positionNotionalValue;
+    } else {
+      return 0;
+    }
+  }
+
+  function userMargin(address _user) public view returns (uint256) {
+    uint256 accountValue = getAccountValue(_user);
+    uint256 positionNotional = getPositionNotional(_user);
+    if (accountValue > 0 && positionNotional > 0) {
+      uint256 margin = (100 * accountValue) / positionNotional;
+      return margin;
+    }
+  }
+
+  function isHardLiquidateable(address _user) public view returns (bool) {
+    uint256 userMargin = userMargin(_user);
+    if (userMargin > 0 && userMargin <= 40) {
       return true;
     } else {
       return false;
     }
   }
 
-  //return true if margin of user is between 40% and 50%
-  function isPartialLiquidatable(address _user) public view returns (bool) {
-    uint256 userMargin = getUserMargin(_user);
+  function isPartialLiquidateable(address _user) public view returns (bool) {
+    uint256 userMargin = userMargin(_user);
     if (40 <= userMargin && userMargin <= 50) {
       return true;
     } else {
@@ -178,449 +403,103 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  function hardLiquidate(address _user) public {
+    require(isHardLiquidateable(_user), "user can not be liquidate");
+    if (uservBaycBalance[msg.sender] > 0) {
+      _closeLongPostito(_user, uint256(uservBaycBalance[msg.sender]));
+    } else if (uservBaycBalance[msg.sender] < 0) {
+      _closeShortPosition(_user, positive(uservBaycBalance[msg.sender]));
+    }
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    uint256 discountAmount = (discountRate * collateralValue) / 100;
+    collateral[usdc][msg.sender] -= discountAmount;
+    insuranceFunds += discountAmount;
+  }
+
   //calculate liquidation amount to turn back the user margin to the save level(60%)
   function calculatePartialLiquidateValue(address _user) public view returns (uint256 x) {
-    uint256 totalAccountValue = totalAccountValue(_user);
-    uint256 totalPositionNotional = totalPositionNotional(_user);
+    uint256 totalAccountValue = getAccountValue(_user);
+    uint256 totalPositionNotional = getPositionNotional(_user);
     uint256 numerator = (totalPositionNotional * saveLevelMargin) / 100 - totalAccountValue;
     uint256 denominator = saveLevelMargin / 100 - discountRate / 100;
     x = numerator / denominator;
   }
 
-  //deposit collateral
-  function depositEther() public payable {
-    collateral[ETHER][msg.sender] = collateral[ETHER][msg.sender].add(msg.value);
-    emit Deposit(ETHER, msg.sender, msg.value, collateral[ETHER][msg.sender]);
-  }
+  function partialLiquidate(address _user) public {
+    require(isPartialLiquidateable(_user), "user can not be partially liquidated");
 
-  //withdraw collateral
-  function withdrawEther(uint256 _amount) public {
-    uint256 ethPrice = ethPrice();
-    uint usdAmount = _amount*ethPrice/1e18;
-
-    uint256 userMargin = getUserMargin(msg.sender);
-    uint256 totalPositionNotional = totalPositionNotional(msg.sender);
-    uint256 totalAccountValue = totalAccountValue(msg.sender);
-    if(totalPositionNotional > 0){
-    uint newAccountValue = totalAccountValue - usdAmount;
-    uint newMargin = 100*newAccountValue/totalPositionNotional;
-    require(
-      newMargin > 60,
-      "You cannot withdraw because your margin rate is the lower than saveMargin level"
-    );
-    }
-    require(
-      collateral[ETHER][msg.sender] >= _amount,
-      "Desire amount is more than collateral balance"
-    );
-    collateral[ETHER][msg.sender] = collateral[ETHER][msg.sender].sub(_amount);
-    payable(msg.sender).transfer(_amount);
-    emit Withdraw(ETHER, msg.sender, _amount, collateral[ETHER][msg.sender]);
-  }
-
-  //increase collateral when positive pnl is realized
-  function _increaseCollateral(address _user, uint256 _usdValue) internal {
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    uint256 etherValue = _usdValue * uint256(ethPrice);
-    collateral[ETHER][_user] += etherValue;
-  }
-
-  //increase collateral when negative pnl is realized
-  function _decreaseCollateral(address _user, uint256 _usdValue) internal {
-    (, int256 ethPrice, , , ) = priceFeed.latestRoundData();
-    uint256 etherValue = _usdValue * uint256(ethPrice);
-    collateral[ETHER][_user] -= etherValue;
-  }
-
-  //get free collateral amount that user can withdraw
-  function _getFreeCollateral(address _user) public view returns (uint256) {
-    uint256 totalAccountValue = totalAccountValue(_user);
-    uint256 totalPositionNotional = totalPositionNotional(_user);
-    uint256 requireMarginAmount = (totalPositionNotional * maintenanceMargin) / 100;
-    uint256 freeCollateral = totalAccountValue - requireMarginAmount;
-    return freeCollateral;
-  }
-
-  //averagePrice = totalInvestedValue/assetSize
-  function getAverageEntryPrice(address _user) public view returns (uint256) {
-    uint256 totalInvestedValue = totalInvestedValue[_user];
-    uint256 totalAssetSize = totalAssetSize[_user];
-    if (totalAssetSize > 0 && totalInvestedValue > 0) {
-      return totalInvestedValue / totalAssetSize;
-    }
-  }
-
-  function allLongOrders() public view returns (LongOrder[] memory) {
-    return longOrders;
-  }
-
-  function allShortOrders() public view returns (ShortOrder[] memory) {
-    return shortOrders;
-  }
-
-  function allPositions() public view returns (Position[] memory) {
-    return positions;
-  }
-
-  //put long order by usd value
-  //convert usd value to the asset size according to the asset price (assetSize = _usdAmount/oraclePrice)
-  //if the short order with the same price exist the position will be created
-  function openLongOrderUsd(
-    address _user,
-    uint256 _usdAmount,
-    uint256 _price
-  ) public {
-    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
-    uint256 assetSize = _usdAmount / latestPrice;
-    openLongOrder(_user, assetSize, _price);
-  }
-
-  //put order by by asset amount (for example 1 ape nft)
-  //if a short order with the same price exist the position will be created
-  function openLongOrder(
-    address _user,
-    uint256 _assetSize,
-    uint256 _price
-  ) public {
-    longOrders.push(LongOrder(_price, _assetSize, _user, false));
-
-    for (uint256 i = 0; i < shortOrders.length; i++) {
-      if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == _price) {
-        positions.push(
-          Position(
-            block.timestamp,//position start time 
-            _price,// position price
-            _price,//long start price
-            _price,//short start price
-            _assetSize,//assetSize
-            _user,//longAddress
-            shortOrders[i].owner,//shortAddress
-            true//is acitve
-          )
-        );
-        shortOrders[i].assetSize -= _assetSize;
-        totalInvestedValue[shortOrders[i].owner] += _assetSize * _price;
-        totalAssetSize[shortOrders[i].owner] += _assetSize;
-        if (shortOrders[i].assetSize == 0) {
-          delete shortOrders[i];
-        }
-        totalInvestedValue[longOrders[longOrders.length - 1].owner] += _assetSize * _price;
-        totalAssetSize[longOrders[longOrders.length - 1].owner] += _assetSize;
-        delete longOrders[longOrders.length - 1];
-        return;
-      }
-    }
-  }
-
-  //cancel the long order
-  function cancelLongOrder(uint _longOrderId) public {
-    require(longOrders[_longOrderId].owner == msg.sender, "Your order id is not true");
-    delete longOrders[_longOrderId];
-  }
-
-  //put long order by usd value
-  //convert usd value to the asset size according to the asset price (assetSize = _usdAmount/oraclePrice)
-  //if the long order with the same price exist the position will be created
-  function openShortOrderUsd(
-    address _user,
-    uint256 _usdAmount,
-    uint256 _price
-  ) public {
-    uint256 latestPrice = nftOracle.showPrice(latestRequestId);
-    uint256 assetSize = _usdAmount / latestPrice;
-    openShortOrder(_user, assetSize, _price);
-  }
-
-  //put order by by asset amount (for example 1 ape nft)
-  //if the long order with the same price exist the position will be created
-  function openShortOrder(
-    address _user,
-    uint256 _assetSize,
-    uint256 _price
-  ) public {
-    shortOrders.push(ShortOrder(_price, _assetSize, _user, false));
-
-    for (uint256 i = 0; i < longOrders.length; i++) {
-      if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == _price) {
-        positions.push(
-          Position(
-            block.timestamp,
-            _price,
-            _price,
-            _price,
-            _assetSize,
-            longOrders[i].owner,
-            _user,
-            true
-          )
-        );
-        longOrders[i].assetSize -= _assetSize;
-        totalInvestedValue[longOrders[i].owner] += _assetSize * _price;
-        totalAssetSize[longOrders[i].owner] += _assetSize;
-        if (longOrders[i].assetSize == 0) {
-          delete longOrders[i];
-        }
-        totalInvestedValue[shortOrders[shortOrders.length - 1].owner] += _assetSize * _price;
-        totalAssetSize[shortOrders[shortOrders.length - 1].owner] += _assetSize;
-        delete shortOrders[shortOrders.length - 1];
-        break;
-      }
-    }
-  }
-
-  //cancel short order
-  function cancelShortOrder(uint _shortOrderId) public {
-    require(shortOrders[_shortOrderId].owner == msg.sender, "Your order id is not true");
-    delete shortOrders[_shortOrderId];
-  }
-
-  //close the position by current orders
-  function _closeLongPositionMarket(
-    address _user,
-    uint256 _assetSize,
-    uint256 _positionId
-  ) public {
-    uint256 assetSize = positions[_positionId].positionSize;
-    address longAddress = positions[_positionId].longAddress;
-    uint256 positionPrice = positions[_positionId].price;
-    require(
-      assetSize >= _assetSize,
-      "asset size of position is not equal to your desire assetSize"
-    );
-    require(longAddress == _user, "user is not the longAddress address of this position");
-    for (uint256 i = 0; i <= longOrders.length; i++) {
-      if (longOrders[i].assetSize >= _assetSize && longOrders[i].price == positionPrice) {
-        totalAssetSize[_user] -= _assetSize;
-        totalInvestedValue[_user] -= _assetSize * positions[_positionId].longStartPrice;
-        _realizePNL(_user, positions[_positionId].longStartPrice, longOrders[i].price, _assetSize);
-
-        positions[_positionId].longAddress = longOrders[i].owner;
-        positions[_positionId].longStartPrice = longOrders[i].price;
-        totalInvestedValue[longOrders[i].owner] += longOrders[i].price * _assetSize;
-        totalAssetSize[longOrders[i].owner] += _assetSize;
-        longOrders[i].assetSize -= _assetSize;
-        if (longOrders[i].assetSize == 0) {
-          delete longOrders[i];
-        }
-        return;
-      }
-    }
-  }
-
-  //close the position by current orders
-  function _closeShortPositionMarket(
-    address _user,
-    uint256 _assetSize,
-    uint256 _positionId
-  ) public {
-    uint256 assetSize = positions[_positionId].positionSize;
-    address shortAddress = positions[_positionId].shortAddress;
-    uint256 positionPrice = positions[_positionId].price;
-    require(
-      assetSize >= _assetSize,
-      "asset size of position is not equal to your desire assetSize"
-    );
-    require(shortAddress == _user, "user is not the short address of this position");
-    for (uint256 i = 0; i <= shortOrders.length; i++) {
-      if (shortOrders[i].assetSize >= _assetSize && shortOrders[i].price == positionPrice) {
-
-        totalAssetSize[_user] -= _assetSize;
-        totalInvestedValue[_user] -= _assetSize * positions[_positionId].shortStartPrice;
-        _realizePNL(_user, positions[_positionId].shortStartPrice, shortOrders[i].price, _assetSize);
-
-        positions[_positionId].shortAddress = shortOrders[i].owner;
-        positions[_positionId].shortStartPrice = shortOrders[i].price;
-        totalInvestedValue[shortOrders[i].owner] += shortOrders[i].price * _assetSize;
-        totalAssetSize[shortOrders[i].owner] += _assetSize;
-        shortOrders[i].assetSize -= _assetSize;
-        totalAssetSize[_user] -= _assetSize;
-        if (shortOrders[i].assetSize == 0) {
-          delete shortOrders[i];
-        }
-        return;
-      }
-    }
-  }
-
-  //this function should be done in adjustPositions function
-  //we use this function only in close position for realize the reward of user
-  function _realizePNL(
-    address _user,
-    uint256 _startPrice,
-    uint256 _currentPrice,
-    uint256 _assetSize
-  ) public {
-    uint256 usdReward;
-    if (_startPrice < _currentPrice) {
-      usdReward = (_currentPrice - _startPrice) * _assetSize;
-      _increaseCollateral(_user, usdReward);
-    }
-    if (_currentPrice < _startPrice) {
-      usdReward = (_startPrice - _currentPrice) * _assetSize;
-      _decreaseCollateral(_user, usdReward);
-    }
-  }
-
-  //calculate the index price of the asset
-  function getIndexPrice() public view returns (uint256) {
-    uint256 highestLongOrderPrice = longOrders[longOrders.length - 1].price;
-    uint256 lowestShortOrderPrice = shortOrders[shortOrders.length - 1].price;
-    for (uint256 i; i < longOrders.length; i++) {
-      if (longOrders[i].price > highestLongOrderPrice) {
-        highestLongOrderPrice = longOrders[i].price;
-      }
-    }
-    for (uint256 i; i < shortOrders.length; i++) {
-      if (shortOrders[i].price < lowestShortOrderPrice) {
-        lowestShortOrderPrice = shortOrders[i].price;
-      }
-    }
-
-    uint256 indexPrice = 0;
-    indexPrice = (highestLongOrderPrice + lowestShortOrderPrice) / 2;
-    return indexPrice;
-  }
-
-  //adjust the funding rate for the long and short postions
-  function _getFundingRate(uint256 indexPrice, uint256 oraclePrice) public {
-    for (uint256 i = 0; i < positions.length; i++) {
-      uint256 assetSize = positions[i].positionSize;
-      address longAddress = positions[i].longAddress;
-      address shortAddress = positions[i].shortAddress;
-      if (indexPrice > oraclePrice) {
-        uint256 fundingFee = assetSize * (indexPrice - oraclePrice)/24;
-        _increaseCollateral(shortAddress, fundingFee);
-        _decreaseCollateral(longAddress, fundingFee);
-      }
-      if (indexPrice < oraclePrice) {
-        uint256 fundingFee = assetSize * (indexPrice - oraclePrice)/24;
-        _increaseCollateral(longAddress, fundingFee);
-        _decreaseCollateral(shortAddress, fundingFee);
-      }
-    }
-  }
-
-  //add user to the liquidate list
-  function _addToLiquidateList(address _user) public {
-    bool isExist;
-    for (uint256 i; i < liquidateList.length; i++) {
-      if (liquidateList[i] == _user) {
-        isExist = true;
-        return;
-      }
-    }
-    if (isExist == false) {
-      liquidateList.push(_user);
-    }
-  }
-
-  //liquidate part of user position to turn it back to the save level
-  function _partialLiquidation(address _user) public {
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
-    uint256 discountAmount = liquidateAmount*discountRate/100;
-    for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].longAddress == _user && positions[i].positionSize >= liquidateAmount) {
-        _closeLongPositionMarket(_user, liquidateAmount, i);
-        _decreaseCollateral(_user, discountAmount);
-        insuranceFunds += discountAmount;
-        return;
-      } else if (
-        positions[i].shortAddress == _user && positions[i].positionSize >= liquidateAmount
-      ) {
-        _closeShortPositionMarket(_user, liquidateAmount, i);
-        _decreaseCollateral(_user, discountAmount);
-        insuranceFunds += discountAmount;
-        return;
-      }
+    if (uservBaycBalance[msg.sender] > 0) {
+      _closeLongPostito(_user, liquidateAmount);
+    } else if (uservBaycBalance[msg.sender] < 0) {
+      _closeShortPosition(_user, liquidateAmount);
     }
-  }
-
-  //hard liquidate(auto liquidate) happen when user margen fall below 0.4
-  function _hardLiquidate(address _user) public onlyOwner {
-    bool liquidatable = isHardLiquidatable(_user);
-    require(liquidatable == true, "user cannot be liquidated");
-    for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].longAddress == _user) {
-        uint256 positionSize = positions[i].positionSize;
-        _closeLongPositionMarket(_user, positionSize, i);
-      }
-      if (positions[i].shortAddress == _user) {
-        uint256 positionSize = positions[i].positionSize;
-        _closeShortPositionMarket(_user, positionSize, i);
-      }
-    }
-    uint256 collateralValue = collateralUsdValue(_user);
-    uint256 discountAmount = discountRate*collateralValue/100;
-    _decreaseCollateral(_user, discountAmount);
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    uint256 discountAmount = (collateralValue * discountRate) / 100;
+    collateral[usdc][msg.sender] -= discountAmount;
     insuranceFunds += discountAmount;
   }
 
-  function executePartialLiquidation() public onlyOwner {
-    for (uint256 i; i < liquidateList.length; i++) {
-      _partialLiquidation(liquidateList[i]);
-      delete liquidateList[i];
-    }
-  }
-
-  //calculate profit or loss for users pnl
-  function adjustPositions() public onlyOwner {
-    uint256 newPrice;
-    uint256 oldPrice;
-    uint256 newOraclePrice = nftOracle.showPrice(latestRequestId);
-    uint256 oldOraclePrice = nftOracle.showPrice(lastRequestId);
-    uint256 indexPrice = getIndexPrice();
-    _getFundingRate(indexPrice, newOraclePrice);
-
-    if ((indexPrice * 100) / newOraclePrice <= 120 && (indexPrice * 100) / newOraclePrice >= 80) {
-      newPrice = indexPrice;
-      oldPrice = oldOraclePrice;
-    } else {
-      newPrice = newOraclePrice;
-      oldPrice = oldOraclePrice;
-    }
-
-    for (uint256 i = 0; i < positions.length; i++) {
-      address longAddress = positions[i].longAddress;
-      address shortAddress = positions[i].shortAddress;
-      if (newPrice > oldPrice) {
-        bool isHardLiquidatable = isHardLiquidatable(shortAddress);
-        bool isPartialLiquidatable = isPartialLiquidatable(shortAddress);
-        if (isHardLiquidatable == true) {
-          _hardLiquidate(shortAddress);
-        }
-        if (isPartialLiquidatable == true) {
-          _addToLiquidateList(shortAddress);
-        }
-      }
-      if (newPrice < oldPrice) {
-        bool isHardLiquidatable = isHardLiquidatable(longAddress);
-        bool isPartialLiquidatable = isPartialLiquidatable(shortAddress);
-        if (isHardLiquidatable == true) {
-          _hardLiquidate(longAddress);
-        }
-        if (isPartialLiquidatable == true) {
-          _addToLiquidateList(longAddress);
-        }
+  function liquidateUsers() public {
+    for (uint256 i = 0; i < activeUsers.length; i++) {
+      bool isLiquidateable = isHardLiquidateable(activeUsers[i]);
+      if (isLiquidateable == true) {
+        hardLiquidate(activeUsers[i]);
       }
     }
   }
 
-  //request price from the oracle and save the requrest id
-  //should be called befor adjust collateral
-  //It should be called every hour
+  function partialLiquidateUsers() public {
+    for (uint256 i = 0; i < activeUsers.length; i++) {
+      bool isPartialLiquidateable = isPartialLiquidateable(activeUsers[i]);
+      if (isPartialLiquidateable == true) {
+        partialLiquidate(activeUsers[i]);
+      }
+    }
+  }
+
   function requestPrice() public onlyOwner {
     bytes32 requestId = nftOracle.getFloorPrice(specId, payment, assetAddress, pricingAsset);
-    if (requestId != latestRequestId) {
-      lastRequestId = latestRequestId;
-      latestRequestId = requestId;
-    }
+    latestRequestId = requestId;
   }
 
-  function _isContract(address account) internal view returns (bool) {
-    uint256 size;
-    assembly {
-      size := extcodesize(account)
+  /*
+  increasing or decreasing users collateral for add funding rate for each user need loop again(same high gas for thousands of users)
+  My suggestion is change the x and y size without change in k.
+    x*y = k
+    
+  Example:
+  100 vBayc * 1000vUsd = 100000
+  bayc price = 10000/1000 = 10usd
+  oracle price = 14 usd
+  funding fee = 100*(14-10)/24 =~ 16$
+  new usdPool = 1000 + 16 = 1016$
+  new baycPool = 10000/1016 =~ 98
+  
+  98 vBayc * 1016 vUsd = 100000
+  sow buy change x and y we give the fund to the long positions and minus it from short positions
+
+  */
+  function setFundingRate() public onlyOwner {
+    uint256 indexPrice = vBaycPoolSize / vUsdPoolSize;
+    uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
+
+    if (indexPrice > oraclePrice) {
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      uint256 fundingFee = (vUsdPoolSize * (indexPrice - oraclePrice)) / 24;
+      uint256 newvUsdPoolSize = vUsdPoolSize - fundingFee;
+      uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+
+      vUsdPoolSize = newvUsdPoolSize;
+      vBaycPoolSize = newvBaycPoolSize;
+    } else if (indexPrice < oraclePrice) {
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      uint256 fundingFee = (vUsdPoolSize * (oraclePrice - oraclePrice)) / 24;
+      uint256 newvUsdPoolSize = vUsdPoolSize + fundingFee;
+      uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+
+      vUsdPoolSize = newvUsdPoolSize;
+      vBaycPoolSize = newvBaycPoolSize;
     }
-    return size > 0;
   }
 }
