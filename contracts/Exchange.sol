@@ -35,7 +35,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   uint8 public saveLevelMargin = 60; //60%
   uint8 public maintenanceMargin = 50; //50%
   uint8 public AutoCloseMargin = 40; //40%
-  uint8 public swapFee = 1; //1%
+
+  uint8 public swapFee = 100; //=> 100/10000 = 1%
+  uint256 public latestFeeUpdate;
 
   address[] liquidateList;
 
@@ -74,7 +76,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //check is user exist in activeUsers array
-  function isUserExist(address _user) public view returns (bool) {
+  function doesUserExist(address _user) public view returns (bool) {
     for (uint256 i; i < activeUsers.length; i++) {
       if (activeUsers[i] == _user) {
         return true;
@@ -84,8 +86,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //add user to the active user list (first check if its not)
-  function addActiveUser(address _user) public {
-    bool isExist = isUserExist(_user);
+  function _addActiveUser(address _user) internal {
+    bool isExist = doesUserExist(_user);
     if (isExist == false) {
       activeUsers.push(_user);
     }
@@ -93,7 +95,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //remove user from active users list
   function removeActiveUser(address _user) public {
-    bool isExist = isUserExist(_user);
+    bool isExist = doesUserExist(_user);
     if (isExist == true) {
       for (uint256 i; i < activeUsers.length; i++) {
         if (activeUsers[i] == _user) {
@@ -115,8 +117,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     vUsdPoolSize = _usdSize;
   }
 
+  //Notice: newFee should be between 1 to 500 (0.01% - 5%)
   function setSwapFee(uint8 _newFee) public onlyOwner {
+    uint256 distance = block.timestamp - latestFeeUpdate;
+    require(distance / 60 / 60 > 12, "You should wait at least 12 hours after latest update");
+    require(_newFee <= 500 && _newFee >= 1, "newFee should be between 1 to 500");
     swapFee = _newFee;
+    latestFeeUpdate = block.timestamp;
   }
 
   //deposit collateral
@@ -214,6 +221,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] += int256(userBayc);
     uservUsdBalance[msg.sender] -= int256(_usdAmount);
+
+    //trade fee
+    uint256 fee = (_usdAmount * swapFee) / 10000;
+    collateral[usdc][msg.sender] -= fee;
+    address owner = owner();
+    IERC20(usdc).transfer(owner, fee);
+
     //update pool
     vBaycPoolSize = newvBaycPoolSize;
     vUsdPoolSize = newvUsdPoolSize;
@@ -237,7 +251,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     vUsdPoolSize = newvUsdPoolSize;
   }
 
-  function _closeLongPostito(address _user, uint256 _assetSize) public {
+  function _closeLongPostiton(address _user, uint256 _assetSize) public {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
       "You dont have enough asset size to close the position"
@@ -327,7 +341,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //if user has positive vBayc balance so he/she has longPosition
     //if user has negative vBayc balance so he/she has shortPosition
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostito(msg.sender, _assetSize);
+      _closeLongPostiton(msg.sender, _assetSize);
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(msg.sender, _assetSize);
     }
@@ -343,7 +357,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function getPNL(address _user) public view returns (int256) {
     if (uservBaycBalance[_user] > 0) {
       uint256 currentBaycValue = getShortUsdAmountOut(uint256(uservBaycBalance[_user]));
-      int256 pnl = int256(currentBaycValue) - (-uservUsdBalance[_user]);
+      int256 pnl = int256(currentBaycValue) + (uservUsdBalance[_user]);
       return pnl;
     } else if (uservBaycBalance[_user] < 0) {
       uint256 currentBaycValue = getLongUsdAmountOut(uint256(uservBaycBalance[_user]));
@@ -406,7 +420,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function hardLiquidate(address _user) public {
     require(isHardLiquidateable(_user), "user can not be liquidate");
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostito(_user, uint256(uservBaycBalance[msg.sender]));
+      _closeLongPostiton(_user, uint256(uservBaycBalance[msg.sender]));
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(_user, positive(uservBaycBalance[msg.sender]));
     }
@@ -430,7 +444,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostito(_user, liquidateAmount);
+      _closeLongPostiton(_user, liquidateAmount);
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(_user, liquidateAmount);
     }
@@ -463,11 +477,33 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     latestRequestId = requestId;
   }
 
+  function getAllLongvBaycBalance() public view returns (int256) {
+    int256 allLongBaycBalance;
+    for (uint256 i; i < activeUsers.length; i++) {
+      int256 vBaycBalance = uservBaycBalance[activeUsers[i]];
+      if (vBaycBalance > 0) {
+        allLongBaycBalance += vBaycBalance;
+      }
+    }
+    return allLongBaycBalance;
+  }
+
+  function getAllShortvBaycBalance() public view returns (int256) {
+    int256 allShortBaycBalance;
+    for (uint256 i; i < activeUsers.length; i++) {
+      int256 vBaycBalance = uservBaycBalance[activeUsers[i]];
+      if (vBaycBalance < 0) {
+        allShortBaycBalance += vBaycBalance;
+      }
+    }
+    return allShortBaycBalance;
+  }
+
   /*
   increasing or decreasing users collateral for add funding rate for each user need loop again(same high gas for thousands of users)
   My suggestion is change the x and y size without change in k.
     x*y = k
-    
+
   Example:
   100 vBayc * 1000vUsd = 100000
   bayc price = 10000/1000 = 10usd
@@ -477,29 +513,36 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   new baycPool = 10000/1016 =~ 98
   
   98 vBayc * 1016 vUsd = 100000
-  sow buy change x and y we give the fund to the long positions and minus it from short positions
+  so buy change x and y we give the fund to the long positions and minus it from short positions
 
   */
   function setFundingRate() public onlyOwner {
     uint256 indexPrice = vBaycPoolSize / vUsdPoolSize;
     uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
 
-    if (indexPrice > oraclePrice) {
-      uint256 k = vBaycPoolSize * vUsdPoolSize;
-      uint256 fundingFee = (vUsdPoolSize * (indexPrice - oraclePrice)) / 24;
-      uint256 newvUsdPoolSize = vUsdPoolSize - fundingFee;
-      uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    //first the contract check actual vBayc positions balance of users
+    int256 allLongvBaycBalance = getAllLongvBaycBalance();
+    int256 allShortBaycBalance = getAllShortvBaycBalance();
 
-      vUsdPoolSize = newvUsdPoolSize;
-      vBaycPoolSize = newvBaycPoolSize;
-    } else if (indexPrice < oraclePrice) {
-      uint256 k = vBaycPoolSize * vUsdPoolSize;
-      uint256 fundingFee = (vUsdPoolSize * (oraclePrice - oraclePrice)) / 24;
-      uint256 newvUsdPoolSize = vUsdPoolSize + fundingFee;
-      uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    //check if we dont have one side(long or short balance = 0) this funding action will not run
+    if (allLongvBaycBalance > 0 && allShortBaycBalance < 0) {
+      if (indexPrice > oraclePrice) {
+        uint256 k = vBaycPoolSize * vUsdPoolSize;
+        uint256 fundingFee = (uint256(allLongvBaycBalance) * (indexPrice - oraclePrice)) / 24;
+        uint256 newvUsdPoolSize = vUsdPoolSize - fundingFee;
+        uint256 newvBaycPoolSize = k / newvUsdPoolSize;
 
-      vUsdPoolSize = newvUsdPoolSize;
-      vBaycPoolSize = newvBaycPoolSize;
+        vUsdPoolSize = newvUsdPoolSize;
+        vBaycPoolSize = newvBaycPoolSize;
+      } else if (indexPrice < oraclePrice) {
+        uint256 k = vBaycPoolSize * vUsdPoolSize;
+        uint256 fundingFee = (positive(allShortBaycBalance) * (oraclePrice - oraclePrice)) / 24;
+        uint256 newvUsdPoolSize = vUsdPoolSize + fundingFee;
+        uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+
+        vUsdPoolSize = newvUsdPoolSize;
+        vBaycPoolSize = newvBaycPoolSize;
+      }
     }
   }
 }

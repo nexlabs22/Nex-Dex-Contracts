@@ -21,18 +21,20 @@ export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
     "AutoCloseMargin()": FunctionFragment;
-    "_closeLongPostito(address,uint256)": FunctionFragment;
+    "_closeLongPostiton(address,uint256)": FunctionFragment;
     "_closeShortPosition(address,uint256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
-    "addActiveUser(address)": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
+    "doesUserExist(address)": FunctionFragment;
     "getAccountValue(address)": FunctionFragment;
     "getAllActiveUsers()": FunctionFragment;
+    "getAllLongvBaycBalance()": FunctionFragment;
+    "getAllShortvBaycBalance()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongUsdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
@@ -44,7 +46,7 @@ export interface ExchangeInterface extends utils.Interface {
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
-    "isUserExist(address)": FunctionFragment;
+    "latestFeeUpdate()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
     "liquidateUsers()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
@@ -82,7 +84,7 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "_closeLongPostito",
+    functionFragment: "_closeLongPostiton",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -92,10 +94,6 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "activeUsers",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addActiveUser",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "assetAddress",
@@ -122,11 +120,23 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "doesUserExist",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getAccountValue",
     values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getAllActiveUsers",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllLongvBaycBalance",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllShortvBaycBalance",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -170,7 +180,10 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "isPartialLiquidateable",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "isUserExist", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "latestFeeUpdate",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "latestRequestId",
     values?: undefined
@@ -270,7 +283,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "_closeLongPostito",
+    functionFragment: "_closeLongPostiton",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -279,10 +292,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "activeUsers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addActiveUser",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -307,11 +316,23 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "doesUserExist",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getAccountValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "getAllActiveUsers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAllLongvBaycBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAllShortvBaycBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -356,7 +377,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isUserExist",
+    functionFragment: "latestFeeUpdate",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -528,7 +549,7 @@ export interface Exchange extends BaseContract {
   functions: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
 
-    _closeLongPostito(
+    _closeLongPostiton(
       _user: string,
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -544,11 +565,6 @@ export interface Exchange extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    addActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<[string]>;
 
@@ -575,12 +591,18 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<[number]>;
 
+    doesUserExist(_user: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -632,7 +654,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    isUserExist(_user: string, overrides?: CallOverrides): Promise<[boolean]>;
+    latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     latestRequestId(overrides?: CallOverrides): Promise<[string]>;
 
@@ -737,7 +759,7 @@ export interface Exchange extends BaseContract {
 
   AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-  _closeLongPostito(
+  _closeLongPostiton(
     _user: string,
     _assetSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -750,11 +772,6 @@ export interface Exchange extends BaseContract {
   ): Promise<ContractTransaction>;
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  addActiveUser(
-    _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   assetAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -781,9 +798,15 @@ export interface Exchange extends BaseContract {
 
   discountRate(overrides?: CallOverrides): Promise<number>;
 
+  doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
+
   getAccountValue(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
+
+  getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   getLongBaycAmountOut(
     _vUsdAmount: BigNumberish,
@@ -835,7 +858,7 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  isUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
+  latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
   latestRequestId(overrides?: CallOverrides): Promise<string>;
 
@@ -934,7 +957,7 @@ export interface Exchange extends BaseContract {
   callStatic: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-    _closeLongPostito(
+    _closeLongPostiton(
       _user: string,
       _assetSize: BigNumberish,
       overrides?: CallOverrides
@@ -947,8 +970,6 @@ export interface Exchange extends BaseContract {
     ): Promise<void>;
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    addActiveUser(_user: string, overrides?: CallOverrides): Promise<void>;
 
     assetAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -975,12 +996,18 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<number>;
 
+    doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
+
+    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1029,7 +1056,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    isUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
+    latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestRequestId(overrides?: CallOverrides): Promise<string>;
 
@@ -1162,7 +1189,7 @@ export interface Exchange extends BaseContract {
   estimateGas: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _closeLongPostito(
+    _closeLongPostiton(
       _user: string,
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1177,11 +1204,6 @@ export interface Exchange extends BaseContract {
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    addActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1209,12 +1231,18 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<BigNumber>;
 
+    doesUserExist(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1266,7 +1294,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isUserExist(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+    latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1372,7 +1400,7 @@ export interface Exchange extends BaseContract {
   populateTransaction: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    _closeLongPostito(
+    _closeLongPostiton(
       _user: string,
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1387,11 +1415,6 @@ export interface Exchange extends BaseContract {
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    addActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1419,12 +1442,25 @@ export interface Exchange extends BaseContract {
 
     discountRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    doesUserExist(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getAllLongvBaycBalance(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getAllShortvBaycBalance(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1479,10 +1515,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isUserExist(
-      _user: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
