@@ -94,7 +94,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //remove user from active users list
-  function removeActiveUser(address _user) public {
+  function _removeActiveUser(address _user) internal {
     bool isExist = doesUserExist(_user);
     if (isExist == true) {
       for (uint256 i; i < activeUsers.length; i++) {
@@ -170,7 +170,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //get output usd amount by Bayc input amount if we want to buy(long)
-  function getLongUsdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
+  function getLongVusdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvBaycPoolSize = vBaycPoolSize - _vBaycAmount;
     uint256 newvUsdPoolSize = k / newvBaycPoolSize;
@@ -188,7 +188,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   //get output usd by Bayc input amount if we want to sell(short)
-  function getShortUsdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
+  function getShortVusdAmountOut(uint256 _vBaycAmount) public view returns (uint256) {
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvBaycPoolSize = vBaycPoolSize + _vBaycAmount;
     uint256 newvUsdPoolSize = k / newvBaycPoolSize;
@@ -221,6 +221,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] += int256(userBayc);
     uservUsdBalance[msg.sender] -= int256(_usdAmount);
+    
+    //add user to the active user list
+    _addActiveUser(msg.sender);
 
     //trade fee
     uint256 fee = (_usdAmount * swapFee) / 10000;
@@ -246,12 +249,22 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] -= int256(userBayc);
     uservUsdBalance[msg.sender] += int256(_usdAmount);
+
+    //add user to the active user list
+    _addActiveUser(msg.sender);
+
+    //trade fee
+    uint256 fee = (_usdAmount * swapFee) / 10000;
+    collateral[usdc][msg.sender] -= fee;
+    address owner = owner();
+    IERC20(usdc).transfer(owner, fee);
+
     //update pool
     vBaycPoolSize = newvBaycPoolSize;
     vUsdPoolSize = newvUsdPoolSize;
   }
 
-  function _closeLongPostiton(address _user, uint256 _assetSize) public {
+  function _closeLongPostiton(address _user, uint256 _assetSize) internal {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
       "You dont have enough asset size to close the position"
@@ -262,7 +275,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
     //get the output usd of closing position
     //f.e 1Bayc -> 2000$
-    uint256 usdBaycValue = getShortUsdAmountOut(_assetSize);
+    uint256 usdBaycValue = getShortVusdAmountOut(_assetSize);
     /*
     1 bayc value = 2000$
     total vBayc balance = 2Bayc
@@ -285,6 +298,16 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update user balance
     uservBaycBalance[_user] -= int256(_assetSize);
     uservUsdBalance[_user] += userPartialvUsdBalance;
+    // if user has not vbalance so he is not active
+    if(uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0){
+      _removeActiveUser(_user);
+    }
+
+    //trade fee
+    uint256 fee = (usdBaycValue * swapFee) / 10000;
+    collateral[usdc][_user] -= fee;
+    address owner = owner();
+    IERC20(usdc).transfer(owner, fee);
 
     //update the pool
     uint256 k = vBaycPoolSize * vUsdPoolSize;
@@ -292,7 +315,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     vUsdPoolSize = k / vBaycPoolSize;
   }
 
-  function _closeShortPosition(address _user, uint256 _assetSize) public {
+  function _closeShortPosition(address _user, uint256 _assetSize) internal {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
       "You dont have enough asset size to close the position"
@@ -302,7 +325,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     liquidateUsers();
     partialLiquidateUsers();
     //get the output usd of closing position
-    uint256 usdBaycValue = getLongUsdAmountOut(_assetSize);
+    uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
     int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /
       uservBaycBalance[_user];
 
@@ -318,15 +341,27 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //increase or decrease pnl of the user
     if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
       uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
-      collateral[usdc][msg.sender] -= pnl;
+      collateral[usdc][_user] -= pnl;
     }
     if (usdBaycValue < uint256(positive(userPartialvUsdBalance))) {
       uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
-      collateral[usdc][msg.sender] += pnl;
+      collateral[usdc][_user] += pnl;
     }
     //update user balance
-    uservBaycBalance[msg.sender] += int256(_assetSize);
-    uservUsdBalance[msg.sender] -= userPartialvUsdBalance;
+    uservBaycBalance[_user] += int256(_assetSize);
+    uservUsdBalance[_user] -= userPartialvUsdBalance;
+
+    // if user has not vbalance so he is not active
+    if(uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0){
+      _removeActiveUser(_user);
+    }
+
+    //trade fee
+    uint256 fee = (usdBaycValue * swapFee) / 10000;
+    collateral[usdc][_user] -= fee;
+    address owner = owner();
+    IERC20(usdc).transfer(owner, fee);
+
     //update pool
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     vBaycPoolSize -= _assetSize;
@@ -356,11 +391,11 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   */
   function getPNL(address _user) public view returns (int256) {
     if (uservBaycBalance[_user] > 0) {
-      uint256 currentBaycValue = getShortUsdAmountOut(uint256(uservBaycBalance[_user]));
+      uint256 currentBaycValue = getShortVusdAmountOut(uint256(uservBaycBalance[_user]));
       int256 pnl = int256(currentBaycValue) + (uservUsdBalance[_user]);
       return pnl;
     } else if (uservBaycBalance[_user] < 0) {
-      uint256 currentBaycValue = getLongUsdAmountOut(uint256(uservBaycBalance[_user]));
+      uint256 currentBaycValue = getLongVusdAmountOut(uint256(uservBaycBalance[_user]));
       int256 pnl = uservUsdBalance[_user] - int256(currentBaycValue);
       return pnl;
     }
@@ -380,10 +415,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   function getPositionNotional(address _user) public view returns (uint256) {
     if (uservBaycBalance[_user] > 0) {
-      uint256 positionNotionalValue = getShortUsdAmountOut(uint256(uservBaycBalance[_user]));
+      uint256 positionNotionalValue = getShortVusdAmountOut(uint256(uservBaycBalance[_user]));
       return positionNotionalValue;
     } else if (uservBaycBalance[_user] < 0) {
-      uint256 positionNotionalValue = getLongUsdAmountOut(positive(uservBaycBalance[_user]));
+      uint256 positionNotionalValue = getLongVusdAmountOut(positive(uservBaycBalance[_user]));
       return positionNotionalValue;
     } else {
       return 0;

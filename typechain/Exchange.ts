@@ -21,8 +21,6 @@ export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
     "AutoCloseMargin()": FunctionFragment;
-    "_closeLongPostiton(address,uint256)": FunctionFragment;
-    "_closeShortPosition(address,uint256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
@@ -36,11 +34,11 @@ export interface ExchangeInterface extends utils.Interface {
     "getAllLongvBaycBalance()": FunctionFragment;
     "getAllShortvBaycBalance()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
-    "getLongUsdAmountOut(uint256)": FunctionFragment;
+    "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
     "getPositionNotional(address)": FunctionFragment;
     "getShortBaycAmountOut(uint256)": FunctionFragment;
-    "getShortUsdAmountOut(uint256)": FunctionFragment;
+    "getShortVusdAmountOut(uint256)": FunctionFragment;
     "hardLiquidate(address)": FunctionFragment;
     "initialVirtualPool(uint256,uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
@@ -61,7 +59,6 @@ export interface ExchangeInterface extends utils.Interface {
     "positive(int256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
     "pricingAsset()": FunctionFragment;
-    "removeActiveUser(address)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestPrice()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
@@ -82,14 +79,6 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "AutoCloseMargin",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "_closeLongPostiton",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "_closeShortPosition",
-    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "activeUsers",
@@ -144,7 +133,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getLongUsdAmountOut",
+    functionFragment: "getLongVusdAmountOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "getPNL", values: [string]): string;
@@ -157,7 +146,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getShortUsdAmountOut",
+    functionFragment: "getShortVusdAmountOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -226,10 +215,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "removeActiveUser",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
@@ -283,14 +268,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "_closeLongPostiton",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "_closeShortPosition",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "activeUsers",
     data: BytesLike
   ): Result;
@@ -340,7 +317,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getLongUsdAmountOut",
+    functionFragment: "getLongVusdAmountOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPNL", data: BytesLike): Result;
@@ -353,7 +330,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getShortUsdAmountOut",
+    functionFragment: "getShortVusdAmountOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -416,10 +393,6 @@ export interface ExchangeInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "priceFeed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pricingAsset",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "removeActiveUser",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -549,18 +522,6 @@ export interface Exchange extends BaseContract {
   functions: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
 
-    _closeLongPostiton(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    _closeShortPosition(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -609,7 +570,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getLongUsdAmountOut(
+    getLongVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -626,7 +587,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getShortUsdAmountOut(
+    getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -700,11 +661,6 @@ export interface Exchange extends BaseContract {
 
     pricingAsset(overrides?: CallOverrides): Promise<[string]>;
 
-    removeActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -759,18 +715,6 @@ export interface Exchange extends BaseContract {
 
   AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-  _closeLongPostiton(
-    _user: string,
-    _assetSize: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  _closeShortPosition(
-    _user: string,
-    _assetSize: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   assetAddress(overrides?: CallOverrides): Promise<string>;
@@ -813,7 +757,7 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  getLongUsdAmountOut(
+  getLongVusdAmountOut(
     _vBaycAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -830,7 +774,7 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  getShortUsdAmountOut(
+  getShortVusdAmountOut(
     _vBaycAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -904,11 +848,6 @@ export interface Exchange extends BaseContract {
 
   pricingAsset(overrides?: CallOverrides): Promise<string>;
 
-  removeActiveUser(
-    _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -957,18 +896,6 @@ export interface Exchange extends BaseContract {
   callStatic: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-    _closeLongPostiton(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    _closeShortPosition(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     assetAddress(overrides?: CallOverrides): Promise<string>;
@@ -1014,7 +941,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getLongUsdAmountOut(
+    getLongVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1031,7 +958,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getShortUsdAmountOut(
+    getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1094,8 +1021,6 @@ export interface Exchange extends BaseContract {
     priceFeed(overrides?: CallOverrides): Promise<string>;
 
     pricingAsset(overrides?: CallOverrides): Promise<string>;
-
-    removeActiveUser(_user: string, overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -1189,18 +1114,6 @@ export interface Exchange extends BaseContract {
   estimateGas: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _closeLongPostiton(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    _closeShortPosition(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1249,7 +1162,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getLongUsdAmountOut(
+    getLongVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1266,7 +1179,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getShortUsdAmountOut(
+    getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1340,11 +1253,6 @@ export interface Exchange extends BaseContract {
 
     pricingAsset(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1399,18 +1307,6 @@ export interface Exchange extends BaseContract {
 
   populateTransaction: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    _closeLongPostiton(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    _closeShortPosition(
-      _user: string,
-      _assetSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     activeUsers(
       arg0: BigNumberish,
@@ -1467,7 +1363,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getLongUsdAmountOut(
+    getLongVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1487,7 +1383,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getShortUsdAmountOut(
+    getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1560,11 +1456,6 @@ export interface Exchange extends BaseContract {
     priceFeed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pricingAsset(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    removeActiveUser(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
