@@ -209,19 +209,23 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   function openLongPosition(uint256 _usdAmount) public {
-    //first we run liquidation functions
-    liquidateUsers();
-    partialLiquidateUsers();
-
     //calculate the new pool size and user bayc amount
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvUsdPoolSize = vUsdPoolSize + _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    require(
+      isInTheRightRange == true,
+      "You can't move the price more than 10% far from the oracle price"
+    );
+    //first we run liquidation functions
+    _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] += int256(userBayc);
     uservUsdBalance[msg.sender] -= int256(_usdAmount);
-    
+
     //add user to the active user list
     _addActiveUser(msg.sender);
 
@@ -237,14 +241,18 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   function openShortPosition(uint256 _usdAmount) public {
-    //first we run liquidation functions
-    liquidateUsers();
-    partialLiquidateUsers();
-
     //calculate the new pool size and user bayc amount
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvUsdPoolSize = vUsdPoolSize - _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    require(
+      isInTheRightRange == true,
+      "You can't move the price more than 10% far from the oracle price"
+    );
+    //first we run liquidation functions
+    _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     uint256 userBayc = newvBaycPoolSize - vBaycPoolSize;
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] -= int256(userBayc);
@@ -264,14 +272,19 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     vUsdPoolSize = newvUsdPoolSize;
   }
 
-  function _closeLongPostiton(address _user, uint256 _assetSize) internal {
+  function _closeLongPosition(address _user, uint256 _assetSize) internal {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
       "You dont have enough asset size to close the position"
     );
+
+    uint256 k;
     //first we run liquidation functions
-    liquidateUsers();
-    partialLiquidateUsers();
+    k = vBaycPoolSize * vUsdPoolSize;
+    uint256 vBaycNewPoolSize = vBaycPoolSize + _assetSize;
+    uint256 vUsdNewPoolSize = k / vBaycNewPoolSize;
+    _liquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
 
     //get the output usd of closing position
     //f.e 1Bayc -> 2000$
@@ -299,7 +312,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uservBaycBalance[_user] -= int256(_assetSize);
     uservUsdBalance[_user] += userPartialvUsdBalance;
     // if user has not vbalance so he is not active
-    if(uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0){
+    if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
       _removeActiveUser(_user);
     }
 
@@ -310,7 +323,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     IERC20(usdc).transfer(owner, fee);
 
     //update the pool
-    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    k = vBaycPoolSize * vUsdPoolSize;
     vBaycPoolSize += _assetSize;
     vUsdPoolSize = k / vBaycPoolSize;
   }
@@ -321,9 +334,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       "You dont have enough asset size to close the position"
     );
 
+    uint256 k;
     //first we run liquidation functions
-    liquidateUsers();
-    partialLiquidateUsers();
+    k = vBaycPoolSize * vUsdPoolSize;
+    uint256 vBaycNewPoolSize = vBaycPoolSize - _assetSize;
+    uint256 vUsdNewPoolSize = k / vBaycNewPoolSize;
+    _liquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
     //get the output usd of closing position
     uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
     int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /
@@ -352,7 +369,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uservUsdBalance[_user] -= userPartialvUsdBalance;
 
     // if user has not vbalance so he is not active
-    if(uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0){
+    if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
       _removeActiveUser(_user);
     }
 
@@ -363,7 +380,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     IERC20(usdc).transfer(owner, fee);
 
     //update pool
-    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    k = vBaycPoolSize * vUsdPoolSize;
     vBaycPoolSize -= _assetSize;
     vUsdPoolSize = k / vBaycPoolSize;
   }
@@ -376,7 +393,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //if user has positive vBayc balance so he/she has longPosition
     //if user has negative vBayc balance so he/she has shortPosition
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostiton(msg.sender, _assetSize);
+      _closeLongPosition(msg.sender, _assetSize);
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(msg.sender, _assetSize);
     }
@@ -401,6 +418,30 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //get user pnl by new pool size(new price);
+  function _getNewPNL(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (int256) {
+    if (uservBaycBalance[_user] > 0) {
+      uint256 k = _vBaycNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvBaycPoolSize = _vBaycNewPoolSize + uint256(uservBaycBalance[_user]);
+      uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+      uint256 currentBaycValue = vUsdPoolSize - newvUsdPoolSize;
+      int256 pnl = int256(currentBaycValue) + (uservUsdBalance[_user]);
+      return pnl;
+    } else if (uservBaycBalance[_user] < 0) {
+      uint256 k = _vBaycNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvBaycPoolSize = _vBaycNewPoolSize - uint256(uservBaycBalance[_user]);
+      uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+      uint256 currentBaycValue = newvUsdPoolSize - vUsdPoolSize;
+      int256 pnl = uservUsdBalance[_user] - int256(currentBaycValue);
+      return pnl;
+    }
+  }
+
+  //account value = collateral +- pnl
   function getAccountValue(address _user) public view returns (uint256) {
     uint256 collateralValue = collateral[usdc][msg.sender];
     int256 pnl = getPNL(_user);
@@ -413,12 +454,53 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //get new account value according to the new pool size (new price)
+  function _getNewAccountValue(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (uint256) {
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    int256 pnl = _getNewPNL(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    if (pnl < 0) {
+      uint256 accountValue = collateralValue - uint256(pnl);
+      return accountValue;
+    } else {
+      uint256 accountValue = collateralValue + uint256(pnl);
+      return accountValue;
+    }
+  }
+
+  //get total position value of each user
   function getPositionNotional(address _user) public view returns (uint256) {
     if (uservBaycBalance[_user] > 0) {
       uint256 positionNotionalValue = getShortVusdAmountOut(uint256(uservBaycBalance[_user]));
       return positionNotionalValue;
     } else if (uservBaycBalance[_user] < 0) {
       uint256 positionNotionalValue = getLongVusdAmountOut(positive(uservBaycBalance[_user]));
+      return positionNotionalValue;
+    } else {
+      return 0;
+    }
+  }
+
+  //get new position notional value according to the new pool size (new price)
+  function _getNewPositionNotional(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (uint256) {
+    if (uservBaycBalance[_user] > 0) {
+      uint256 k = _vBaycNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvBaycPoolSize = _vBaycNewPoolSize + uint256(uservBaycBalance[_user]);
+      uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+      uint256 positionNotionalValue = _vUsdNewPoolSize - newvUsdPoolSize;
+      return positionNotionalValue;
+    } else if (uservBaycBalance[_user] < 0) {
+      uint256 k = _vBaycNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvBaycPoolSize = _vBaycNewPoolSize - positive(uservBaycBalance[_user]);
+      uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+      uint256 positionNotionalValue = newvUsdPoolSize - _vUsdNewPoolSize;
       return positionNotionalValue;
     } else {
       return 0;
@@ -434,8 +516,36 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //get the new margin of user according to the new pool size (new price)
+  function _userNewMargin(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (uint256) {
+    uint256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    if (accountValue > 0 && positionNotional > 0) {
+      uint256 margin = (100 * accountValue) / positionNotional;
+      return margin;
+    }
+  }
+
   function isHardLiquidateable(address _user) public view returns (bool) {
     uint256 userMargin = userMargin(_user);
+    if (userMargin > 0 && userMargin <= 40) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //ckeck that is user can be liquidated according to the new price
+  function _isHardLiquidateable(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (bool) {
+    uint256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     if (userMargin > 0 && userMargin <= 40) {
       return true;
     } else {
@@ -452,12 +562,88 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //ckeck that is user can be partialy liquidated according to the new price
+  function _isPartialLiquidateable(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (bool) {
+    uint256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    if (40 <= userMargin && userMargin <= 50) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function hardLiquidate(address _user) public {
     require(isHardLiquidateable(_user), "user can not be liquidate");
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostiton(_user, uint256(uservBaycBalance[msg.sender]));
+      _closeLongPosition(_user, uint256(uservBaycBalance[msg.sender]));
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(_user, positive(uservBaycBalance[msg.sender]));
+    }
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    uint256 discountAmount = (discountRate * collateralValue) / 100;
+    collateral[usdc][msg.sender] -= discountAmount;
+    insuranceFunds += discountAmount;
+  }
+
+  //this function is called if user should be liquidated by new price
+  function _hardLiquidate(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) public {
+    require(
+      _isHardLiquidateable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "user can not be liquidate"
+    );
+    if (uservBaycBalance[msg.sender] > 0) {
+      // _closeLongPosition(_user, uint256(uservBaycBalance[msg.sender]));
+      uint256 _assetSize = uint256(uservBaycBalance[msg.sender]);
+      uint256 usdBaycValue = getShortVusdAmountOut(_assetSize);
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue > uint256(positive(uservUsdBalance[_user]))) {
+        uint256 pnl = usdBaycValue - uint256(positive(uservUsdBalance[_user]));
+        collateral[usdc][_user] += pnl;
+      } else if (usdBaycValue < uint256(positive(uservUsdBalance[_user]))) {
+        uint256 pnl = uint256(positive(uservUsdBalance[_user]) - usdBaycValue);
+        collateral[usdc][_user] -= pnl;
+      }
+      //update user balance
+      uservBaycBalance[_user] -= int256(_assetSize);
+      uservUsdBalance[_user] += uservUsdBalance[_user];
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update the pool
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize += _assetSize;
+      vUsdPoolSize = k / vBaycPoolSize;
+    } else if (uservBaycBalance[msg.sender] < 0) {
+      uint256 _assetSize = uint256(positive(uservBaycBalance[msg.sender]));
+      uint256 usdBaycValue = getShortVusdAmountOut(_assetSize);
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue > uint256(uservUsdBalance[_user])) {
+        uint256 pnl = usdBaycValue - uint256(positive(uservUsdBalance[_user]));
+        collateral[usdc][_user] -= pnl;
+      } else if (usdBaycValue < uint256(uservUsdBalance[_user])) {
+        uint256 pnl = uint256(positive(uservUsdBalance[_user]) - usdBaycValue);
+        collateral[usdc][_user] += pnl;
+      }
+      //update user balance
+      uservBaycBalance[_user] += int256(_assetSize);
+      uservUsdBalance[_user] -= uservUsdBalance[_user];
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update the pool
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize += _assetSize;
+      vUsdPoolSize = k / vBaycPoolSize;
     }
     uint256 collateralValue = collateral[usdc][msg.sender];
     uint256 discountAmount = (discountRate * collateralValue) / 100;
@@ -474,12 +660,29 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     x = numerator / denominator;
   }
 
+  //calculate liquidation amount to turn back the user margin to the save level(60%) according to the new price
+  function _calculatePartialLiquidateValue(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal view returns (uint256 x) {
+    uint256 totalAccountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    uint256 totalPositionNotional = _getNewPositionNotional(
+      _user,
+      _vBaycNewPoolSize,
+      _vUsdNewPoolSize
+    );
+    uint256 numerator = (totalPositionNotional * saveLevelMargin) / 100 - totalAccountValue;
+    uint256 denominator = saveLevelMargin / 100 - discountRate / 100;
+    x = numerator / denominator;
+  }
+
   function partialLiquidate(address _user) public {
     require(isPartialLiquidateable(_user), "user can not be partially liquidated");
 
     uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
     if (uservBaycBalance[msg.sender] > 0) {
-      _closeLongPostiton(_user, liquidateAmount);
+      _closeLongPosition(_user, liquidateAmount);
     } else if (uservBaycBalance[msg.sender] < 0) {
       _closeShortPosition(_user, liquidateAmount);
     }
@@ -489,6 +692,82 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     insuranceFunds += discountAmount;
   }
 
+  //Liquidate user partialy according to the new price
+  function _partialLiquidate(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) internal {
+    require(
+      _isPartialLiquidateable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "user can not be partially liquidated"
+    );
+
+    uint256 liquidateAmount = _calculatePartialLiquidateValue(
+      _user,
+      _vBaycNewPoolSize,
+      _vUsdNewPoolSize
+    );
+    if (uservBaycBalance[msg.sender] > 0) {
+      _closeLongPosition(_user, liquidateAmount);
+      //get the output usd of closing position
+
+      uint256 usdBaycValue = getShortVusdAmountOut(liquidateAmount);
+      int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(liquidateAmount)) /
+        uservBaycBalance[_user];
+
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
+        uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
+        collateral[usdc][_user] += pnl;
+      } else if (usdBaycValue < uint256(positive(userPartialvUsdBalance))) {
+        uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
+        collateral[usdc][_user] -= pnl;
+      }
+      //update user balance
+      uservBaycBalance[_user] -= int256(liquidateAmount);
+      uservUsdBalance[_user] += userPartialvUsdBalance;
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update the pool
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize += liquidateAmount;
+      vUsdPoolSize = k / vBaycPoolSize;
+    } else if (uservBaycBalance[msg.sender] < 0) {
+      //get the output usd of closing position
+      uint256 usdBaycValue = getLongVusdAmountOut(liquidateAmount);
+      int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(liquidateAmount)) /
+        uservBaycBalance[_user];
+      //increase or decrease pnl of the user
+      if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
+        uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
+        collateral[usdc][_user] -= pnl;
+      }
+      if (usdBaycValue < uint256(positive(userPartialvUsdBalance))) {
+        uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
+        collateral[usdc][_user] += pnl;
+      }
+      //update user balance
+      uservBaycBalance[_user] += int256(liquidateAmount);
+      uservUsdBalance[_user] -= userPartialvUsdBalance;
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update pool
+      uint256 k2 = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize -= liquidateAmount;
+      vUsdPoolSize = k2 / vBaycPoolSize;
+    }
+    uint256 collateralValue = collateral[usdc][msg.sender];
+    uint256 discountAmount = (collateralValue * discountRate) / 100;
+    collateral[usdc][msg.sender] -= discountAmount;
+    insuranceFunds += discountAmount;
+  }
+
+  //any one can call this function (admin, user, server or bot) to liquidate liquidateable users
   function liquidateUsers() public {
     for (uint256 i = 0; i < activeUsers.length; i++) {
       bool isLiquidateable = isHardLiquidateable(activeUsers[i]);
@@ -498,11 +777,39 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
+  //liquidate users according to the new price (is used only in trade trade functions)
+  function _liquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize) internal {
+    for (uint256 i = 0; i < activeUsers.length; i++) {
+      bool isLiquidateable = _isHardLiquidateable(
+        activeUsers[i],
+        _vBaycNewPoolSize,
+        _vUsdNewPoolSize
+      );
+      if (isLiquidateable == true) {
+        _hardLiquidate(activeUsers[i], _vBaycNewPoolSize, _vUsdNewPoolSize);
+      }
+    }
+  }
+
   function partialLiquidateUsers() public {
     for (uint256 i = 0; i < activeUsers.length; i++) {
       bool isPartialLiquidateable = isPartialLiquidateable(activeUsers[i]);
       if (isPartialLiquidateable == true) {
         partialLiquidate(activeUsers[i]);
+      }
+    }
+  }
+
+  //liquidate users partialy according to the new price (is used only in trade trade functions)
+  function _partialLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize) internal {
+    for (uint256 i = 0; i < activeUsers.length; i++) {
+      bool isPartialLiquidateable = _isPartialLiquidateable(
+        activeUsers[i],
+        _vBaycNewPoolSize,
+        _vUsdNewPoolSize
+      );
+      if (isPartialLiquidateable == true) {
+        _partialLiquidate(activeUsers[i], _vBaycNewPoolSize, _vUsdNewPoolSize);
       }
     }
   }
@@ -534,23 +841,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return allShortBaycBalance;
   }
 
-  /*
-  increasing or decreasing users collateral for add funding rate for each user need loop again(same high gas for thousands of users)
-  My suggestion is change the x and y size without change in k.
-    x*y = k
-
-  Example:
-  100 vBayc * 1000vUsd = 100000
-  bayc price = 10000/1000 = 10usd
-  oracle price = 14 usd
-  funding fee = 100*(14-10)/24 =~ 16$
-  new usdPool = 1000 + 16 = 1016$
-  new baycPool = 10000/1016 =~ 98
-  
-  98 vBayc * 1016 vUsd = 100000
-  so buy change x and y we give the fund to the long positions and minus it from short positions
-
-  */
   function setFundingRate() public onlyOwner {
     uint256 indexPrice = vBaycPoolSize / vUsdPoolSize;
     uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
@@ -562,21 +852,75 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //check if we dont have one side(long or short balance = 0) this funding action will not run
     if (allLongvBaycBalance > 0 && allShortBaycBalance < 0) {
       if (indexPrice > oraclePrice) {
-        uint256 k = vBaycPoolSize * vUsdPoolSize;
         uint256 fundingFee = (uint256(allLongvBaycBalance) * (indexPrice - oraclePrice)) / 24;
-        uint256 newvUsdPoolSize = vUsdPoolSize - fundingFee;
-        uint256 newvBaycPoolSize = k / newvUsdPoolSize;
-
-        vUsdPoolSize = newvUsdPoolSize;
-        vBaycPoolSize = newvBaycPoolSize;
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+          if (uservBaycBalance[activeUsers[i]] > 0) {
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+              uint256(allLongvBaycBalance);
+            collateral[usdc][activeUsers[i]] -= userFundingFee;
+          } else if (uservBaycBalance[activeUsers[i]] < 0) {
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+              positive(allShortBaycBalance);
+            collateral[usdc][activeUsers[i]] += userFundingFee;
+          }
+        }
       } else if (indexPrice < oraclePrice) {
-        uint256 k = vBaycPoolSize * vUsdPoolSize;
         uint256 fundingFee = (positive(allShortBaycBalance) * (oraclePrice - oraclePrice)) / 24;
-        uint256 newvUsdPoolSize = vUsdPoolSize + fundingFee;
-        uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+          if (uservBaycBalance[activeUsers[i]] > 0) {
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+              uint256(allLongvBaycBalance);
+            collateral[usdc][activeUsers[i]] += userFundingFee;
+          } else if (uservBaycBalance[activeUsers[i]] < 0) {
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+              positive(allShortBaycBalance);
+            collateral[usdc][activeUsers[i]] += userFundingFee;
+          }
+        }
+      }
+    }
+  }
 
-        vUsdPoolSize = newvUsdPoolSize;
-        vBaycPoolSize = newvBaycPoolSize;
+  //return positive int
+  function absoluteInt(int256 _value) public view returns (int256) {
+    if (_value < 0) {
+      return -(_value);
+    } else {
+      return _value;
+    }
+  }
+
+  //return false if new price go further than the oracle price
+  function isPriceIntheRightRange(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize)
+    public
+    view
+    returns (bool)
+  {
+    uint256 currentPrice = vBaycPoolSize / vUsdPoolSize;
+    uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
+    uint256 newPrice = _vBaycNewPoolSize / _vUsdNewPoolSize;
+
+    int256 currentDifferent = int256(oraclePrice) - int256(currentPrice);
+    int256 currentDifferentPercentage = (100 * currentDifferent) / int256(currentPrice);
+    int256 currentDifferentDistance = absoluteInt(currentDifferentPercentage) - 10;
+
+    int256 newDifferent = int256(oraclePrice) - int256(newPrice);
+    int256 newDifferentPercentage = (100 * newDifferent) / int256(newPrice);
+    int256 newDifferentDistance = absoluteInt(newDifferentPercentage) - 10;
+
+    if (currentDifferentDistance > 0) {
+      //we are outside the target range and need to be brought back
+      if (newDifferentDistance < currentDifferentDistance) {
+        return true; //trade allowed, we move closer
+      } else {
+        return false; //trade is not allowed, we move more distant
+      }
+    } else {
+      //we are inside the target range
+      if (newDifferentDistance < 10) {
+        return true; //trade allowed we stay within target range.
+      } else {
+        return false;
       }
     }
   }

@@ -11,6 +11,7 @@ import "hardhat-gas-reporter"
 import "hardhat-contract-sizer"
 import "@appliedblockchain/chainlink-plugins-fund-link"
 import "./tasks"
+import "hardhat-gas-reporter"
 
 dotenv.config()
 
@@ -91,7 +92,8 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    // enabled: process.env.REPORT_GAS !== undefined,
+    enabled: true,
     currency: "USD",
     outputFile: "gas-report.txt",
     noColors: true,

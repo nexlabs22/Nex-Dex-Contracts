@@ -21,6 +21,8 @@ export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
     "AutoCloseMargin()": FunctionFragment;
+    "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
+    "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
@@ -44,6 +46,7 @@ export interface ExchangeInterface extends utils.Interface {
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
+    "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "latestRequestId()": FunctionFragment;
     "liquidateUsers()": FunctionFragment;
@@ -79,6 +82,14 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "AutoCloseMargin",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_hardLiquidate",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "absoluteInt",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "activeUsers",
@@ -168,6 +179,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "isPartialLiquidateable",
     values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isPriceIntheRightRange",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "latestFeeUpdate",
@@ -268,6 +283,14 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "_hardLiquidate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "absoluteInt",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "activeUsers",
     data: BytesLike
   ): Result;
@@ -351,6 +374,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isPartialLiquidateable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isPriceIntheRightRange",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -522,6 +549,18 @@ export interface Exchange extends BaseContract {
   functions: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
 
+    _hardLiquidate(
+      _user: string,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    absoluteInt(
+      _value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -612,6 +651,12 @@ export interface Exchange extends BaseContract {
 
     isPartialLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isPriceIntheRightRange(
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
@@ -715,6 +760,18 @@ export interface Exchange extends BaseContract {
 
   AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
+  _hardLiquidate(
+    _user: string,
+    _vBaycNewPoolSize: BigNumberish,
+    _vUsdNewPoolSize: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  absoluteInt(
+    _value: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   assetAddress(overrides?: CallOverrides): Promise<string>;
@@ -799,6 +856,12 @@ export interface Exchange extends BaseContract {
 
   isPartialLiquidateable(
     _user: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isPriceIntheRightRange(
+    _vBaycNewPoolSize: BigNumberish,
+    _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
@@ -896,6 +959,18 @@ export interface Exchange extends BaseContract {
   callStatic: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
+    _hardLiquidate(
+      _user: string,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    absoluteInt(
+      _value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     assetAddress(overrides?: CallOverrides): Promise<string>;
@@ -980,6 +1055,12 @@ export interface Exchange extends BaseContract {
 
     isPartialLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isPriceIntheRightRange(
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1114,6 +1195,18 @@ export interface Exchange extends BaseContract {
   estimateGas: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
+    _hardLiquidate(
+      _user: string,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    absoluteInt(
+      _value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1204,6 +1297,12 @@ export interface Exchange extends BaseContract {
 
     isPartialLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isPriceIntheRightRange(
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1308,6 +1407,18 @@ export interface Exchange extends BaseContract {
   populateTransaction: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    _hardLiquidate(
+      _user: string,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    absoluteInt(
+      _value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1408,6 +1519,12 @@ export interface Exchange extends BaseContract {
 
     isPartialLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isPriceIntheRightRange(
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
