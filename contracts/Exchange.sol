@@ -47,6 +47,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   address[] public activeUsers;
 
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
+  mapping(address => int256) public virtualCollateral; //funding reward of each user
 
   mapping(address => int256) public uservUsdBalance; // virtual usd balance of each user;
   mapping(address => int256) public uservBaycBalance; // virtual nft balance of each user;
@@ -147,7 +148,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         "You cannot withdraw because your margin rate is the lower than saveMargin level"
       );
     }
-
     //check user has enough collateral
     require(
       collateral[usdc][msg.sender] >= _amount,
@@ -157,6 +157,18 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     IERC20(usdc).transfer(msg.sender, _amount);
     collateral[usdc][msg.sender] = collateral[usdc][msg.sender].sub(_amount);
     emit Withdraw(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
+  }
+
+  //give the user funding reward when position will be closed
+  function _realizevirtualCollateral(address _user, int256 _amount) internal {
+    require(_amount <= absoluteInt(virtualCollateral[_user]), "out of vitrual collateral balance");
+    if (virtualCollateral[_user] > 0) {
+      collateral[usdc][_user] += uint256(_amount);
+      virtualCollateral[_user] -= _amount;
+    } else if (virtualCollateral[_user] < 0) {
+      collateral[usdc][_user] -= uint256(_amount);
+      virtualCollateral[_user] += _amount;
+    }
   }
 
   //get output Bayc by usd input amount if we want to buy(long)
@@ -308,6 +320,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
       collateral[usdc][_user] -= pnl;
     }
+    //realize funding reward of user;
+    int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(_assetSize)) /
+      uservBaycBalance[_user];
+    _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
     //update user balance
     uservBaycBalance[_user] -= int256(_assetSize);
     uservUsdBalance[_user] += userPartialvUsdBalance;
@@ -345,16 +361,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
     int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /
       uservBaycBalance[_user];
-
-    /*
-    1 bayc value = 2000$
-    total vBayc balance = -2Bayc
-    total vUsd balance = +3000$
-    for 1 Bayc -> partialVusdBalance = 3000*1/2 = 1500$
-
-    pnl =  partial usd balance - 1 bayc value = 1500 - 2000 = -500$
-    */
-
     //increase or decrease pnl of the user
     if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
       uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
@@ -364,21 +370,22 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
       collateral[usdc][_user] += pnl;
     }
+    //realize funding reward of user;
+    int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(_assetSize)) /
+      uservBaycBalance[_user];
+    _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
     //update user balance
     uservBaycBalance[_user] += int256(_assetSize);
     uservUsdBalance[_user] -= userPartialvUsdBalance;
-
     // if user has not vbalance so he is not active
     if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
       _removeActiveUser(_user);
     }
-
     //trade fee
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
     IERC20(usdc).transfer(owner, fee);
-
     //update pool
     k = vBaycPoolSize * vUsdPoolSize;
     vBaycPoolSize -= _assetSize;
@@ -445,13 +452,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function getAccountValue(address _user) public view returns (uint256) {
     uint256 collateralValue = collateral[usdc][msg.sender];
     int256 pnl = getPNL(_user);
-    if (pnl < 0) {
-      uint256 accountValue = collateralValue - uint256(pnl);
-      return accountValue;
-    } else {
-      uint256 accountValue = collateralValue + uint256(pnl);
-      return accountValue;
-    }
+    int256 fundingReward = virtualCollateral[_user];
+    int256 accountValue = int256(collateralValue) + pnl + fundingReward;
+    return uint256(accountValue);
   }
 
   //get new account value according to the new pool size (new price)
@@ -462,13 +465,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) internal view returns (uint256) {
     uint256 collateralValue = collateral[usdc][msg.sender];
     int256 pnl = _getNewPNL(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
-    if (pnl < 0) {
-      uint256 accountValue = collateralValue - uint256(pnl);
-      return accountValue;
-    } else {
-      uint256 accountValue = collateralValue + uint256(pnl);
-      return accountValue;
-    }
+    int256 fundingReward = virtualCollateral[_user];
+    int256 accountValue = int256(collateralValue) + pnl + fundingReward;
+    return uint256(accountValue);
   }
 
   //get total position value of each user
@@ -611,6 +610,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 pnl = uint256(positive(uservUsdBalance[_user]) - usdBaycValue);
         collateral[usdc][_user] -= pnl;
       }
+      //realize funding reward of user;
+      int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(_assetSize)) /
+        uservBaycBalance[_user];
+      _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
       //update user balance
       uservBaycBalance[_user] -= int256(_assetSize);
       uservUsdBalance[_user] += uservUsdBalance[_user];
@@ -633,6 +636,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 pnl = uint256(positive(uservUsdBalance[_user]) - usdBaycValue);
         collateral[usdc][_user] += pnl;
       }
+      //realize funding reward of user;
+      int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(_assetSize)) /
+        uservBaycBalance[_user];
+      _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
       //update user balance
       uservBaycBalance[_user] += int256(_assetSize);
       uservUsdBalance[_user] -= uservUsdBalance[_user];
@@ -724,6 +731,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
         collateral[usdc][_user] -= pnl;
       }
+      //realize funding reward of user;
+      int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(liquidateAmount)) /
+        uservBaycBalance[_user];
+      _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
       //update user balance
       uservBaycBalance[_user] -= int256(liquidateAmount);
       uservUsdBalance[_user] += userPartialvUsdBalance;
@@ -749,6 +760,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         uint256 pnl = uint256(positive(userPartialvUsdBalance) - usdBaycValue);
         collateral[usdc][_user] += pnl;
       }
+      //realize funding reward of user;
+      int256 realizeVitrualCollAmount = (virtualCollateral[_user] * int256(liquidateAmount)) /
+        uservBaycBalance[_user];
+      _realizevirtualCollateral(_user, absoluteInt(realizeVitrualCollAmount));
       //update user balance
       uservBaycBalance[_user] += int256(liquidateAmount);
       uservUsdBalance[_user] -= userPartialvUsdBalance;
@@ -822,7 +837,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function getAllLongvBaycBalance() public view returns (int256) {
     int256 allLongBaycBalance;
     for (uint256 i; i < activeUsers.length; i++) {
-      int256 vBaycBalance = uservBaycBalance[activeUsers[i]];
+      address user = activeUsers[i];
+      int256 vBaycBalance = uservBaycBalance[user];
       if (vBaycBalance > 0) {
         allLongBaycBalance += vBaycBalance;
       }
@@ -833,7 +849,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function getAllShortvBaycBalance() public view returns (int256) {
     int256 allShortBaycBalance;
     for (uint256 i; i < activeUsers.length; i++) {
-      int256 vBaycBalance = uservBaycBalance[activeUsers[i]];
+      address user = activeUsers[i];
+      int256 vBaycBalance = uservBaycBalance[user];
       if (vBaycBalance < 0) {
         allShortBaycBalance += vBaycBalance;
       }
@@ -852,29 +869,45 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //check if we dont have one side(long or short balance = 0) this funding action will not run
     if (allLongvBaycBalance > 0 && allShortBaycBalance < 0) {
       if (indexPrice > oraclePrice) {
-        uint256 fundingFee = (uint256(allLongvBaycBalance) * (indexPrice - oraclePrice)) / 24;
+        int256 minBaycBalance = (
+          absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
+            ? absoluteInt(allShortBaycBalance)
+            : absoluteInt(allLongvBaycBalance)
+        );
+        uint256 fundingFee = (uint256(minBaycBalance) * (indexPrice - oraclePrice)) / 24;
         for (uint256 i = 0; i < activeUsers.length; i++) {
-          if (uservBaycBalance[activeUsers[i]] > 0) {
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+          address user = activeUsers[i];
+          if (uservBaycBalance[user] > 0) {
+            //change vitraul collateral of user
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
               uint256(allLongvBaycBalance);
-            collateral[usdc][activeUsers[i]] -= userFundingFee;
-          } else if (uservBaycBalance[activeUsers[i]] < 0) {
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+            virtualCollateral[user] -= int256(userFundingFee);
+          } else if (uservBaycBalance[user] < 0) {
+            //change vitraul collateral of user
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
               positive(allShortBaycBalance);
-            collateral[usdc][activeUsers[i]] += userFundingFee;
+            virtualCollateral[user] += int256(userFundingFee);
           }
         }
       } else if (indexPrice < oraclePrice) {
-        uint256 fundingFee = (positive(allShortBaycBalance) * (oraclePrice - oraclePrice)) / 24;
+        int256 minBaycBalance = (
+          absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
+            ? absoluteInt(allShortBaycBalance)
+            : absoluteInt(allLongvBaycBalance)
+        );
+        uint256 fundingFee = (uint256(minBaycBalance) * (oraclePrice - oraclePrice)) / 24;
         for (uint256 i = 0; i < activeUsers.length; i++) {
-          if (uservBaycBalance[activeUsers[i]] > 0) {
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
-              uint256(allLongvBaycBalance);
-            collateral[usdc][activeUsers[i]] += userFundingFee;
-          } else if (uservBaycBalance[activeUsers[i]] < 0) {
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[activeUsers[i]])) /
+          address user = activeUsers[i];
+          if (uservBaycBalance[user] > 0) {
+            //change vitraul collateral of user
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
+            uint256(allLongvBaycBalance);
+            virtualCollateral[user] += int(userFundingFee);
+          } else if (uservBaycBalance[user] < 0) {
+            //change vitraul collateral of user
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
               positive(allShortBaycBalance);
-            collateral[usdc][activeUsers[i]] += userFundingFee;
+            virtualCollateral[user] += int(userFundingFee);
           }
         }
       }
@@ -900,17 +933,17 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
     uint256 newPrice = _vBaycNewPoolSize / _vUsdNewPoolSize;
 
-    int256 currentDifferent = int256(oraclePrice) - int256(currentPrice);
-    int256 currentDifferentPercentage = (100 * currentDifferent) / int256(currentPrice);
-    int256 currentDifferentDistance = absoluteInt(currentDifferentPercentage) - 10;
+    int256 currentDifference = int256(oraclePrice) - int256(currentPrice);
+    int256 currentDifferencePercentage = (100 * currentDifference) / int256(currentPrice);
+    int256 currentDifferenceDistance = absoluteInt(currentDifferencePercentage) - 10;
 
     int256 newDifferent = int256(oraclePrice) - int256(newPrice);
     int256 newDifferentPercentage = (100 * newDifferent) / int256(newPrice);
     int256 newDifferentDistance = absoluteInt(newDifferentPercentage) - 10;
 
-    if (currentDifferentDistance > 0) {
+    if (currentDifferenceDistance > 0) {
       //we are outside the target range and need to be brought back
-      if (newDifferentDistance < currentDifferentDistance) {
+      if (newDifferentDistance < currentDifferenceDistance) {
         return true; //trade allowed, we move closer
       } else {
         return false; //trade is not allowed, we move more distant

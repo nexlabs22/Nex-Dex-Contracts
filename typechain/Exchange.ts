@@ -76,6 +76,7 @@ export interface ExchangeInterface extends utils.Interface {
     "uservUsdBalance(address)": FunctionFragment;
     "vBaycPoolSize()": FunctionFragment;
     "vUsdPoolSize()": FunctionFragment;
+    "virtualCollateral(address)": FunctionFragment;
     "withdrawCollateral(uint256)": FunctionFragment;
   };
 
@@ -274,6 +275,10 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "virtualCollateral",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "withdrawCollateral",
     values: [BigNumberish]
   ): string;
@@ -461,6 +466,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "vUsdPoolSize",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "virtualCollateral",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -752,6 +761,11 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    virtualCollateral(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     withdrawCollateral(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -951,6 +965,11 @@ export interface Exchange extends BaseContract {
 
   vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
+  virtualCollateral(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   withdrawCollateral(
     _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1139,6 +1158,11 @@ export interface Exchange extends BaseContract {
     vBaycPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+    virtualCollateral(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     withdrawCollateral(
       _amount: BigNumberish,
@@ -1398,6 +1422,11 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
+    virtualCollateral(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     withdrawCollateral(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1622,6 +1651,11 @@ export interface Exchange extends BaseContract {
     vBaycPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    virtualCollateral(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     withdrawCollateral(
       _amount: BigNumberish,
