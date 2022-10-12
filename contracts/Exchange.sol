@@ -907,7 +907,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             //change vitraul collateral of user
             uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
               positive(allShortBaycBalance);
-            virtualCollateral[user] += int(userFundingFee);
+            virtualCollateral[user] -= int(userFundingFee);
           }
         }
       }
