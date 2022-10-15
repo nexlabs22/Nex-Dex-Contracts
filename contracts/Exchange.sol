@@ -129,7 +129,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //deposit collateral
   function depositCollateral(uint256 _amount) public {
-    IERC20(usdc).transferFrom(msg.sender, address(this), _amount);
+    SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
     collateral[usdc][msg.sender] = collateral[usdc][msg.sender].add(_amount);
     emit Deposit(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
   }
@@ -154,7 +154,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       "Desire amount is more than collateral balance"
     );
     //transfer tokens to the user
-    IERC20(usdc).transfer(msg.sender, _amount);
+    SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
     collateral[usdc][msg.sender] = collateral[usdc][msg.sender].sub(_amount);
     emit Withdraw(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
   }
@@ -245,7 +245,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
-    IERC20(usdc).transfer(owner, fee);
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
     vBaycPoolSize = newvBaycPoolSize;
@@ -277,7 +277,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
-    IERC20(usdc).transfer(owner, fee);
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
     vBaycPoolSize = newvBaycPoolSize;
@@ -336,7 +336,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
-    IERC20(usdc).transfer(owner, fee);
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update the pool
     k = vBaycPoolSize * vUsdPoolSize;
@@ -385,7 +385,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
-    IERC20(usdc).transfer(owner, fee);
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
     //update pool
     k = vBaycPoolSize * vUsdPoolSize;
     vBaycPoolSize -= _assetSize;
@@ -859,7 +859,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
   function setFundingRate() public onlyOwner {
-    uint256 indexPrice = vUsdPoolSize/vBaycPoolSize;
+    uint256 currentPrice = vUsdPoolSize/vBaycPoolSize;
     uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
 
     //first the contract check actual vBayc positions balance of users
@@ -868,13 +868,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
     //check if we dont have one side(long or short balance = 0) this funding action will not run
     if (allLongvBaycBalance > 0 && allShortBaycBalance < 0) {
-      if (indexPrice > oraclePrice) {
+      if (currentPrice > oraclePrice) {
         int256 minOpenInterest = (
           absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
             ? absoluteInt(allShortBaycBalance)
             : absoluteInt(allLongvBaycBalance)
         );
-        uint256 fundingFee = (uint256(minOpenInterest) * (indexPrice - oraclePrice)) / 24;
+        uint256 fundingFee = (uint256(minOpenInterest) * (currentPrice - oraclePrice)) / 24;
         for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
@@ -889,7 +889,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             virtualCollateral[user] += int256(userFundingFee);
           }
         }
-      } else if (indexPrice < oraclePrice) {
+      } else if (currentPrice < oraclePrice) {
         int256 minOpenInterest = (
           absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
             ? absoluteInt(allShortBaycBalance)
@@ -929,7 +929,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     view
     returns (bool)
   {
-    uint256 currentPrice = vBaycPoolSize / vUsdPoolSize;
+    uint256 currentPrice = vUsdPoolSize / vBaycPoolSize;
     uint256 oraclePrice = nftOracle.showPrice(latestRequestId);
     uint256 newPrice = _vBaycNewPoolSize / _vUsdNewPoolSize;
 
