@@ -26,8 +26,10 @@ const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments })
     oracle = MockOracle.address
     additionalMessage = ` --linkaddress ${linkTokenAddress}`
   } else {
-    linkTokenAddress = networkConfig[chainId].linkToken
-    oracle = networkConfig[chainId].oracle
+    // linkTokenAddress = networkConfig[chainId].linkToken
+    linkTokenAddress = process.env.LINK_GOERLI_ADDRESS
+    // oracle = networkConfig[chainId].oracle
+    oracle = process.env.NFT_ORACLE_ADDRESS
   }
 
   // const jobId = ethers.utils.toUtf8Bytes(networkConfig[chainId].jobId!)

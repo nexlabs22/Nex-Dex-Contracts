@@ -7,6 +7,11 @@
 <br/>
 
 
+```
+nftOracle = https://goerli.etherscan.io/address/0x20641Df7EFDe0CCC0fc4c9F26E89c07A616e5DAe#code
+
+exchange= https://goerli.etherscan.io/address/0x5460E8eaFcB046fC4c4396835c2cd25d290eF6D0#code
+````
 
 # Getting Started 
 

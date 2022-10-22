@@ -35,6 +35,7 @@ export interface ExchangeInterface extends utils.Interface {
     "getAllActiveUsers()": FunctionFragment;
     "getAllLongvBaycBalance()": FunctionFragment;
     "getAllShortvBaycBalance()": FunctionFragment;
+    "getEthUsdPrice()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
@@ -54,6 +55,7 @@ export interface ExchangeInterface extends utils.Interface {
     "nftOracle()": FunctionFragment;
     "openLongPosition(uint256)": FunctionFragment;
     "openShortPosition(uint256)": FunctionFragment;
+    "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "partialLiquidate(address)": FunctionFragment;
     "partialLiquidateUsers()": FunctionFragment;
@@ -67,6 +69,8 @@ export interface ExchangeInterface extends utils.Interface {
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
+    "showPriceETH()": FunctionFragment;
+    "showPriceUSD()": FunctionFragment;
     "specId()": FunctionFragment;
     "swapFee()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -141,6 +145,10 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getEthUsdPrice",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getLongBaycAmountOut",
     values: [BigNumberish]
   ): string;
@@ -210,6 +218,10 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "openShortPosition",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "oraclePrice",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "partialLiquidate",
@@ -249,6 +261,14 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setSwapFee",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "showPriceETH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "showPriceUSD",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "specId", values?: undefined): string;
   encodeFunctionData(functionFragment: "swapFee", values?: undefined): string;
@@ -341,6 +361,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getEthUsdPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getLongBaycAmountOut",
     data: BytesLike
   ): Result;
@@ -410,6 +434,10 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "openShortPosition",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "oraclePrice",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "partialLiquidate",
@@ -444,6 +472,14 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setSwapFee", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "showPriceETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "showPriceUSD",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "specId", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swapFee", data: BytesLike): Result;
   decodeFunctionResult(
@@ -613,6 +649,8 @@ export interface Exchange extends BaseContract {
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -691,6 +729,8 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     partialLiquidate(
@@ -733,6 +773,10 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    showPriceETH(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    showPriceUSD(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     specId(overrides?: CallOverrides): Promise<[string]>;
 
@@ -823,6 +867,8 @@ export interface Exchange extends BaseContract {
 
   getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   getLongBaycAmountOut(
     _vUsdAmount: BigNumberish,
     overrides?: CallOverrides
@@ -901,6 +947,8 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   partialLiquidate(
@@ -943,6 +991,10 @@ export interface Exchange extends BaseContract {
     _newFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
+
+  showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
   specId(overrides?: CallOverrides): Promise<string>;
 
@@ -1030,6 +1082,8 @@ export interface Exchange extends BaseContract {
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1103,6 +1157,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     partialLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
@@ -1131,6 +1187,10 @@ export interface Exchange extends BaseContract {
     setFundingRate(overrides?: CallOverrides): Promise<void>;
 
     setSwapFee(_newFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+    showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
+
+    showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
     specId(overrides?: CallOverrides): Promise<string>;
 
@@ -1274,6 +1334,8 @@ export interface Exchange extends BaseContract {
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1352,6 +1414,8 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     partialLiquidate(
@@ -1394,6 +1458,10 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
+
+    showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
     specId(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1498,6 +1566,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getEthUsdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1579,6 +1649,8 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     partialLiquidate(
@@ -1621,6 +1693,10 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    showPriceETH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    showPriceUSD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     specId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

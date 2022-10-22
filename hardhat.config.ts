@@ -67,6 +67,15 @@ const config: HardhatUserConfig = {
       saveDeployments: true,
       chainId: 4,
     },
+    goerli: {
+      url: process.env.GOERLI_RPC_URL,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      //   accounts: {
+      //     mnemonic: MNEMONIC,
+      //   },
+      saveDeployments: true,
+      chainId: 5,
+    },
     mainnet: {
       url: MAINNET_RPC_URL,
       accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
@@ -88,6 +97,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       rinkeby: ETHERSCAN_API_KEY,
       kovan: ETHERSCAN_API_KEY,
+      goerli: ETHERSCAN_API_KEY,
       polygon: POLYGONSCAN_API_KEY,
     },
   },

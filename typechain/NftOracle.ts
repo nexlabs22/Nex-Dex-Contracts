@@ -17,23 +17,33 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
+export declare namespace NftOracle {
+  export type TimestampAndFloorPriceStruct = {
+    timestamp: BigNumberish;
+    floorPrice: BigNumberish;
+  };
+
+  export type TimestampAndFloorPriceStructOutput = [BigNumber, BigNumber] & {
+    timestamp: BigNumber;
+    floorPrice: BigNumber;
+  };
+}
+
 export interface NftOracleInterface extends utils.Interface {
   contractName: "NftOracle";
   functions: {
     "cancelRequest(bytes32,uint256,bytes4,uint256)": FunctionFragment;
-    "fulfillDateAndPrice(bytes32,bytes32)": FunctionFragment;
     "fulfillPrice(bytes32,uint256)": FunctionFragment;
-    "getDateAndFloorPrice(bytes32,uint256,address,string)": FunctionFragment;
+    "fulfillTimesampAndFloorPrice(bytes32,bytes32)": FunctionFragment;
     "getEstimate(bytes32,uint256,address,uint256,string)": FunctionFragment;
     "getFloorPrice(bytes32,uint256,address,string)": FunctionFragment;
     "getOracleAddress()": FunctionFragment;
-    "latestPrice()": FunctionFragment;
-    "latestRequestId()": FunctionFragment;
-    "requestIdDateAndPrice(bytes32)": FunctionFragment;
+    "getTimestampAndFloorPrice(bytes32)": FunctionFragment;
+    "price()": FunctionFragment;
     "requestIdPrice(bytes32)": FunctionFragment;
+    "requestIdTimestampAndFloorPrice(bytes32)": FunctionFragment;
     "setOracle(address)": FunctionFragment;
-    "showPrice(bytes32)": FunctionFragment;
-    "withdrawLink(uint256,address)": FunctionFragment;
+    "withdrawLink(address,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -41,16 +51,12 @@ export interface NftOracleInterface extends utils.Interface {
     values: [BytesLike, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "fulfillDateAndPrice",
-    values: [BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "fulfillPrice",
     values: [BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getDateAndFloorPrice",
-    values: [BytesLike, BigNumberish, string, string]
+    functionFragment: "fulfillTimesampAndFloorPrice",
+    values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getEstimate",
@@ -65,29 +71,22 @@ export interface NftOracleInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "latestPrice",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "latestRequestId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "requestIdDateAndPrice",
+    functionFragment: "getTimestampAndFloorPrice",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "price", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "requestIdPrice",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "setOracle", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "showPrice",
+    functionFragment: "requestIdTimestampAndFloorPrice",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "setOracle", values: [string]): string;
   encodeFunctionData(
     functionFragment: "withdrawLink",
-    values: [BigNumberish, string]
+    values: [string, BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -95,15 +94,11 @@ export interface NftOracleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "fulfillDateAndPrice",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "fulfillPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getDateAndFloorPrice",
+    functionFragment: "fulfillTimesampAndFloorPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -119,23 +114,19 @@ export interface NftOracleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "latestPrice",
+    functionFragment: "getTimestampAndFloorPrice",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "latestRequestId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestIdDateAndPrice",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "price", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "requestIdPrice",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestIdTimestampAndFloorPrice",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setOracle", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "showPrice", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawLink",
     data: BytesLike
@@ -203,23 +194,15 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    fulfillDateAndPrice(
-      _requestId: BytesLike,
-      _result: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     fulfillPrice(
       _requestId: BytesLike,
       _estimate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getDateAndFloorPrice(
-      _specId: BytesLike,
-      _payment: BigNumberish,
-      _assetAddress: string,
-      _pricingAsset: string,
+    fulfillTimesampAndFloorPrice(
+      _requestId: BytesLike,
+      _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -242,30 +225,39 @@ export interface NftOracle extends BaseContract {
 
     getOracleAddress(overrides?: CallOverrides): Promise<[string]>;
 
-    latestPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    latestRequestId(overrides?: CallOverrides): Promise<[string]>;
-
-    requestIdDateAndPrice(
-      arg0: BytesLike,
+    "getTimestampAndFloorPrice(bytes32)"(
+      _requestId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<[BigNumber, BigNumber] & { date: BigNumber; price: BigNumber }>;
+    ): Promise<[NftOracle.TimestampAndFloorPriceStructOutput]>;
+
+    "getTimestampAndFloorPrice(bytes32,uint256,address,string)"(
+      _specId: BytesLike,
+      _payment: BigNumberish,
+      _assetAddress: string,
+      _pricingAsset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    price(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     requestIdPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    requestIdTimestampAndFloorPrice(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     setOracle(
       _oracle: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    showPrice(_id: BytesLike, overrides?: CallOverrides): Promise<[BigNumber]>;
-
     withdrawLink(
-      _amount: BigNumberish,
       _payee: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -278,23 +270,15 @@ export interface NftOracle extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  fulfillDateAndPrice(
-    _requestId: BytesLike,
-    _result: BytesLike,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   fulfillPrice(
     _requestId: BytesLike,
     _estimate: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getDateAndFloorPrice(
-    _specId: BytesLike,
-    _payment: BigNumberish,
-    _assetAddress: string,
-    _pricingAsset: string,
+  fulfillTimesampAndFloorPrice(
+    _requestId: BytesLike,
+    _result: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -317,30 +301,39 @@ export interface NftOracle extends BaseContract {
 
   getOracleAddress(overrides?: CallOverrides): Promise<string>;
 
-  latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-  latestRequestId(overrides?: CallOverrides): Promise<string>;
-
-  requestIdDateAndPrice(
-    arg0: BytesLike,
+  "getTimestampAndFloorPrice(bytes32)"(
+    _requestId: BytesLike,
     overrides?: CallOverrides
-  ): Promise<[BigNumber, BigNumber] & { date: BigNumber; price: BigNumber }>;
+  ): Promise<NftOracle.TimestampAndFloorPriceStructOutput>;
+
+  "getTimestampAndFloorPrice(bytes32,uint256,address,string)"(
+    _specId: BytesLike,
+    _payment: BigNumberish,
+    _assetAddress: string,
+    _pricingAsset: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  price(overrides?: CallOverrides): Promise<BigNumber>;
 
   requestIdPrice(
     arg0: BytesLike,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  requestIdTimestampAndFloorPrice(
+    arg0: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   setOracle(
     _oracle: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  showPrice(_id: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
   withdrawLink(
-    _amount: BigNumberish,
     _payee: string,
+    _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -353,25 +346,17 @@ export interface NftOracle extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    fulfillDateAndPrice(
-      _requestId: BytesLike,
-      _result: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     fulfillPrice(
       _requestId: BytesLike,
       _estimate: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getDateAndFloorPrice(
-      _specId: BytesLike,
-      _payment: BigNumberish,
-      _assetAddress: string,
-      _pricingAsset: string,
+    fulfillTimesampAndFloorPrice(
+      _requestId: BytesLike,
+      _result: BytesLike,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<void>;
 
     getEstimate(
       _specId: BytesLike,
@@ -388,31 +373,40 @@ export interface NftOracle extends BaseContract {
       _assetAddress: string,
       _pricingAsset: string,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<void>;
 
     getOracleAddress(overrides?: CallOverrides): Promise<string>;
 
-    latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    latestRequestId(overrides?: CallOverrides): Promise<string>;
-
-    requestIdDateAndPrice(
-      arg0: BytesLike,
+    "getTimestampAndFloorPrice(bytes32)"(
+      _requestId: BytesLike,
       overrides?: CallOverrides
-    ): Promise<[BigNumber, BigNumber] & { date: BigNumber; price: BigNumber }>;
+    ): Promise<NftOracle.TimestampAndFloorPriceStructOutput>;
+
+    "getTimestampAndFloorPrice(bytes32,uint256,address,string)"(
+      _specId: BytesLike,
+      _payment: BigNumberish,
+      _assetAddress: string,
+      _pricingAsset: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    price(overrides?: CallOverrides): Promise<BigNumber>;
 
     requestIdPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    requestIdTimestampAndFloorPrice(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     setOracle(_oracle: string, overrides?: CallOverrides): Promise<void>;
 
-    showPrice(_id: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
     withdrawLink(
-      _amount: BigNumberish,
       _payee: string,
+      _amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -443,23 +437,15 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    fulfillDateAndPrice(
-      _requestId: BytesLike,
-      _result: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     fulfillPrice(
       _requestId: BytesLike,
       _estimate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getDateAndFloorPrice(
-      _specId: BytesLike,
-      _payment: BigNumberish,
-      _assetAddress: string,
-      _pricingAsset: string,
+    fulfillTimesampAndFloorPrice(
+      _requestId: BytesLike,
+      _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -482,16 +468,27 @@ export interface NftOracle extends BaseContract {
 
     getOracleAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
-    latestPrice(overrides?: CallOverrides): Promise<BigNumber>;
+    "getTimestampAndFloorPrice(bytes32)"(
+      _requestId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
+    "getTimestampAndFloorPrice(bytes32,uint256,address,string)"(
+      _specId: BytesLike,
+      _payment: BigNumberish,
+      _assetAddress: string,
+      _pricingAsset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
-    requestIdDateAndPrice(
+    price(overrides?: CallOverrides): Promise<BigNumber>;
+
+    requestIdPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    requestIdPrice(
+    requestIdTimestampAndFloorPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -501,11 +498,9 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    showPrice(_id: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
     withdrawLink(
-      _amount: BigNumberish,
       _payee: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -519,23 +514,15 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    fulfillDateAndPrice(
-      _requestId: BytesLike,
-      _result: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     fulfillPrice(
       _requestId: BytesLike,
       _estimate: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getDateAndFloorPrice(
-      _specId: BytesLike,
-      _payment: BigNumberish,
-      _assetAddress: string,
-      _pricingAsset: string,
+    fulfillTimesampAndFloorPrice(
+      _requestId: BytesLike,
+      _result: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -558,16 +545,27 @@ export interface NftOracle extends BaseContract {
 
     getOracleAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    latestPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getTimestampAndFloorPrice(bytes32)"(
+      _requestId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getTimestampAndFloorPrice(bytes32,uint256,address,string)"(
+      _specId: BytesLike,
+      _payment: BigNumberish,
+      _assetAddress: string,
+      _pricingAsset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
-    requestIdDateAndPrice(
+    price(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    requestIdPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    requestIdPrice(
+    requestIdTimestampAndFloorPrice(
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -577,14 +575,9 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    showPrice(
-      _id: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     withdrawLink(
-      _amount: BigNumberish,
       _payee: string,
+      _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
