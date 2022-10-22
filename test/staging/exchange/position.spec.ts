@@ -2,8 +2,8 @@ import { numToBytes32, stringToBytes } from "@chainlink/test-helpers/dist/src/he
 import { assert, expect } from "chai"
 import { BigNumber, ContractReceipt, ContractTransaction } from "ethers"
 import { network, deployments, ethers, run } from "hardhat"
-import { developmentChains, networkConfig } from "../../helper-hardhat-config"
-import { APIConsumer, LinkToken, MockOracle } from "../../typechain"
+import { developmentChains, networkConfig } from "../../../helper-hardhat-config"
+import { APIConsumer, LinkToken, MockOracle } from "../../../typechain"
 
 const chainId = 31337;
 const jobId = ethers.utils.toUtf8Bytes(networkConfig[chainId].jobId!);
@@ -31,8 +31,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
-
+      
       it("Should successfully make an price request and get a result", async () => {
+        /*
         const [owner, account1, account2] = await ethers.getSigners();
         await exchange.initialVirtualPool(toWei('1000'), toWei('100000'));
         //owner deposit collateral
@@ -45,11 +46,12 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await usdc.connect(account1).approve(exchange.address, toWei('1000'));
         await exchange.connect(account1).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account1.address))).to.equal('1000')
-        
+        */
         await exchange.requestPrice();
         const newRequestId = await exchange.latestRequestId();
         const newValue: any = toWei('110');
         await mockOracle.fulfillOracleRequest(newRequestId, numToBytes32(newValue));
+        /*
         await exchange.openLongPosition(toWei('100'))
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
@@ -61,8 +63,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
         console.log('final collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));
-
-
+        */
+        
 
         // console.log((await exchange.isPriceIntheRightRange2(toWei('71'), toWei('10000'))))
         // console.log(toEther(await exchange.oraclePrice()))

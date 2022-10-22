@@ -26,6 +26,7 @@ export interface ExchangeInterface extends utils.Interface {
     "activeUsers(uint256)": FunctionFragment;
     "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
+    "changeAssetAddress(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
@@ -43,7 +44,7 @@ export interface ExchangeInterface extends utils.Interface {
     "getShortBaycAmountOut(uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256)": FunctionFragment;
     "hardLiquidate(address)": FunctionFragment;
-    "initialVirtualPool(uint256,uint256)": FunctionFragment;
+    "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
@@ -106,6 +107,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "calculatePartialLiquidateValue",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeAssetAddress",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -175,7 +180,7 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialVirtualPool",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "insuranceFunds",
@@ -325,6 +330,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "calculatePartialLiquidateValue",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeAssetAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -618,6 +627,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { x: BigNumber }>;
 
+    changeAssetAddress(
+      _newAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     closePosition(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -685,7 +699,6 @@ export interface Exchange extends BaseContract {
 
     initialVirtualPool(
       _assetSize: BigNumberish,
-      _usdSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -839,6 +852,11 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  changeAssetAddress(
+    _newAddress: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   closePosition(
     _assetSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -903,7 +921,6 @@ export interface Exchange extends BaseContract {
 
   initialVirtualPool(
     _assetSize: BigNumberish,
-    _usdSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1051,6 +1068,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    changeAssetAddress(
+      _newAddress: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     closePosition(
       _assetSize: BigNumberish,
       overrides?: CallOverrides
@@ -1115,7 +1137,6 @@ export interface Exchange extends BaseContract {
 
     initialVirtualPool(
       _assetSize: BigNumberish,
-      _usdSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1303,6 +1324,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    changeAssetAddress(
+      _newAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     closePosition(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1370,7 +1396,6 @@ export interface Exchange extends BaseContract {
 
     initialVirtualPool(
       _assetSize: BigNumberish,
-      _usdSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1528,6 +1553,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    changeAssetAddress(
+      _newAddress: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     closePosition(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1605,7 +1635,6 @@ export interface Exchange extends BaseContract {
 
     initialVirtualPool(
       _assetSize: BigNumberish,
-      _usdSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

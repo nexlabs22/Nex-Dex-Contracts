@@ -39,6 +39,7 @@ export interface NftOracleInterface extends utils.Interface {
     "getFloorPrice(bytes32,uint256,address,string)": FunctionFragment;
     "getOracleAddress()": FunctionFragment;
     "getTimestampAndFloorPrice(bytes32)": FunctionFragment;
+    "latestRequestId()": FunctionFragment;
     "price()": FunctionFragment;
     "requestIdPrice(bytes32)": FunctionFragment;
     "requestIdTimestampAndFloorPrice(bytes32)": FunctionFragment;
@@ -73,6 +74,10 @@ export interface NftOracleInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getTimestampAndFloorPrice",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "latestRequestId",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "price", values?: undefined): string;
   encodeFunctionData(
@@ -115,6 +120,10 @@ export interface NftOracleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getTimestampAndFloorPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "latestRequestId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "price", data: BytesLike): Result;
@@ -238,6 +247,8 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    latestRequestId(overrides?: CallOverrides): Promise<[string]>;
+
     price(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     requestIdPrice(
@@ -314,6 +325,8 @@ export interface NftOracle extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  latestRequestId(overrides?: CallOverrides): Promise<string>;
+
   price(overrides?: CallOverrides): Promise<BigNumber>;
 
   requestIdPrice(
@@ -373,7 +386,7 @@ export interface NftOracle extends BaseContract {
       _assetAddress: string,
       _pricingAsset: string,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
 
     getOracleAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -389,6 +402,8 @@ export interface NftOracle extends BaseContract {
       _pricingAsset: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    latestRequestId(overrides?: CallOverrides): Promise<string>;
 
     price(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -481,6 +496,8 @@ export interface NftOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
+
     price(overrides?: CallOverrides): Promise<BigNumber>;
 
     requestIdPrice(
@@ -557,6 +574,8 @@ export interface NftOracle extends BaseContract {
       _pricingAsset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     price(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

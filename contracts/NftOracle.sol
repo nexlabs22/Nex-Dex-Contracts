@@ -20,6 +20,7 @@ contract NftOracle is ChainlinkClient {
     mapping(bytes32 => uint256) public requestIdPrice;
     mapping(bytes32 => bytes32) public requestIdTimestampAndFloorPrice;
     uint public price;
+    bytes32 public latestRequestId;
 
     error FailedTransferLINK(address to, uint256 amount);
 
@@ -52,6 +53,7 @@ contract NftOracle is ChainlinkClient {
     function fulfillPrice(bytes32 _requestId, uint256 _estimate) external recordChainlinkFulfillment(_requestId) {
         requestIdPrice[_requestId] = _estimate;
         price = _estimate;
+        latestRequestId = _requestId;
     }
 
     /**
@@ -107,7 +109,7 @@ contract NftOracle is ChainlinkClient {
         req.addBytes("assetAddress", abi.encode(_assetAddress));
         req.add("pricingAsset", _pricingAsset);
 
-        sendOperatorRequest(req, _payment);
+         sendOperatorRequest(req, _payment);
     }
 
     /**
