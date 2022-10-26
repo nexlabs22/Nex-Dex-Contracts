@@ -98,18 +98,33 @@ contract NftOracle is ChainlinkClient {
      * @param _assetAddress the NFT Collection address of which you want to find an estimate.
      * @param _pricingAsset the asset of the price. Defaults to 'ETH'.
      */
+    // function getFloorPrice(
+    //     bytes32 _specId,
+    //     uint256 _payment,
+    //     address _assetAddress,
+    //     string calldata _pricingAsset
+    // ) external {
+    //     Chainlink.Request memory req = buildOperatorRequest(_specId, this.fulfillPrice.selector);
+
+    //     req.addBytes("assetAddress", abi.encode(_assetAddress));
+    //     req.add("pricingAsset", _pricingAsset);
+
+    //      sendOperatorRequest(req, _payment);
+    // }
+
+
     function getFloorPrice(
         bytes32 _specId,
         uint256 _payment,
         address _assetAddress,
         string calldata _pricingAsset
-    ) external {
-        Chainlink.Request memory req = buildOperatorRequest(_specId, this.fulfillPrice.selector);
+    ) public returns(bytes32) {
+        Chainlink.Request memory req = buildChainlinkRequest(_specId, address(this), this.fulfillPrice.selector);
 
-        req.addBytes("assetAddress", abi.encode(_assetAddress));
+        req.addBytes("assetAddress", abi.encodePacked(_assetAddress));
         req.add("pricingAsset", _pricingAsset);
 
-         sendOperatorRequest(req, _payment);
+         return sendChainlinkRequest(req, _payment);
     }
 
     /**

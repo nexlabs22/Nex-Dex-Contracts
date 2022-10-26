@@ -11,7 +11,8 @@ const deployFunction: DeployFunction = async () => {
   const DECIMALS: string = `18`
   let INITIAL_PRICE: any = `200000000000000000000`
   let response:any = await fetchJson(url);
-  INITIAL_PRICE = toWei(response.ethereum.usd.toString());
+  // INITIAL_PRICE = toWei(response.ethereum.usd.toString());
+  INITIAL_PRICE = (response.ethereum.usd.toFixed(0)*10**8).toString();
   /**
    * @dev Read more at https://docs.chain.link/docs/chainlink-vrf/
    */

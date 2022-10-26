@@ -30,21 +30,20 @@ const jobId = ethers.utils.toUtf8Bytes(networkConfig[chainId].jobId!);
         console.log('mock oracle:',mockOracle.address)
         console.log('link token :', linkToken.address)
         const transaction = await nftOracle.getFloorPrice(
-            // jobId,
-            '0x3233363963313764383130373464313338343962376136346563616363633834',
+            jobId,
             '1000000000000000000',
             process.env.NFT_ADDRESS,
             'ETH'
         )
         
-        // const transactionReceipt = await transaction.wait(1)
+        const transactionReceipt = await transaction.wait(1)
         // const requestId: string = nftOracle.latestRequestId();
-        // if (!transactionReceipt.events) return
-        // const requestId: string = transactionReceipt.events[0].topics[1]
-        // const callbackValue = 135;
-        // await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue))
-        // const price = await nftOracle.price(requestId)
-        // assert.equal(price.toNumber(), callbackValue);
+        if (!transactionReceipt.events) return
+        const requestId: string = transactionReceipt.events[0].topics[1]
+        const callbackValue = 135;
+        await mockOracle.fulfillOracleRequest(requestId, numToBytes32(callbackValue))
+        const price = await nftOracle.price()
+        assert.equal(price.toNumber(), callbackValue);
       })
 
     })

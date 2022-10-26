@@ -28,6 +28,7 @@ export interface ExchangeInterface extends utils.Interface {
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "changeAssetAddress(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
+    "closePositionComplete()": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
@@ -36,6 +37,7 @@ export interface ExchangeInterface extends utils.Interface {
     "getAllActiveUsers()": FunctionFragment;
     "getAllLongvBaycBalance()": FunctionFragment;
     "getAllShortvBaycBalance()": FunctionFragment;
+    "getCurrentExchangePrice()": FunctionFragment;
     "getEthUsdPrice()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
@@ -47,6 +49,7 @@ export interface ExchangeInterface extends utils.Interface {
     "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
+    "isHardLiquidateable2(address)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
@@ -69,6 +72,7 @@ export interface ExchangeInterface extends utils.Interface {
     "requestPrice()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
+    "setFundingRate2()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
     "showPriceETH()": FunctionFragment;
     "showPriceUSD()": FunctionFragment;
@@ -118,6 +122,10 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "closePositionComplete",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "collateral",
     values: [string, string]
   ): string;
@@ -147,6 +155,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getAllShortvBaycBalance",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getCurrentExchangePrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -188,6 +200,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "isHardLiquidateable",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isHardLiquidateable2",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -261,6 +277,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setFundingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setFundingRate2",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -340,6 +360,10 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "closePosition",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "closePositionComplete",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositCollateral",
@@ -367,6 +391,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getAllShortvBaycBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getCurrentExchangePrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -408,6 +436,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isHardLiquidateable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isHardLiquidateable2",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -478,6 +510,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setFundingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setFundingRate2",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setSwapFee", data: BytesLike): Result;
@@ -637,6 +673,10 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    closePositionComplete(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     collateral(
       arg0: string,
       arg1: string,
@@ -662,6 +702,8 @@ export interface Exchange extends BaseContract {
     getAllLongvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -705,6 +747,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isHardLiquidateable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isHardLiquidateable2(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -781,6 +828,8 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    setFundingRate2(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     setSwapFee(
       _newFee: BigNumberish,
@@ -862,6 +911,10 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  closePositionComplete(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   collateral(
     arg0: string,
     arg1: string,
@@ -884,6 +937,8 @@ export interface Exchange extends BaseContract {
   getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -927,6 +982,11 @@ export interface Exchange extends BaseContract {
   insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
   isHardLiquidateable(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isHardLiquidateable2(
     _user: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -1004,6 +1064,8 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
+
   setSwapFee(
     _newFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1078,6 +1140,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    closePositionComplete(overrides?: CallOverrides): Promise<void>;
+
     collateral(
       arg0: string,
       arg1: string,
@@ -1103,6 +1167,8 @@ export interface Exchange extends BaseContract {
     getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1143,6 +1209,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidateable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isHardLiquidateable2(
       _user: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1206,6 +1277,8 @@ export interface Exchange extends BaseContract {
     saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
     setFundingRate(overrides?: CallOverrides): Promise<void>;
+
+    setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
 
     setSwapFee(_newFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -1334,6 +1407,10 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    closePositionComplete(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     collateral(
       arg0: string,
       arg1: string,
@@ -1359,6 +1436,8 @@ export interface Exchange extends BaseContract {
     getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1402,6 +1481,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidateable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isHardLiquidateable2(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1478,6 +1562,8 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
 
     setSwapFee(
       _newFee: BigNumberish,
@@ -1563,6 +1649,10 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    closePositionComplete(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     collateral(
       arg0: string,
       arg1: string,
@@ -1593,6 +1683,10 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getAllShortvBaycBalance(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getCurrentExchangePrice(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1641,6 +1735,11 @@ export interface Exchange extends BaseContract {
     insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isHardLiquidateable(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isHardLiquidateable2(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1717,6 +1816,8 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    setFundingRate2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setSwapFee(
       _newFee: BigNumberish,
