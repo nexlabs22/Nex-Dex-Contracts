@@ -49,7 +49,6 @@ export interface ExchangeInterface extends utils.Interface {
     "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
-    "isHardLiquidateable2(address)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
@@ -72,7 +71,6 @@ export interface ExchangeInterface extends utils.Interface {
     "requestPrice()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
-    "setFundingRate2()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
     "showPriceETH()": FunctionFragment;
     "showPriceUSD()": FunctionFragment;
@@ -203,10 +201,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isHardLiquidateable2",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "isPartialLiquidateable",
     values: [string]
   ): string;
@@ -277,10 +271,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setFundingRate",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setFundingRate2",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -439,10 +429,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isHardLiquidateable2",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "isPartialLiquidateable",
     data: BytesLike
   ): Result;
@@ -510,10 +496,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setFundingRate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setFundingRate2",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setSwapFee", data: BytesLike): Result;
@@ -751,11 +733,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    isHardLiquidateable2(
-      _user: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
     isPartialLiquidateable(
       _user: string,
       overrides?: CallOverrides
@@ -828,8 +805,6 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    setFundingRate2(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     setSwapFee(
       _newFee: BigNumberish,
@@ -986,11 +961,6 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  isHardLiquidateable2(
-    _user: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
   isPartialLiquidateable(
     _user: string,
     overrides?: CallOverrides
@@ -1063,8 +1033,6 @@ export interface Exchange extends BaseContract {
   setFundingRate(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
 
   setSwapFee(
     _newFee: BigNumberish,
@@ -1213,11 +1181,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    isHardLiquidateable2(
-      _user: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     isPartialLiquidateable(
       _user: string,
       overrides?: CallOverrides
@@ -1277,8 +1240,6 @@ export interface Exchange extends BaseContract {
     saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
     setFundingRate(overrides?: CallOverrides): Promise<void>;
-
-    setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
 
     setSwapFee(_newFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -1485,11 +1446,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isHardLiquidateable2(
-      _user: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     isPartialLiquidateable(
       _user: string,
       overrides?: CallOverrides
@@ -1562,8 +1518,6 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    setFundingRate2(overrides?: CallOverrides): Promise<BigNumber>;
 
     setSwapFee(
       _newFee: BigNumberish,
@@ -1739,11 +1693,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isHardLiquidateable2(
-      _user: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     isPartialLiquidateable(
       _user: string,
       overrides?: CallOverrides
@@ -1816,8 +1765,6 @@ export interface Exchange extends BaseContract {
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    setFundingRate2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setSwapFee(
       _newFee: BigNumberish,
