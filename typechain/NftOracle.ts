@@ -386,7 +386,7 @@ export interface NftOracle extends BaseContract {
       _assetAddress: string,
       _pricingAsset: string,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
 
     getOracleAddress(overrides?: CallOverrides): Promise<string>;
 
