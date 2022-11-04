@@ -24,6 +24,7 @@ export interface ExchangeInterface extends utils.Interface {
     "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
+    "addInsuranceFunds(uint256)": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "changeNftOracleAddress(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
@@ -45,24 +46,24 @@ export interface ExchangeInterface extends utils.Interface {
     "getPositionNotional(address)": FunctionFragment;
     "getShortBaycAmountOut(uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256)": FunctionFragment;
-    "hardLiquidate(address)": FunctionFragment;
     "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidateable(address)": FunctionFragment;
+    "isLongInRightRange(uint256)": FunctionFragment;
     "isPartialLiquidateable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
+    "isShortInRightRange(uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
-    "liquidateUsers()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
+    "marketPrice()": FunctionFragment;
     "openLongPosition(uint256)": FunctionFragment;
     "openShortPosition(uint256)": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
-    "partialLiquidate(address)": FunctionFragment;
-    "partialLiquidateUsers()": FunctionFragment;
     "paused()": FunctionFragment;
     "positive(int256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
+    "removeInsuranceFunds(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
@@ -95,6 +96,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "activeUsers",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "addInsuranceFunds",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -179,10 +184,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "hardLiquidate",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "initialVirtualPool",
     values: [BigNumberish]
   ): string;
@@ -195,6 +196,10 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "isLongInRightRange",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "isPartialLiquidateable",
     values: [string]
   ): string;
@@ -203,15 +208,19 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "isShortInRightRange",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "latestFeeUpdate",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "liquidateUsers",
+    functionFragment: "maintenanceMargin",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "maintenanceMargin",
+    functionFragment: "marketPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -227,20 +236,16 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "partialLiquidate",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "partialLiquidateUsers",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "positive",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "priceFeed", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "removeInsuranceFunds",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -311,6 +316,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "activeUsers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "addInsuranceFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -392,10 +401,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "hardLiquidate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "initialVirtualPool",
     data: BytesLike
   ): Result;
@@ -408,6 +413,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "isLongInRightRange",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "isPartialLiquidateable",
     data: BytesLike
   ): Result;
@@ -416,15 +425,19 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "isShortInRightRange",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "latestFeeUpdate",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "liquidateUsers",
+    functionFragment: "maintenanceMargin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maintenanceMargin",
+    functionFragment: "marketPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -440,17 +453,13 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "partialLiquidate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "partialLiquidateUsers",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "positive", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "priceFeed", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "removeInsuranceFunds",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -602,6 +611,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    addInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -680,11 +694,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    hardLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     initialVirtualPool(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -694,6 +703,11 @@ export interface Exchange extends BaseContract {
 
     isHardLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isLongInRightRange(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
@@ -708,13 +722,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    isShortInRightRange(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    liquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
+
+    marketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -730,15 +747,6 @@ export interface Exchange extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    partialLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    partialLiquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
     positive(
@@ -747,6 +755,11 @@ export interface Exchange extends BaseContract {
     ): Promise<[BigNumber]>;
 
     priceFeed(overrides?: CallOverrides): Promise<[string]>;
+
+    removeInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -818,6 +831,11 @@ export interface Exchange extends BaseContract {
   ): Promise<BigNumber>;
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  addInsuranceFunds(
+    _amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   calculatePartialLiquidateValue(
     _user: string,
@@ -894,11 +912,6 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  hardLiquidate(
-    _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   initialVirtualPool(
     _assetSize: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -908,6 +921,11 @@ export interface Exchange extends BaseContract {
 
   isHardLiquidateable(
     _user: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isLongInRightRange(
+    _usdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
@@ -922,13 +940,16 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  isShortInRightRange(
+    _usdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
-  liquidateUsers(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
+
+  marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   openLongPosition(
     _usdAmount: BigNumberish,
@@ -944,15 +965,6 @@ export interface Exchange extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  partialLiquidate(
-    _user: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  partialLiquidateUsers(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   paused(overrides?: CallOverrides): Promise<boolean>;
 
   positive(
@@ -961,6 +973,11 @@ export interface Exchange extends BaseContract {
   ): Promise<BigNumber>;
 
   priceFeed(overrides?: CallOverrides): Promise<string>;
+
+  removeInsuranceFunds(
+    _amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1026,6 +1043,11 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    addInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     calculatePartialLiquidateValue(
       _user: string,
@@ -1103,8 +1125,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    hardLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
-
     initialVirtualPool(
       _assetSize: BigNumberish,
       overrides?: CallOverrides
@@ -1114,6 +1134,11 @@ export interface Exchange extends BaseContract {
 
     isHardLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isLongInRightRange(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1128,11 +1153,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    isShortInRightRange(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
-    liquidateUsers(overrides?: CallOverrides): Promise<void>;
-
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
+
+    marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1148,10 +1178,6 @@ export interface Exchange extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    partialLiquidate(_user: string, overrides?: CallOverrides): Promise<void>;
-
-    partialLiquidateUsers(overrides?: CallOverrides): Promise<void>;
-
     paused(overrides?: CallOverrides): Promise<boolean>;
 
     positive(
@@ -1160,6 +1186,11 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     priceFeed(overrides?: CallOverrides): Promise<string>;
+
+    removeInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -1275,6 +1306,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    addInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -1353,11 +1389,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    hardLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     initialVirtualPool(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1367,6 +1398,11 @@ export interface Exchange extends BaseContract {
 
     isHardLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isLongInRightRange(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1381,13 +1417,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    liquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
+    isShortInRightRange(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
+
+    marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1403,15 +1442,6 @@ export interface Exchange extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    partialLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    partialLiquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
     positive(
@@ -1420,6 +1450,11 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     priceFeed(overrides?: CallOverrides): Promise<BigNumber>;
+
+    removeInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1494,6 +1529,11 @@ export interface Exchange extends BaseContract {
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    addInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     calculatePartialLiquidateValue(
@@ -1586,11 +1626,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    hardLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     initialVirtualPool(
       _assetSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1600,6 +1635,11 @@ export interface Exchange extends BaseContract {
 
     isHardLiquidateable(
       _user: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isLongInRightRange(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1614,13 +1654,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    liquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
+    isShortInRightRange(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    marketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1636,15 +1679,6 @@ export interface Exchange extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    partialLiquidate(
-      _user: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    partialLiquidateUsers(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     positive(
@@ -1653,6 +1687,11 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     priceFeed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    removeInsuranceFunds(
+      _amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }

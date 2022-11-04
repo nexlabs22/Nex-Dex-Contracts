@@ -269,16 +269,20 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    require(
+      isUserHardLiquidateable == false,
+      "You can't open this position because you probability will be liquidated by this margin"
+    );
     //first we run liquidation functions
     bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
-    
+
     uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] += int256(userBayc);
@@ -309,13 +313,17 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
-    //first we run liquidation functions
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    require(
+      isUserHardLiquidateable == false,
+      "You can't open this position because you probability will be liquidated by this margin"
+    );
     
+    //first we run liquidation functions
     bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
@@ -656,9 +664,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  function hardLiquidate(address _user) public {
-    _hardLiquidate(_user, vBaycPoolSize, vUsdPoolSize);
-  }
+  
 
   //this function is called if user should be liquidated by new price
   function _hardLiquidate(
@@ -757,20 +763,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return x;
   }
 
-  function partialLiquidate(address _user) public {
-    require(isPartialLiquidateable(_user), "user can not be partially liquidated");
-
-    uint256 liquidateAmount = calculatePartialLiquidateValue(_user);
-    if (uservBaycBalance[_user] > 0) {
-      _closeLongPosition(_user, liquidateAmount);
-    } else if (uservBaycBalance[_user] < 0) {
-      _closeShortPosition(_user, liquidateAmount);
-    }
-    uint256 collateralValue = collateral[usdc][_user];
-    uint256 discountAmount = (collateralValue * discountRate) / 100;
-    collateral[usdc][_user] -= discountAmount;
-    insuranceFunds += discountAmount;
-  }
+  
 
   
 
@@ -858,20 +851,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 discountAmount = (collateralValue * discountRate) / 100;
     collateral[usdc][_user] -= discountAmount;
     insuranceFunds += discountAmount;
-    
   }
 
-  //any one can call this function (admin, user, server or bot) to liquidate liquidateable users
-  function liquidateUsers() public {
-    for (uint256 i = 0; i < activeUsers.length; i++) {
-      if(activeUsers[i] != address(0)){
-      bool isLiquidateable = isHardLiquidateable(activeUsers[i]);
-      if (isLiquidateable == true) {
-        hardLiquidate(activeUsers[i]);
-      }
-      }
-    }
-  }
+  
 
   //liquidate users according to the new price (is used only in trade trade functions)
   function _liquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize) internal {
@@ -889,16 +871,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  function partialLiquidateUsers() public {
-    for (uint256 i = 0; i < activeUsers.length; i++) {
-      if(activeUsers[i] != address(0)){
-      bool isPartialLiquidateable = isPartialLiquidateable(activeUsers[i]);
-      if (isPartialLiquidateable == true) {
-        partialLiquidate(activeUsers[i]);
-      }
-    }
-    }
-  }
+  
 
   //liquidate users partialy according to the new price (is used only in trade trade functions)
   function _partialLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize) internal {
@@ -1049,5 +1022,36 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-  
+  // add insurance funds to the contract
+  function addInsuranceFunds(uint _amount) public onlyOwner {
+    SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
+    insuranceFunds += _amount;
+  }
+
+  // remove insurance funds from contract to owner account
+  function removeInsuranceFunds(uint _amount) public onlyOwner {
+    require(_amount <= insuranceFunds, "greater than insurance funds balance");
+    SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
+    insuranceFunds -= _amount;
+  }
+
+  function isLongInRightRange(uint256 _usdAmount) public view returns(bool){
+   uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize + _usdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    return isInTheRightRange;
+  }
+
+  function isShortInRightRange(uint256 _usdAmount) public view returns(bool){
+    uint256 k = vBaycPoolSize * vUsdPoolSize;
+    uint256 newvUsdPoolSize = vUsdPoolSize - _usdAmount;
+    uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    return isInTheRightRange;
+  }
+
+  function marketPrice() public view returns(uint){
+    return 1e18*vUsdPoolSize / vBaycPoolSize;
+  }
 }
