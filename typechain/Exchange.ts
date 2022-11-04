@@ -24,9 +24,8 @@ export interface ExchangeInterface extends utils.Interface {
     "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
-    "assetAddress()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
-    "changeAssetAddress(address)": FunctionFragment;
+    "changeNftOracleAddress(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
     "closePositionComplete()": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
@@ -39,6 +38,7 @@ export interface ExchangeInterface extends utils.Interface {
     "getAllShortvBaycBalance()": FunctionFragment;
     "getCurrentExchangePrice()": FunctionFragment;
     "getEthUsdPrice()": FunctionFragment;
+    "getLatestNftPrice()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
@@ -52,10 +52,8 @@ export interface ExchangeInterface extends utils.Interface {
     "isPartialLiquidateable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
-    "latestRequestId()": FunctionFragment;
     "liquidateUsers()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
-    "nftOracle()": FunctionFragment;
     "openLongPosition(uint256)": FunctionFragment;
     "openShortPosition(uint256)": FunctionFragment;
     "oraclePrice()": FunctionFragment;
@@ -63,18 +61,14 @@ export interface ExchangeInterface extends utils.Interface {
     "partialLiquidate(address)": FunctionFragment;
     "partialLiquidateUsers()": FunctionFragment;
     "paused()": FunctionFragment;
-    "payment()": FunctionFragment;
     "positive(int256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
-    "pricingAsset()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "requestPrice()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
     "showPriceETH()": FunctionFragment;
     "showPriceUSD()": FunctionFragment;
-    "specId()": FunctionFragment;
     "swapFee()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdc()": FunctionFragment;
@@ -104,15 +98,11 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "assetAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "calculatePartialLiquidateValue",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "changeAssetAddress",
+    functionFragment: "changeNftOracleAddress",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -161,6 +151,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getEthUsdPrice",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getLatestNftPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -213,10 +207,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "latestRequestId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "liquidateUsers",
     values?: undefined
   ): string;
@@ -224,7 +214,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "maintenanceMargin",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "nftOracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "openLongPosition",
     values: [BigNumberish]
@@ -247,22 +236,13 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
-  encodeFunctionData(functionFragment: "payment", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "positive",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "priceFeed", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "pricingAsset",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "renounceOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "requestPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -285,7 +265,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "showPriceUSD",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "specId", values?: undefined): string;
   encodeFunctionData(functionFragment: "swapFee", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -335,15 +314,11 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "assetAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "calculatePartialLiquidateValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "changeAssetAddress",
+    functionFragment: "changeNftOracleAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -389,6 +364,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getEthUsdPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getLatestNftPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -441,10 +420,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "latestRequestId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "liquidateUsers",
     data: BytesLike
   ): Result;
@@ -452,7 +427,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "maintenanceMargin",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "nftOracle", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "openLongPosition",
     data: BytesLike
@@ -475,19 +449,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "payment", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "positive", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "priceFeed", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "pricingAsset",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -507,7 +472,6 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "showPriceUSD",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "specId", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swapFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
@@ -638,14 +602,12 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    assetAddress(overrides?: CallOverrides): Promise<[string]>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { x: BigNumber }>;
 
-    changeAssetAddress(
+    changeNftOracleAddress(
       _newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -688,6 +650,8 @@ export interface Exchange extends BaseContract {
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getLatestNftPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -746,15 +710,11 @@ export interface Exchange extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<[string]>;
-
     liquidateUsers(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
-
-    nftOracle(overrides?: CallOverrides): Promise<[string]>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -781,8 +741,6 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
-    payment(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -790,13 +748,7 @@ export interface Exchange extends BaseContract {
 
     priceFeed(overrides?: CallOverrides): Promise<[string]>;
 
-    pricingAsset(overrides?: CallOverrides): Promise<[string]>;
-
     renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    requestPrice(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -814,8 +766,6 @@ export interface Exchange extends BaseContract {
     showPriceETH(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     showPriceUSD(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    specId(overrides?: CallOverrides): Promise<[string]>;
 
     swapFee(overrides?: CallOverrides): Promise<[number]>;
 
@@ -869,14 +819,12 @@ export interface Exchange extends BaseContract {
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  assetAddress(overrides?: CallOverrides): Promise<string>;
-
   calculatePartialLiquidateValue(
     _user: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  changeAssetAddress(
+  changeNftOracleAddress(
     _newAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -916,6 +864,8 @@ export interface Exchange extends BaseContract {
   getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getLatestNftPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getLongBaycAmountOut(
     _vUsdAmount: BigNumberish,
@@ -974,15 +924,11 @@ export interface Exchange extends BaseContract {
 
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
-  latestRequestId(overrides?: CallOverrides): Promise<string>;
-
   liquidateUsers(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
-
-  nftOracle(overrides?: CallOverrides): Promise<string>;
 
   openLongPosition(
     _usdAmount: BigNumberish,
@@ -1009,8 +955,6 @@ export interface Exchange extends BaseContract {
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
-  payment(overrides?: CallOverrides): Promise<BigNumber>;
-
   positive(
     _amount: BigNumberish,
     overrides?: CallOverrides
@@ -1018,13 +962,7 @@ export interface Exchange extends BaseContract {
 
   priceFeed(overrides?: CallOverrides): Promise<string>;
 
-  pricingAsset(overrides?: CallOverrides): Promise<string>;
-
   renounceOwnership(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  requestPrice(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1042,8 +980,6 @@ export interface Exchange extends BaseContract {
   showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
 
   showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
-
-  specId(overrides?: CallOverrides): Promise<string>;
 
   swapFee(overrides?: CallOverrides): Promise<number>;
 
@@ -1091,14 +1027,12 @@ export interface Exchange extends BaseContract {
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    assetAddress(overrides?: CallOverrides): Promise<string>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    changeAssetAddress(
+    changeNftOracleAddress(
       _newAddress: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1139,6 +1073,8 @@ export interface Exchange extends BaseContract {
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getLatestNftPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1194,13 +1130,9 @@ export interface Exchange extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<string>;
-
     liquidateUsers(overrides?: CallOverrides): Promise<void>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
-
-    nftOracle(overrides?: CallOverrides): Promise<string>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1222,8 +1154,6 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
-    payment(overrides?: CallOverrides): Promise<BigNumber>;
-
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -1231,11 +1161,7 @@ export interface Exchange extends BaseContract {
 
     priceFeed(overrides?: CallOverrides): Promise<string>;
 
-    pricingAsset(overrides?: CallOverrides): Promise<string>;
-
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    requestPrice(overrides?: CallOverrides): Promise<void>;
 
     saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
@@ -1246,8 +1172,6 @@ export interface Exchange extends BaseContract {
     showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
 
     showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
-
-    specId(overrides?: CallOverrides): Promise<string>;
 
     swapFee(overrides?: CallOverrides): Promise<number>;
 
@@ -1351,14 +1275,12 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    assetAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    changeAssetAddress(
+    changeNftOracleAddress(
       _newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1401,6 +1323,8 @@ export interface Exchange extends BaseContract {
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getLatestNftPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1459,15 +1383,11 @@ export interface Exchange extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<BigNumber>;
-
     liquidateUsers(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
-
-    nftOracle(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1494,8 +1414,6 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
-    payment(overrides?: CallOverrides): Promise<BigNumber>;
-
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -1503,13 +1421,7 @@ export interface Exchange extends BaseContract {
 
     priceFeed(overrides?: CallOverrides): Promise<BigNumber>;
 
-    pricingAsset(overrides?: CallOverrides): Promise<BigNumber>;
-
     renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    requestPrice(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1527,8 +1439,6 @@ export interface Exchange extends BaseContract {
     showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
 
     showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
-
-    specId(overrides?: CallOverrides): Promise<BigNumber>;
 
     swapFee(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1586,14 +1496,12 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    assetAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    changeAssetAddress(
+    changeNftOracleAddress(
       _newAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1645,6 +1553,8 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getLatestNftPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1706,15 +1616,11 @@ export interface Exchange extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    latestRequestId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     liquidateUsers(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    nftOracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
@@ -1741,8 +1647,6 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    payment(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -1750,13 +1654,7 @@ export interface Exchange extends BaseContract {
 
     priceFeed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    pricingAsset(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    requestPrice(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1774,8 +1672,6 @@ export interface Exchange extends BaseContract {
     showPriceETH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     showPriceUSD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    specId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     swapFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

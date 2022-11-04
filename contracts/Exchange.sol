@@ -10,7 +10,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {NftOracle} from "./NftOracle.sol";
 import "hardhat/console.sol";
 
 // @title Nex Exchange smart contract
@@ -18,17 +17,14 @@ import "hardhat/console.sol";
 contract Exchange is Ownable, Pausable, ReentrancyGuard {
   using SafeMath for uint256;
 
-  NftOracle public nftOracle;
+  AggregatorV3Interface internal nftFloorPriceFeed;
+
   AggregatorV3Interface public priceFeed;
 
   address public usdc;
 
-  bytes32 public latestRequestId; // latest oracle request id (Chainlink)
 
-  bytes32 public specId; //bytes32 jobId
-  uint256 public payment; //link amount for call oracle in wei 10000000000000000
-  address public assetAddress; //nft address
-  string public pricingAsset; // ETH or USD
+  
   uint256 public insuranceFunds;
 
   uint8 public discountRate = 20; //20%
@@ -58,37 +54,25 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   constructor(
     address _nftOracleAddress,
-    bytes32 _specId,
-    uint256 _payment,
-    address _assetAddress,
-    string memory _pricingAsset,
     address _priceFeed,
     address _usdc
   ) {
-    nftOracle = NftOracle(_nftOracleAddress);
-    // nftOracle.getFloorPrice(_specId, _payment, _assetAddress, _pricingAsset);
-    // latestRequestId = requestId;
+    nftFloorPriceFeed = AggregatorV3Interface(_nftOracleAddress);
     priceFeed = AggregatorV3Interface(_priceFeed);
-    specId = _specId;
-    payment = _payment;
-    assetAddress = _assetAddress;
-    pricingAsset = _pricingAsset;
     usdc = _usdc;
   }
 
-  //request oracle price on nftOracle contract
-  function requestPrice() public onlyOwner {
-    nftOracle.getFloorPrice(specId, payment, assetAddress, pricingAsset);
-  }
+
 
   //get nft Price in ETH
   function showPriceETH() public view returns(uint){
-        return nftOracle.price()*1e4;
+        int nftPrice = getLatestNftPrice();
+        return uint(nftPrice);
     }
 
   //get nft price in USD
   function showPriceUSD() public view returns(uint){
-        uint price = nftOracle.price()*1e4;
+        uint price = showPriceETH();
         int ethPrice = getEthUsdPrice()*1e10;
         return price*uint(ethPrice)/1e18;
     }
@@ -103,6 +87,17 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
             /*uint80 answeredInRound*/
         ) = priceFeed.latestRoundData();
         return price;
+    }
+  
+  function getLatestNftPrice() public view returns (int) {
+        (
+            /*uint80 roundID*/,
+            int nftFloorPrice,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = nftFloorPriceFeed.latestRoundData();
+        return nftFloorPrice;
     }
 
   //check is user exist in activeUsers array
@@ -149,8 +144,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-  function changeAssetAddress(address _newAddress) public onlyOwner {
-    assetAddress = _newAddress;
+  function changeNftOracleAddress(address _newAddress) public onlyOwner {
+    nftFloorPriceFeed = AggregatorV3Interface(_newAddress);
   }
 
   //Notice: newFee should be between 1 to 500 (0.01% - 5%)
@@ -275,8 +270,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       "You can't move the price more than 10% far from the oracle price"
     );
     //first we run liquidation functions
-    _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    }
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    if(isUserHardLiquidateable == false){
+    _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    }
+    
     uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
     //update bayc and usd balance of user
     uservBaycBalance[msg.sender] += int256(userBayc);
@@ -308,8 +310,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       "You can't move the price more than 10% far from the oracle price"
     );
     //first we run liquidation functions
+    
+    bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    }
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    }
 
     k = vBaycPoolSize * vUsdPoolSize;
     newvUsdPoolSize = vUsdPoolSize - _usdAmount;
@@ -347,8 +356,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     k = vBaycPoolSize * vUsdPoolSize;
     uint256 vBaycNewPoolSize = vBaycPoolSize + _assetSize;
     uint256 vUsdNewPoolSize = k / vBaycNewPoolSize;
+
+    bool isUserPartialLiquidateable = _isPartialLiquidateable(_user, vBaycNewPoolSize, vUsdNewPoolSize);
+    if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    }
+    bool isUserHardLiquidateable = _isHardLiquidateable(_user, vBaycNewPoolSize, vUsdNewPoolSize);
+    if(isUserHardLiquidateable == false){
     _liquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    }
 
     //get the output usd of closing position
     //f.e 1Bayc -> 2000$
@@ -401,8 +417,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     k = vBaycPoolSize * vUsdPoolSize;
     uint256 vBaycNewPoolSize = vBaycPoolSize - _assetSize;
     uint256 vUsdNewPoolSize = k / vBaycNewPoolSize;
+    
+    bool isUserPartialLiquidateable = _isPartialLiquidateable(_user, vBaycNewPoolSize, vUsdNewPoolSize);
+    if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    }
+    bool isUserHardLiquidateable = _isHardLiquidateable(_user, vBaycNewPoolSize, vUsdNewPoolSize);
+    if(isUserHardLiquidateable == false){
     _liquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    }
     //get the output usd of closing position
     uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
     int256 userPartialvUsdBalance = (uservUsdBalance[_user] * int256(_assetSize)) /

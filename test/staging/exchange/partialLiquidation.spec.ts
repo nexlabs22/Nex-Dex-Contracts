@@ -23,27 +23,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       beforeEach(async () => {
         await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
         linkToken = await ethers.getContract("LinkToken")
-        const linkTokenAddress: string = linkToken.address
-        nftOracle = await ethers.getContract("NftOracle")
-        await run("fund-link", { contract: nftOracle.address, linkaddress: linkTokenAddress })
+        nftOracle = await ethers.getContract("MockV3AggregatorNft")
         exchange = await ethers.getContract("Exchange")
-        mockOracle = await ethers.getContract("MockOracle")
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
 
       async function setOraclePrice(newPrice:any){
-        const transaction = await nftOracle.getFloorPrice(
-          jobId,
-          '1000000000000000000',
-          process.env.NFT_ADDRESS,
-          'ETH'
-      )
-      const transactionReceipt = await transaction.wait(1)
-      if (!transactionReceipt.events) return
-      const requestId: string = transactionReceipt.events[0].topics[1]
-      await mockOracle.fulfillOracleRequest(requestId, numToBytes32(newPrice*10**14))
-      }
+        await nftOracle.updateAnswer((newPrice*10**18).toString())
+        }
       
       it("Test hard liquidate long position", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
@@ -73,7 +61,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        await exchange.openLongPosition(toWei('1100'))
+        await exchange.openLongPosition(toWei('1000'))
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
@@ -83,8 +71,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        await exchange.connect(account1).openShortPosition(toWei('500'))
-        await exchange.connect(account2).openShortPosition(toWei('300'))
+        await exchange.connect(account1).openShortPosition(toWei('800'))
+        await exchange.connect(account2).openShortPosition(toWei('800'))
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner account pnl 2 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner account value 2 :',toEther(await exchange.getAccountValue(owner.address)));
@@ -107,7 +95,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
-        await exchange.initialVirtualPool(toWei('5'));
+        await exchange.initialVirtualPool(toWei('10'));
         //owner deposit collateral
         await usdc.approve(exchange.address, toWei('600'));
         await exchange.depositCollateral(toWei('600'));
@@ -140,16 +128,17 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('first collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
-        await setOraclePrice(1.7);
+        await setOraclePrice(1.8);
         // return
-        await exchange.connect(account1).openLongPosition(toWei('500'))
-        await exchange.connect(account2).openLongPosition(toWei('300'))
+        await exchange.connect(account1).openLongPosition(toWei('800'))
+        await exchange.connect(account2).openLongPosition(toWei('500'))
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner account pnl 2 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner account value 2 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner collateral 2 :',toEther(await exchange.collateral(usdc.address, owner.address)));
         // return
-        await exchange.connect(account3).openLongPosition(toWei('500'))
+        await setOraclePrice(2.2);
+        await exchange.connect(account3).openLongPosition(toWei('900'))
 
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner account value 3 :',toEther(await exchange.getAccountValue(owner.address)));

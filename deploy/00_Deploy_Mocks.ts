@@ -42,12 +42,20 @@ const deployFunction: DeployFunction = async () => {
       args: [BASE_FEE, GAS_PRICE_LINK],
     })
 
+    await deploy(`MockV3AggregatorNft`, {
+      contract: `MockV3Aggregator`,
+      from: deployer,
+      log: true,
+      args: [DECIMALS, INITIAL_PRICE],
+    })
+
+    
     await deploy(`MockOracle`, {
       from: deployer,
       log: true,
       args: [linkToken.address],
     })
-
+    
     log(`Mocks Deployed!`)
     log(`----------------------------------------------------`)
     log(`You are deploying to a local network, you'll need a local network running to interact`)

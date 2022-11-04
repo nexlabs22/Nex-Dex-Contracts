@@ -23,26 +23,17 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       beforeEach(async () => {
         await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
         linkToken = await ethers.getContract("LinkToken")
-        const linkTokenAddress: string = linkToken.address
-        nftOracle = await ethers.getContract("NftOracle")
-        await run("fund-link", { contract: nftOracle.address, linkaddress: linkTokenAddress })
+        // const linkTokenAddress: string = linkToken.address
+        nftOracle = await ethers.getContract("MockV3AggregatorNft")
+        // await run("fund-link", { contract: nftOracle.address, linkaddress: linkTokenAddress })
         exchange = await ethers.getContract("Exchange")
-        mockOracle = await ethers.getContract("MockOracle")
+        // mockOracle = await ethers.getContract("MockOracle")
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
 
       async function setOraclePrice(newPrice:any){
-        const transaction = await nftOracle.getFloorPrice(
-          jobId,
-          '1000000000000000000',
-          process.env.NFT_ADDRESS,
-          'ETH'
-      )
-      const transactionReceipt = await transaction.wait(1)
-      if (!transactionReceipt.events) return
-      const requestId: string = transactionReceipt.events[0].topics[1]
-      await mockOracle.fulfillOracleRequest(requestId, numToBytes32(newPrice*10**14))
+      await nftOracle.updateAnswer((newPrice*10**18).toString())
       }
       
       it("Test hard liquidate long position", async () => {

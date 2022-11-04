@@ -22,28 +22,16 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
 
       beforeEach(async () => {
         await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
-        linkToken = await ethers.getContract("LinkToken")
-        const linkTokenAddress: string = linkToken.address
-        nftOracle = await ethers.getContract("NftOracle")
-        await run("fund-link", { contract: nftOracle.address, linkaddress: linkTokenAddress })
+        // linkToken = await ethers.getContract("LinkToken")
+        nftOracle = await ethers.getContract("MockV3AggregatorNft")
         exchange = await ethers.getContract("Exchange")
-        mockOracle = await ethers.getContract("MockOracle")
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
 
       async function setOraclePrice(newPrice:any){
-        const transaction = await nftOracle.getFloorPrice(
-          jobId,
-          '1000000000000000000',
-          process.env.NFT_ADDRESS,
-          'ETH'
-      )
-      const transactionReceipt = await transaction.wait(1)
-      if (!transactionReceipt.events) return
-      const requestId: string = transactionReceipt.events[0].topics[1]
-      await mockOracle.fulfillOracleRequest(requestId, numToBytes32(newPrice*10**14))
-      }
+        await nftOracle.updateAnswer((newPrice*10**18).toString())
+        }
       
       it("Test open and close long position", async () => {
         const [owner, account1, account2] = await ethers.getSigners();
@@ -117,7 +105,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
-        const ownerAssetSize = await exchange.uservBaycBalance(owner.address);
+        let ownerAssetSize = await exchange.uservBaycBalance(owner.address);
         console.log('owner position national 1 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('first collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
@@ -128,8 +116,11 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner position national 2 :',toEther(await exchange.getPositionNotional(owner.address)));
         // console.log('owner unrealized pnl :', toEther(await exchange.))
-        // console.log(Math.abs(ownerAssetSize))
-        await exchange.closePosition(Math.abs(ownerAssetSize).toString());
+        console.log('owner asset size :', Math.abs(Number(ownerAssetSize)).toString())
+        ownerAssetSize = await exchange.uservBaycBalance(owner.address);
+        console.log('real asset size :', (await exchange.uservBaycBalance(owner.address)))
+        console.log('positive asset size :', Math.abs(Number(ownerAssetSize)).toString())
+        // await exchange.closePosition(Math.abs(Number(ownerAssetSize)).toString());
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         await exchange.closePositionComplete();
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
