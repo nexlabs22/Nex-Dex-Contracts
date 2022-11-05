@@ -22,7 +22,7 @@ export interface ExchangeInterface extends utils.Interface {
   functions: {
     "AutoCloseMargin()": FunctionFragment;
     "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
-    "_isNewMarginHardliquidatable(address,uint256,uint256,uint256)": FunctionFragment;
+    "_isNewMarginLiquidatable(address,uint256,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
     "addInsuranceFunds(uint256)": FunctionFragment;
@@ -92,7 +92,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "_isNewMarginHardliquidatable",
+    functionFragment: "_isNewMarginLiquidatable",
     values: [string, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -316,7 +316,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "_isNewMarginHardliquidatable",
+    functionFragment: "_isNewMarginLiquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -610,7 +610,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    _isNewMarginHardliquidatable(
+    _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
       _vBaycNewPoolSize: BigNumberish,
@@ -842,7 +842,7 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  _isNewMarginHardliquidatable(
+  _isNewMarginLiquidatable(
     _user: string,
     _usdAmount: BigNumberish,
     _vBaycNewPoolSize: BigNumberish,
@@ -1062,7 +1062,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    _isNewMarginHardliquidatable(
+    _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
       _vBaycNewPoolSize: BigNumberish,
@@ -1329,7 +1329,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    _isNewMarginHardliquidatable(
+    _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
       _vBaycNewPoolSize: BigNumberish,
@@ -1562,7 +1562,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    _isNewMarginHardliquidatable(
+    _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
       _vBaycNewPoolSize: BigNumberish,

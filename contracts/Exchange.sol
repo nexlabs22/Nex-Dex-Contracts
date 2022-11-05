@@ -269,7 +269,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
-    bool isNewMarginHardLiquidateable = _isNewMarginHardliquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
+    bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
       "You can't open this position because you probability will be liquidated by this margin"
@@ -314,7 +314,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
-    bool isNewMarginHardLiquidateable = _isNewMarginHardliquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
+    bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
       "You can't open this position because you probability will be liquidated by this margin"
@@ -641,7 +641,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
   }
 
-  function _isNewMarginHardliquidatable(
+  function _isNewMarginLiquidatable(
     address _user,
     uint256 _usdAmount,
     uint256 _vBaycNewPoolSize,
@@ -651,7 +651,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 newPositionNotional = positionNotional + _usdAmount;
     uint newMargin = 100*accountValue/newPositionNotional;
-    if (newMargin > 0 && newMargin <= 40) {
+    if (newMargin > 0 && newMargin <= 60) {
       return true;
     } else {
       return false;
