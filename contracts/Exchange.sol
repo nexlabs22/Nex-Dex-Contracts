@@ -269,9 +269,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    bool isNewMarginHardLiquidateable = _isNewMarginHardliquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
-      isUserHardLiquidateable == false,
+      isNewMarginHardLiquidateable == false,
       "You can't open this position because you probability will be liquidated by this margin"
     );
     //first we run liquidation functions
@@ -279,6 +279,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
@@ -313,9 +314,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
+    bool isNewMarginHardLiquidateable = _isNewMarginHardliquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
-      isUserHardLiquidateable == false,
+      isNewMarginHardLiquidateable == false,
       "You can't open this position because you probability will be liquidated by this margin"
     );
     
@@ -324,6 +325,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     if(isUserPartialLiquidateable == false){
     _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
+    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
     if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     }
@@ -633,6 +635,23 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) internal view returns (bool) {
     uint256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     if (userMargin > 0 && userMargin <= 40) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _isNewMarginHardliquidatable(
+    address _user,
+    uint256 _usdAmount,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) public view returns(bool){
+    uint256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    uint256 newPositionNotional = positionNotional + _usdAmount;
+    uint newMargin = 100*accountValue/newPositionNotional;
+    if (newMargin > 0 && newMargin <= 40) {
       return true;
     } else {
       return false;

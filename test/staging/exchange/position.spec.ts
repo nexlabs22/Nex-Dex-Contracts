@@ -128,6 +128,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
         console.log('final collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));
+        const finalCollateral = await exchange.collateral(usdc.address, owner.address);
+        await exchange.withdrawCollateral(finalCollateral);
+        console.log('final collateral after withdraw:', toEther(await exchange.collateral(usdc.address, owner.address)));
         return
       })
     })

@@ -22,6 +22,7 @@ export interface ExchangeInterface extends utils.Interface {
   functions: {
     "AutoCloseMargin()": FunctionFragment;
     "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
+    "_isNewMarginHardliquidatable(address,uint256,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
     "addInsuranceFunds(uint256)": FunctionFragment;
@@ -89,6 +90,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "_hardLiquidate",
     values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_isNewMarginHardliquidatable",
+    values: [string, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "absoluteInt",
@@ -308,6 +313,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "_hardLiquidate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "_isNewMarginHardliquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -601,6 +610,14 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    _isNewMarginHardliquidatable(
+      _user: string,
+      _usdAmount: BigNumberish,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     absoluteInt(
       _value: BigNumberish,
       overrides?: CallOverrides
@@ -825,6 +842,14 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  _isNewMarginHardliquidatable(
+    _user: string,
+    _usdAmount: BigNumberish,
+    _vBaycNewPoolSize: BigNumberish,
+    _vUsdNewPoolSize: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
   absoluteInt(
     _value: BigNumberish,
     overrides?: CallOverrides
@@ -1036,6 +1061,14 @@ export interface Exchange extends BaseContract {
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    _isNewMarginHardliquidatable(
+      _user: string,
+      _usdAmount: BigNumberish,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     absoluteInt(
       _value: BigNumberish,
@@ -1296,6 +1329,14 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    _isNewMarginHardliquidatable(
+      _user: string,
+      _usdAmount: BigNumberish,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     absoluteInt(
       _value: BigNumberish,
       overrides?: CallOverrides
@@ -1519,6 +1560,14 @@ export interface Exchange extends BaseContract {
       _vBaycNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    _isNewMarginHardliquidatable(
+      _user: string,
+      _usdAmount: BigNumberish,
+      _vBaycNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     absoluteInt(

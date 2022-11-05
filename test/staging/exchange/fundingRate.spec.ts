@@ -23,11 +23,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       beforeEach(async () => {
         await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
         linkToken = await ethers.getContract("LinkToken")
-        // const linkTokenAddress: string = linkToken.address
         nftOracle = await ethers.getContract("MockV3AggregatorNft")
-        // await run("fund-link", { contract: nftOracle.address, linkaddress: linkTokenAddress })
         exchange = await ethers.getContract("Exchange")
-        // mockOracle = await ethers.getContract("MockOracle")
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
