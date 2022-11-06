@@ -39,9 +39,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('500'));
-        await exchange.depositCollateral(toWei('500'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('500.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))
@@ -71,9 +71,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        await exchange.connect(account1).openShortPosition(toWei('800'))
-        await exchange.connect(account2).openShortPosition(toWei('800'))
-        await exchange.connect(account3).openShortPosition(toWei('800'))
+        await exchange.connect(account1).openShortPosition(toWei('1000'))
+        await exchange.connect(account2).openShortPosition(toWei('1000'))
+        await exchange.connect(account3).openShortPosition(toWei('1000'))
         // await exchange.connect(account1).openShortPosition(toWei('200'))
         // console.log('HHH:',toEther(await exchange.openShortPosition2(toWei('100'))));
         // console.log('HHH:',(await exchange.connect(account1).openShortPosition2(toWei('100'))));

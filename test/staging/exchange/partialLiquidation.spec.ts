@@ -39,9 +39,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('600'));
-        await exchange.depositCollateral(toWei('600'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('600.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))

@@ -164,6 +164,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     emit Deposit(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
   }
 
+  
+
   //withdraw collateral
   //befor that the function check user margin
   function withdrawCollateral(uint256 _amount) public {
@@ -174,7 +176,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       uint256 newAccountValue = totalAccountValue - _amount;
       uint256 newMargin = (100 * newAccountValue) / totalPositionNotional;
       require(
-        newMargin > 60,
+        newMargin > saveLevelMargin,
         "You cannot withdraw because your margin rate is the lower than saveMargin level"
       );
     }
@@ -651,7 +653,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 newPositionNotional = positionNotional + _usdAmount;
     uint newMargin = 100*accountValue/newPositionNotional;
-    if (newMargin > 0 && newMargin <= 60) {
+    if (newMargin > 0 && newMargin <= saveLevelMargin) {
       return true;
     } else {
       return false;

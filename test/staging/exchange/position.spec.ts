@@ -133,4 +133,6 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('final collateral after withdraw:', toEther(await exchange.collateral(usdc.address, owner.address)));
         return
       })
+
+     
     })
