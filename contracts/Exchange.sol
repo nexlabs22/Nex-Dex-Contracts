@@ -266,11 +266,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvUsdPoolSize = vUsdPoolSize + _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    /*
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
+    */
     bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
@@ -311,11 +313,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 k = vBaycPoolSize * vUsdPoolSize;
     uint256 newvUsdPoolSize = vUsdPoolSize - _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
+    /*
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
       "You can't move the price more than 10% far from the oracle price"
     );
+    */
     bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
