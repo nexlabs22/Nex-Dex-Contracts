@@ -278,15 +278,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       isNewMarginHardLiquidateable == false,
       "You can't open this position because you probability will be liquidated by this margin"
     );
+
     //first we run liquidation functions
-    bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
-    if(isUserPartialLiquidateable == false){
-    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    }
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
-    if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    }
+    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
 
     uint256 userBayc = vBaycPoolSize - newvBaycPoolSize;
     //update bayc and usd balance of user
@@ -327,14 +322,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     );
     
     //first we run liquidation functions
-    bool isUserPartialLiquidateable = _isPartialLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
-    if(isUserPartialLiquidateable == false){
-    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    }
-    bool isUserHardLiquidateable = _isHardLiquidateable(msg.sender, newvBaycPoolSize, newvUsdPoolSize);
-    if(isUserHardLiquidateable == false){
     _liquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    }
+    _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
 
     k = vBaycPoolSize * vUsdPoolSize;
     newvUsdPoolSize = vUsdPoolSize - _usdAmount;
@@ -552,13 +541,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     address _user,
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
-  ) internal view returns (uint256) {
+  ) internal view returns (int256) {
     uint256 collateralValue = collateral[usdc][_user];
     int256 pnl = _getNewPNL(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     int256 fundingReward = virtualCollateral[_user];
     int256 accountValue = int256(collateralValue) + pnl + fundingReward;
     // int256 accountValue = int256(collateralValue);
-    return uint256(accountValue);
+    return accountValue;
   }
 
   //get total position value of each user
@@ -611,13 +600,16 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     address _user,
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
-  ) internal view returns (uint256) {
-    uint256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+  ) internal view returns (int256) {
+    int256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     if (accountValue > 0 && positionNotional > 0) {
-      uint256 margin = (100 * accountValue) / positionNotional;
+      int256 margin = (100 * accountValue) / int(positionNotional);
       return margin;
-    }else{
+    } if (accountValue < 0 && positionNotional > 0) {
+      int256 margin = (100 * accountValue) / int(positionNotional);
+      return margin;
+    } else{
       return 0;
     }
   }
@@ -639,8 +631,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
   ) internal view returns (bool) {
-    uint256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
-    if (userMargin > 0 && userMargin <= 40) {
+    int256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    if (userMargin != 0 && userMargin <= 40) {
       return true;
     } else {
       return false;
@@ -653,10 +645,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
   ) public view returns(bool){
-    uint256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    int256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 newPositionNotional = positionNotional + _usdAmount;
-    uint newMargin = 100*accountValue/newPositionNotional;
+    uint newMargin = 100*uint(accountValue)/newPositionNotional;
     if (newMargin > 0 && newMargin <= saveLevelMargin) {
       return true;
     } else {
@@ -681,7 +673,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
   ) internal view returns (bool) {
-    uint256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    int256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     if (40 <= userMargin && userMargin <= 50) {
       return true;
     } else {
@@ -761,6 +753,78 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     insuranceFunds += discountAmount;
   }
 
+
+
+  //this function is called if user should be liquidated by new price
+  function _hardNegativeLiquidate(
+    address _user,
+    uint256 _vBaycNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) public {
+    require(
+      _isHardLiquidateable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "user can not be liquidate"
+    );
+    if (uservBaycBalance[_user] > 0) {
+      
+      uint256 _assetSize = uint256(uservBaycBalance[_user]);
+      int256 negativeValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+      
+      collateral[usdc][_user] = 0;
+      virtualCollateral[_user] = 0;
+      //update user balance
+      uservBaycBalance[_user] -= int256(_assetSize);
+      uservUsdBalance[_user] += absoluteInt(uservUsdBalance[_user]);
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update the pool
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize += _assetSize;
+      vUsdPoolSize = k / vBaycPoolSize;
+      // reduce short users virtual collateral
+      int256 allShortBaycBalance = getAllShortvBaycBalance();
+      for (uint256 i = 0; i < activeUsers.length; i++) {
+          address user = activeUsers[i];
+          if (uservBaycBalance[user] < 0) {
+            uint256 userFundingFee = (uint(negativeValue) * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
+            virtualCollateral[user] -= int256(userFundingFee);
+          }
+      }
+
+    } else if (uservBaycBalance[_user] < 0) {
+      uint256 _assetSize = uint256(positive(uservBaycBalance[_user]));
+      int256 negativeValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+
+      
+      collateral[usdc][_user] = 0;
+      virtualCollateral[_user] = 0;
+      
+      //update user balance
+      uservBaycBalance[_user] += int256(_assetSize);
+      uservUsdBalance[_user] -= uservUsdBalance[_user];
+      // if user has not vbalance so he is not active
+      if (uservBaycBalance[_user] == 0 && uservUsdBalance[_user] == 0) {
+        _removeActiveUser(_user);
+      }
+      //update the pool
+      uint256 k = vBaycPoolSize * vUsdPoolSize;
+      vBaycPoolSize += _assetSize;
+      vUsdPoolSize = k / vBaycPoolSize;
+      // reduce long users virtual collateral
+      int256 allLongvBaycBalance = getAllLongvBaycBalance();
+      for (uint256 i = 0; i < activeUsers.length; i++) {
+          address user = activeUsers[i];
+          if (uservBaycBalance[user] > 0) {
+             uint256 userFundingFee = ( uint(negativeValue)* uint256(uservBaycBalance[user])) /
+             uint256(allLongvBaycBalance);
+             virtualCollateral[user] -= int256(userFundingFee);
+          }
+      }
+    }
+  }
+
   //calculate liquidation amount to turn back the user margin to the save level(60%)
   function calculatePartialLiquidateValue(address _user) public view returns (uint256 x) {
     uint256 totalAccountValue = getAccountValue(_user);
@@ -776,13 +840,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _vBaycNewPoolSize,
     uint256 _vUsdNewPoolSize
   ) internal view returns (uint256) {
-    uint256 totalAccountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    int256 totalAccountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 totalPositionNotional = _getNewPositionNotional(
       _user,
       _vBaycNewPoolSize,
       _vUsdNewPoolSize
     );
-    uint256 numerator = totalPositionNotional*saveLevelMargin/100 > totalAccountValue ? totalPositionNotional*saveLevelMargin/100 - totalAccountValue : totalAccountValue - totalPositionNotional*saveLevelMargin/100;
+    uint256 numerator = totalPositionNotional*saveLevelMargin/100 > uint(totalAccountValue) ? totalPositionNotional*saveLevelMargin/100 - uint(totalAccountValue) : uint(totalAccountValue) - totalPositionNotional*saveLevelMargin/100;
     uint256 denominator = saveLevelMargin - discountRate;
     uint x = numerator*100/denominator;
     return x;
@@ -890,7 +954,12 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         _vUsdNewPoolSize
       );
       if (isLiquidateable == true) {
+        int256 userMargin = _userNewMargin(activeUsers[i], _vBaycNewPoolSize, _vUsdNewPoolSize);
+        if(userMargin > 0 ){
         _hardLiquidate(activeUsers[i], _vBaycNewPoolSize, _vUsdNewPoolSize);
+        } else if(userMargin < 0) {
+        _hardNegativeLiquidate(activeUsers[i], _vBaycNewPoolSize, _vUsdNewPoolSize);
+        }
       }
     }
     }
