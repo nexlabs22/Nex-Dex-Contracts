@@ -71,17 +71,13 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        await exchange.connect(account1).openShortPosition(toWei('1000'))
-        await exchange.connect(account2).openShortPosition(toWei('1000'))
+        await exchange.connect(account1).openShortPosition(toWei('1200'))
+        await exchange.connect(account2).openShortPosition(toWei('1200'))
         await exchange.connect(account3).openShortPosition(toWei('1000'))
-        // await exchange.connect(account1).openShortPosition(toWei('200'))
-        // console.log('HHH:',toEther(await exchange.openShortPosition2(toWei('100'))));
-        // console.log('HHH:',(await exchange.connect(account1).openShortPosition2(toWei('100'))));
-        // await exchange.connect(account2).openShortPosition2(toWei('100'))
+        
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner position national 2 :',toEther(await exchange.getPositionNotional(owner.address)));
-        // console.log('is hard liquidatable ? :', await exchange.isHardLiquidateable2(owner.address))
-        // await exchange.connect(account1).hardLiquidate(owner.address);
+        
         console.log('p2:', toEther(await exchange.getCurrentExchangePrice()))
         // console.log('owner unrealized pnl :', toEther(await exchange.))
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
@@ -134,7 +130,6 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await setOraclePrice(1.8);
         await exchange.connect(account1).openLongPosition(toWei('500'))
         await exchange.connect(account2).openLongPosition(toWei('700'))
-        await exchange.connect(account3).openLongPosition(toWei('400'))
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         // console.log('is hard liquidatable ? :', await exchange.isHardLiquidateable2(owner.address))
         // await exchange.hardLiquidate(owner.address);
@@ -144,6 +139,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // console.log('owner unrealized pnl :', toEther(await exchange.))
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
+        await exchange.connect(account3).openLongPosition(toWei('400'))
         // await exchange.closePosition(ownerAssetSize);
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('final collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));

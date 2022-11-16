@@ -21,7 +21,6 @@ export interface ExchangeInterface extends utils.Interface {
   contractName: "Exchange";
   functions: {
     "AutoCloseMargin()": FunctionFragment;
-    "_hardLiquidate(address,uint256,uint256)": FunctionFragment;
     "_hardNegativeLiquidate(address,uint256,uint256)": FunctionFragment;
     "_isNewMarginLiquidatable(address,uint256,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
@@ -87,10 +86,6 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "AutoCloseMargin",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "_hardLiquidate",
-    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "_hardNegativeLiquidate",
@@ -314,10 +309,6 @@ export interface ExchangeInterface extends utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "AutoCloseMargin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "_hardLiquidate",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -612,13 +603,6 @@ export interface Exchange extends BaseContract {
   functions: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
 
-    _hardLiquidate(
-      _user: string,
-      _vBaycNewPoolSize: BigNumberish,
-      _vUsdNewPoolSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     _hardNegativeLiquidate(
       _user: string,
       _vBaycNewPoolSize: BigNumberish,
@@ -851,13 +835,6 @@ export interface Exchange extends BaseContract {
 
   AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-  _hardLiquidate(
-    _user: string,
-    _vBaycNewPoolSize: BigNumberish,
-    _vUsdNewPoolSize: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   _hardNegativeLiquidate(
     _user: string,
     _vBaycNewPoolSize: BigNumberish,
@@ -1078,19 +1055,17 @@ export interface Exchange extends BaseContract {
   callStatic: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
 
-    _hardLiquidate(
-      _user: string,
-      _vBaycNewPoolSize: BigNumberish,
-      _vUsdNewPoolSize: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     _hardNegativeLiquidate(
       _user: string,
       _vBaycNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<
+      [BigNumber, BigNumber] & {
+        vBaycNewPoolSize: BigNumber;
+        vUsdNewPoolSize: BigNumber;
+      }
+    >;
 
     _isNewMarginLiquidatable(
       _user: string,
@@ -1352,13 +1327,6 @@ export interface Exchange extends BaseContract {
   estimateGas: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _hardLiquidate(
-      _user: string,
-      _vBaycNewPoolSize: BigNumberish,
-      _vUsdNewPoolSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     _hardNegativeLiquidate(
       _user: string,
       _vBaycNewPoolSize: BigNumberish,
@@ -1591,13 +1559,6 @@ export interface Exchange extends BaseContract {
 
   populateTransaction: {
     AutoCloseMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    _hardLiquidate(
-      _user: string,
-      _vBaycNewPoolSize: BigNumberish,
-      _vUsdNewPoolSize: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     _hardNegativeLiquidate(
       _user: string,

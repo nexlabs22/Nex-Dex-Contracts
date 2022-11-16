@@ -71,16 +71,18 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        await exchange.connect(account1).openShortPosition(toWei('800'))
-        await exchange.connect(account2).openShortPosition(toWei('800'))
+        await exchange.connect(account1).openShortPosition(toWei('900'))
+        await exchange.connect(account2).openShortPosition(toWei('900'))
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
+        console.log('p2:', toEther(await exchange.getCurrentExchangePrice()))
         console.log('owner account pnl 2 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner account value 2 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner collateral 2 :',toEther(await exchange.collateral(usdc.address, owner.address)));
         // return
-        await exchange.connect(account3).openShortPosition(toWei('500'))
-
+        await exchange.connect(account3).openShortPosition(toWei('580'))
+        
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
+        console.log('p3:', toEther(await exchange.getCurrentExchangePrice()))
         console.log('owner account value 3 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner account pnl 3 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner virtual collateral 3 :',toEther(await exchange.virtualCollateral(owner.address)));
@@ -133,14 +135,16 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account1).openLongPosition(toWei('800'))
         await exchange.connect(account2).openLongPosition(toWei('500'))
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
+        console.log('p2:', toEther(await exchange.getCurrentExchangePrice()))
         console.log('owner account pnl 2 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner account value 2 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner collateral 2 :',toEther(await exchange.collateral(usdc.address, owner.address)));
         // return
         await setOraclePrice(2.2);
-        await exchange.connect(account3).openLongPosition(toWei('900'))
-
+        await exchange.connect(account3).openLongPosition(toWei('80'))
+        
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
+        console.log('p3:', toEther(await exchange.getCurrentExchangePrice()))
         console.log('owner account value 3 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner account pnl 3 :',toEther(await exchange.getPNL(owner.address)));
         console.log('owner virtual collateral 3 :',toEther(await exchange.virtualCollateral(owner.address)));
