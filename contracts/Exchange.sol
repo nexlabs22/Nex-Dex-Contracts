@@ -151,8 +151,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //Notice: newFee should be between 1 to 500 (0.01% - 5%)
   function setSwapFee(uint8 _newFee) public onlyOwner {
     uint256 distance = block.timestamp - latestFeeUpdate;
-    require(distance / 60 / 60 > 12, "You should wait at least 12 hours after latest update");
-    require(_newFee <= 500 && _newFee >= 1, "newFee should be between 1 to 500");
+    require(distance / 60 / 60 > 12, "You should wait at least 12 hours after the latest update");
+    require(_newFee <= 500 && _newFee >= 1, "The newFee should be between 1 and 500 (0.01% - 5%)");
     swapFee = _newFee;
     latestFeeUpdate = block.timestamp;
   }
@@ -177,13 +177,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       int256 newMargin = (100 * newAccountValue) / int(totalPositionNotional);
       require(
         newMargin > int8(saveLevelMargin),
-        "You cannot withdraw because your margin rate is the lower than saveMargin level"
+        "You cannot withdraw because your margin is lower than the saveMargin level"
       );
     }
     //check user has enough collateral
     require(
       collateral[usdc][msg.sender] >= _amount,
-      "Desire amount is more than collateral balance"
+      "Requested withdrawal amount is larger than the collateral balance."
     );
     //transfer tokens to the user
     SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
@@ -193,7 +193,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //give the user funding reward when position will be closed
   function _realizevirtualCollateral(address _user, int256 _amount) internal {
-    require(_amount <= absoluteInt(virtualCollateral[_user]), "out of vitrual collateral balance");
+    require(_amount <= absoluteInt(virtualCollateral[_user]), "Requested amount is larger than the virtual collateral balance.");
     if (virtualCollateral[_user] > 0) {
       collateral[usdc][_user] += uint256(_amount);
       virtualCollateral[_user] -= _amount;
@@ -270,13 +270,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
-      "You can't move the price more than 10% far from the oracle price"
+      "You can't move the price more than 10% away from the oracle price."
     );
     */
     bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
-      "You can't open this position because you probability will be liquidated by this margin"
+      "Insufficient margin to open position with requested size."
     );
 
     //first we run liquidation functions
@@ -312,13 +312,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
-      "You can't move the price more than 10% far from the oracle price"
+      "You can't move the price more than 10% away from the oracle price."
     );
     */
     bool isNewMarginHardLiquidateable = _isNewMarginLiquidatable(msg.sender, _usdAmount, newvBaycPoolSize, newvUsdPoolSize);
     require(
       isNewMarginHardLiquidateable == false,
-      "You can't open this position because you probability will be liquidated by this margin"
+      "Insufficient margin to open position with requested size."
     );
     
     //first we run liquidation functions
@@ -353,7 +353,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function _closeLongPosition(address _user, uint256 _assetSize) internal {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
-      "You dont have enough asset size to close the long position"
+      "Reduce only order can only close long size equal or less than the outstanding asset size."
     );
 
     uint256 k;
@@ -410,7 +410,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function _closeShortPosition(address _user, uint256 _assetSize) internal {
     require(
       _assetSize <= positive(uservBaycBalance[_user]),
-      "You dont have enough asset size to close the short position"
+      "Reduce only order can only close short size equal or less than the outstanding asset size."
     );
 
     uint256 k;
@@ -465,7 +465,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function closePosition(uint256 _assetSize) public {
     require(
       _assetSize <= positive(uservBaycBalance[msg.sender]),
-      "You dont have enough asset size to close the all positions"
+      "Reduce only order can only close size equal or less than the outstanding asset size."
     );
     //if user has positive vBayc balance so he/she has longPosition
     //if user has negative vBayc balance so he/she has shortPosition
@@ -685,7 +685,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) internal returns(uint vBaycNewPoolSize, uint vUsdNewPoolSize) {
     require(
       _isHardLiquidateable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
-      "user can not be liquidate"
+      "User is not hard liquidatable."
     );
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
@@ -761,7 +761,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) public returns(uint256 vBaycNewPoolSize, uint256 vUsdNewPoolSize) {
     require(
       _isHardLiquidateable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
-      "user can not be liquidate"
+      "User is not hard liquidatable."
     );
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
@@ -789,8 +789,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (uservBaycBalance[user] < 0) {
-            uint256 userFundingFee = (uint(negativeValue) * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
-            virtualCollateral[user] -= int256(userFundingFee);
+            uint256 liquidationCover = (uint(negativeValue) * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
+            virtualCollateral[user] -= int256(liquidationCover);
           }
       }
 
@@ -819,9 +819,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
-             uint256 userFundingFee = ( uint(negativeValue)* uint256(uservBaycBalance[user])) /
+             uint256 liquidationCover = ( uint(negativeValue)* uint256(uservBaycBalance[user])) /
              uint256(allLongvBaycBalance);
-             virtualCollateral[user] -= int256(userFundingFee);
+             virtualCollateral[user] -= int256(liquidationCover);
           }
       }
     }
@@ -1044,13 +1044,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
             //change vitraul collateral of user
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
+            uint256 liquidationCover = (fundingFee * uint256(uservBaycBalance[user])) /
               uint256(allLongvBaycBalance);
-            virtualCollateral[user] -= int256(userFundingFee);
+            virtualCollateral[user] -= int256(liquidationCover);
           } else if (uservBaycBalance[user] < 0) {
             //change vitraul collateral of user
-            uint256 userFundingFee = (fundingFee * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
-            virtualCollateral[user] += int256(userFundingFee);
+            uint256 liquidationCover = (fundingFee * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
+            virtualCollateral[user] += int256(liquidationCover);
           }
         }
       } else if (currentPrice < oraclePrice) {
@@ -1065,14 +1065,14 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
             //change vitraul collateral of user
-            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
+            uint256 liquidationCover = (fundingFee * uint256(uservBaycBalance[user])) /
             uint256(allLongvBaycBalance);
-            virtualCollateral[user] += int(userFundingFee);
+            virtualCollateral[user] += int(liquidationCover);
           } else if (uservBaycBalance[user] < 0) {
             //change vitraul collateral of user
-            uint256 userFundingFee = (fundingFee * positive(uservBaycBalance[user])) /
+            uint256 liquidationCover = (fundingFee * positive(uservBaycBalance[user])) /
               positive(allShortBaycBalance);
-            virtualCollateral[user] -= int(userFundingFee);
+            virtualCollateral[user] -= int(liquidationCover);
           }
         }
       }
@@ -1136,7 +1136,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   // remove insurance funds from contract to owner account
   function removeInsuranceFunds(uint _amount) public onlyOwner {
-    require(_amount <= insuranceFunds, "greater than insurance funds balance");
+    require(_amount <= insuranceFunds, "Requested collect amount is larger than the ContractFee balance.");
     SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
     insuranceFunds -= _amount;
   }
