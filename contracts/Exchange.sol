@@ -23,7 +23,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   address public usdc;
 
-
+  bool public poolInitialized; // is pool initialized
   
   uint256 public insuranceFunds;
 
@@ -138,9 +138,11 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   //create the pool
   //for this time owner can do it
   function initialVirtualPool(uint256 _assetSize) public onlyOwner {
+    require(poolInitialized == false, "You cannot initialize pool again");
     uint oraclePrice = showPriceUSD();
     vBaycPoolSize = _assetSize;
     vUsdPoolSize = _assetSize*oraclePrice/1e18;
+    poolInitialized = true;
   }
 
 
@@ -667,7 +669,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 _vUsdNewPoolSize
   ) internal view returns (bool) {
     int256 userMargin = _userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
-    // if ( 40 < userMargin < 60 ) => user is partial liquidatable
+    // if ( 40 < userMargin < 50 ) => user is partial liquidatable
     if (int8(AutoCloseMargin) <= userMargin && userMargin <= int8(maintenanceMargin)) {
       return true;
     } else {
@@ -804,7 +806,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       
       //update user balance
       uservBaycBalance[_user] = 0;
-      uservUsdBalance[_user] -= 0;
+      uservUsdBalance[_user] = 0;
       // if user has not vbalance so he is not active
       _removeActiveUser(_user);
       //update the pool
@@ -831,9 +833,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   function calculatePartialLiquidateValue(address _user) public view returns (uint256 x) {
     int256 totalAccountValue = getAccountValue(_user);
     uint256 totalPositionNotional = getPositionNotional(_user);
-    uint256 numerator = totalPositionNotional*saveLevelMargin/100 > positive(totalAccountValue) ? totalPositionNotional*saveLevelMargin/100 - positive(totalAccountValue) : positive(totalAccountValue) - totalPositionNotional*saveLevelMargin/100;
-    uint256 denominator = saveLevelMargin / 100 - discountRate / 100;
-    x = numerator / denominator;
+    uint256 numerator =  totalPositionNotional*saveLevelMargin/100 - positive(totalAccountValue);
+    uint256 denominator = saveLevelMargin - discountRate;
+    x = numerator*100/denominator;
   }
 
   //calculate liquidation amount to turn back the user margin to the save level(60%) according to the new price
@@ -848,7 +850,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       _vBaycNewPoolSize,
       _vUsdNewPoolSize
     );
-    uint256 numerator = totalPositionNotional*saveLevelMargin/100 > positive(totalAccountValue) ? totalPositionNotional*saveLevelMargin/100 - positive(totalAccountValue) : positive(totalAccountValue) - totalPositionNotional*saveLevelMargin/100;
+    uint256 numerator =  totalPositionNotional*saveLevelMargin/100 - positive(totalAccountValue);
     uint256 denominator = saveLevelMargin - discountRate;
     uint x = numerator*100/denominator;
     return x;
@@ -1044,13 +1046,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
             //change vitraul collateral of user
-            uint256 liquidationCover = (fundingFee * uint256(uservBaycBalance[user])) /
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
               uint256(allLongvBaycBalance);
-            virtualCollateral[user] -= int256(liquidationCover);
+            virtualCollateral[user] -= int256(userFundingFee);
           } else if (uservBaycBalance[user] < 0) {
             //change vitraul collateral of user
-            uint256 liquidationCover = (fundingFee * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
-            virtualCollateral[user] += int256(liquidationCover);
+            uint256 userFundingFee = (fundingFee * positive(uservBaycBalance[user]))/positive(allShortBaycBalance);
+            virtualCollateral[user] += int256(userFundingFee);
           }
         }
       } else if (currentPrice < oraclePrice) {
@@ -1065,14 +1067,14 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
           address user = activeUsers[i];
           if (uservBaycBalance[user] > 0) {
             //change vitraul collateral of user
-            uint256 liquidationCover = (fundingFee * uint256(uservBaycBalance[user])) /
+            uint256 userFundingFee = (fundingFee * uint256(uservBaycBalance[user])) /
             uint256(allLongvBaycBalance);
-            virtualCollateral[user] += int(liquidationCover);
+            virtualCollateral[user] += int(userFundingFee);
           } else if (uservBaycBalance[user] < 0) {
             //change vitraul collateral of user
-            uint256 liquidationCover = (fundingFee * positive(uservBaycBalance[user])) /
+            uint256 userFundingFee = (fundingFee * positive(uservBaycBalance[user])) /
               positive(allShortBaycBalance);
-            virtualCollateral[user] -= int(liquidationCover);
+            virtualCollateral[user] -= int(userFundingFee);
           }
         }
       }

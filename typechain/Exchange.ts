@@ -62,6 +62,7 @@ export interface ExchangeInterface extends utils.Interface {
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
+    "poolInitialized()": FunctionFragment;
     "positive(int256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
     "removeInsuranceFunds(uint256)": FunctionFragment;
@@ -242,6 +243,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "poolInitialized",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "positive",
     values: [BigNumberish]
@@ -463,6 +468,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "poolInitialized",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "positive", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "priceFeed", data: BytesLike): Result;
   decodeFunctionResult(
@@ -766,6 +775,8 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
+    poolInitialized(overrides?: CallOverrides): Promise<[boolean]>;
+
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -992,6 +1003,8 @@ export interface Exchange extends BaseContract {
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
+  poolInitialized(overrides?: CallOverrides): Promise<boolean>;
+
   positive(
     _amount: BigNumberish,
     overrides?: CallOverrides
@@ -1217,6 +1230,8 @@ export interface Exchange extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
+
+    poolInitialized(overrides?: CallOverrides): Promise<boolean>;
 
     positive(
       _amount: BigNumberish,
@@ -1490,6 +1505,8 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
+    poolInitialized(overrides?: CallOverrides): Promise<BigNumber>;
+
     positive(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -1734,6 +1751,8 @@ export interface Exchange extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    poolInitialized(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     positive(
       _amount: BigNumberish,
