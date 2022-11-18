@@ -598,10 +598,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   ) internal view returns (int256) {
     int256 accountValue = _getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
     uint256 positionNotional = _getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
-    if (accountValue > 0 && positionNotional > 0) {
-      int256 margin = (100 * accountValue) / int(positionNotional);
-      return margin;
-    } if (accountValue < 0 && positionNotional > 0) {
+    if (accountValue != 0 && positionNotional > 0) {
       int256 margin = (100 * accountValue) / int(positionNotional);
       return margin;
     } else{
