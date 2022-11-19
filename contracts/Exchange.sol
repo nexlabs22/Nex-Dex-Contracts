@@ -1127,12 +1127,6 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-  // add insurance funds to the contract
-  function addInsuranceFunds(uint _amount) public onlyOwner {
-    SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
-    insuranceFunds += _amount;
-  }
-
   // remove insurance funds from contract to owner account
   function removeInsuranceFunds(uint _amount) public onlyOwner {
     require(_amount <= insuranceFunds, "Requested collect amount is larger than the ContractFee balance.");

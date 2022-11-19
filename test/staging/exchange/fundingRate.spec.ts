@@ -33,15 +33,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       await nftOracle.updateAnswer((newPrice*10**18).toString())
       }
       
-      it("Test hard liquidate long position", async () => {
+      it("Positive funding rate", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('600'));
-        await exchange.depositCollateral(toWei('600'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('600.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))
@@ -76,15 +76,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       })
 
 
-      it("Test hard liquidate long position", async () => {
+      it("Negative funding rate", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('600'));
-        await exchange.depositCollateral(toWei('600'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('600.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))

@@ -25,7 +25,6 @@ export interface ExchangeInterface extends utils.Interface {
     "_isNewMarginLiquidatable(address,uint256,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
-    "addInsuranceFunds(uint256)": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "changeNftOracleAddress(address)": FunctionFragment;
     "closePosition(uint256)": FunctionFragment;
@@ -102,10 +101,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "activeUsers",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addInsuranceFunds",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -330,10 +325,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "activeUsers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addInsuranceFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -637,11 +628,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    addInsuranceFunds(
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -868,11 +854,6 @@ export interface Exchange extends BaseContract {
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  addInsuranceFunds(
-    _amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   calculatePartialLiquidateValue(
     _user: string,
     overrides?: CallOverrides
@@ -1094,11 +1075,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    addInsuranceFunds(
-      _amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     calculatePartialLiquidateValue(
       _user: string,
@@ -1367,11 +1343,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    addInsuranceFunds(
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -1600,11 +1571,6 @@ export interface Exchange extends BaseContract {
     activeUsers(
       arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    addInsuranceFunds(
-      _amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     calculatePartialLiquidateValue(

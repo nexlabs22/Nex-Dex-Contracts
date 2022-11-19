@@ -33,15 +33,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await nftOracle.updateAnswer((newPrice*10**18).toString())
         }
       
-      it("Test hard liquidate long position", async () => {
+      it("Test Insurance funds 1", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('500'));
-        await exchange.depositCollateral(toWei('500'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('500.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))
@@ -90,15 +90,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       })
 
       
-      it("Test open and close short position", async () => {
+      it("Test Insurance funds 2", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
-        await usdc.approve(exchange.address, toWei('500'));
-        await exchange.depositCollateral(toWei('500'));
-        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('500.0')
+        await usdc.approve(exchange.address, toWei('700'));
+        await exchange.depositCollateral(toWei('700'));
+        expect(toEther(await exchange.collateral(usdc.address, owner.address))).to.equal('700.0')
         
         //account1 deposit collateral
         await usdc.transfer(account1.address, toWei('1000'))
@@ -149,8 +149,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.removeInsuranceFunds(toWei('10'))
         console.log('insurance funds 2 :', toEther(await exchange.insuranceFunds()))
         await usdc.approve(exchange.address, toWei('100'));
-        await exchange.addInsuranceFunds(toWei('100'))
-        console.log('insurance funds 3 :', toEther(await exchange.insuranceFunds()))
+        
       })
       
     })
