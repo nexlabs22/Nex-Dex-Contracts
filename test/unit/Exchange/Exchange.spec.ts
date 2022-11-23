@@ -68,6 +68,19 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     }
 
     it("Test hard and partial liquidate for long position", async () => {
+      const description = "\
+      -------------------------------------------------------------------\n\
+      Test for Exchange Smart Contract\n\
+      Three Users: User0($300) User1($5000) User2($500)\n\
+      \n\
+      - First, user0 will open Long Position with $490. \n\
+      - Second, user1 will open Short Position with $4500. \n\
+          At that time, user0 will be liquidated partially because his margin is 50% for new pool state. \n\
+      - Third, user2 will open Short Position with $7000 and user0 will be liquidated hardly. \n\
+      - Finally, user1 will close Position completely, and user2 will be liquidated hardly because of this.\n\
+      --------------------------------------------------------------------";
+      console.log(description);
+
       // organize virtual pool to expect smart contract results
       // 2000 - pool price
       // 20 - pool size
@@ -97,32 +110,36 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
         expect(toEther(await exchange.collateral(usdc.address, account.address))).to.equal(collateral);
       }
 
+      console.log('Initial State');
+      pool.printCurrentStatus();
 
       const longPositionUSD1 = 490;
       // user0 open long position($490) in contract's pool
       await exchange.connect(pool.account(0)).openLongPosition(toWeiN(longPositionUSD1));
-
 
       // open long position in test pool and calculate new pool state
       let newPoolState = pool.openLongPosition(longPositionUSD1);
       // update user0's balance
       pool.updateUserBalance(
         0, {
-          baycSize: pool.poolState.baycSize - newPoolState.baycSize,
-          usdSize: longPositionUSD1 * (-1)
-        }
+        baycSize: pool.poolState.baycSize - newPoolState.baycSize,
+        usdSize: longPositionUSD1 * (-1)
+      }
       );
       // calculate fee of opened position
       const swapFee1 = longPositionUSD1 * SWAP_FEE;
       // reduce the fee from user0's collateral
-      pool.updateUserCollateral(0, swapFee1, 'position fee');
+      pool.updateUserCollateral(0, swapFee1, 'open position fee');
       // update test pool state
       pool.poolState = newPoolState;
 
       // compare two pool's status and user0's status
       await compareResultExchange(pool, [0]);
 
-    
+      console.log('First Step Result - User0 opened Long Position $490');
+      pool.printCurrentStatus();
+
+
 
       const shortPositionUSD2 = 4500;
       // user1 open short position($4500) in contract's pool
@@ -140,22 +157,24 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       // update user1's balance
       pool.updateUserBalance(
         1, {
-          baycSize: pool.poolState.baycSize - newPoolState.baycSize,
-          usdSize: shortPositionUSD2
-        }
+        baycSize: pool.poolState.baycSize - newPoolState.baycSize,
+        usdSize: shortPositionUSD2
+      }
       );
       // calculate fee of opened position
       const swapFee2 = shortPositionUSD2 * SWAP_FEE;
       // reduce the fee from user1's collateral
-      pool.updateUserCollateral(1, swapFee2, 'position fee');
+      pool.updateUserCollateral(1, swapFee2, 'open position fee');
       // update test pool state
       pool.poolState = newPoolState;
 
       // compare two pool's status and status of user0 and user1
       await compareResultExchange(pool, [0, 1]);
 
+      console.log('Second Step Result - User1 opened Short Position $4500');
+      pool.printCurrentStatus();
 
-      
+
       const shortPositionUSD3 = 7500;
       // user2 open short position($7500) in contract's pool
       await exchange.connect(pool.account(2)).openShortPosition(toWeiN(shortPositionUSD3));
@@ -172,22 +191,53 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       // update user2's balance
       pool.updateUserBalance(
         2, {
-          baycSize: pool.poolState.baycSize - newPoolState.baycSize,
-          usdSize: shortPositionUSD3
-        }
+        baycSize: pool.poolState.baycSize - newPoolState.baycSize,
+        usdSize: shortPositionUSD3
+      }
       );
       // calculate fee of opened position
       const swapFee3 = shortPositionUSD3 * SWAP_FEE;
       // reduce the fee from user2's collateral
-      pool.updateUserCollateral(2, swapFee3, 'position fee');
+      pool.updateUserCollateral(2, swapFee3, 'open position fee');
       // update test pool state
       pool.poolState = newPoolState;
 
       // compare two pool's status and status of user0, user1 and user2 
       await compareResultExchange(pool, [0, 1, 2]);
 
-      expect(pool.collateralCheck()).to.equal(true);
-      console.log(pool.testReport());
+      console.log('Third Step Result - User2 opened Short Position $7500');
+      pool.printCurrentStatus();
+
+
+      await exchange.connect(pool.account(1)).closePositionComplete();
+
+      newPoolState = pool.closePosition(pool.getUserBaycvBalance(1));
+
+      expect(pool.isHardLiquidateable(2, newPoolState)).to.equal(true);
+
+      pool.hardLiquidate(2, newPoolState);
+
+      newPoolState = pool.closePosition(pool.getUserBaycvBalance(1));
+
+      let usdBaycValue = pool.getVusdAmountOut(pool.getUserBaycvBalance(1), pool.poolState); // 4415.8664
+      let usdBalance = pool.getUserUsdvBalance(1); // 4500
+
+      expect(usdBaycValue < usdBalance).to.equal(true);
+      let pnl = usdBalance - usdBaycValue;
+      pool.updateUserCollateral(1, -pnl, 'trading profit');
+      pool.updateUserBalance(
+        1, {
+        baycSize: - pool.getUserBaycvBalance(1),
+        usdSize: - pool.getUserUsdvBalance(1)
+      }
+      );
+      const swapFee4 = usdBaycValue * SWAP_FEE;
+      pool.updateUserCollateral(1, swapFee4, 'close position fee');
+      pool.poolState = newPoolState;
+      await compareResultExchange(pool, [0, 1, 2]);
+
+      console.log('Last Step Result - User1 closed position $4500');
+      pool.printCurrentStatus();
     })
 
   })

@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { compareResult } from "./basics";
+import { compareResult, roundDecimal } from "./basics";
 
 export interface User {
   account: SignerWithAddress;
@@ -140,14 +140,32 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     return this.userAccounts[userId];
   }
 
-  Pool.getVusdAmountOut = function (baycAmount: number, { usdSize, baycSize }: PoolType) {
+  Pool.getUserUsdvBalance = function (userId: number) {
+    if (userId >= this.userCount) return null;
+
+    return this.userUsdBalance[userId];
+  }
+    
+  Pool.getUserBaycvBalance = function (userId: number) {
+    if (userId >= this.userCount) return null;
+
+    return this.userBaycBalance[userId];
+  }
+
+  Pool.getLongVusdAmountOut = function (baycAmount: number, { usdSize, baycSize }: PoolType) {
     const K = usdSize * baycSize;
+    return K / (baycSize - baycAmount) - usdSize;
+  }
 
-    let vUsd = 0;
-    if (baycAmount > 0)      vUsd = usdSize - K / (baycSize + baycAmount);
-    else if (baycAmount < 0) vUsd = K / (baycSize + baycAmount) - usdSize;
+  Pool.getShortVusdAmountOut = function (baycAmount: number, { usdSize, baycSize }: PoolType) {
+    const K = usdSize * baycSize;
+    return usdSize - K / (baycSize + baycAmount);
+  }
 
-    return vUsd;
+  Pool.getVusdAmountOut = function (baycAmount: number, poolState: PoolType) {
+    if (baycAmount > 0)      return this.getShortVusdAmountOut(baycAmount, poolState);
+    else if (baycAmount < 0) return this.getLongVusdAmountOut(Math.abs(baycAmount), poolState);
+    return 0;
   }
 
   Pool.getNotionalValue = function (userId: number, poolState: PoolType) {
@@ -315,10 +333,40 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       this.vUsdPoolSize = K / this.vBaycPoolSize;
     }
     else if (userBaycBalance < 0) {
-      // TODO: complete this part
+      const _assetSize = Math.abs(userBaycBalance);
+      const usdBaycValue = this.getVusdAmountOut(_assetSize, this.poolState);
+
+      if (usdBaycValue > userUsdBalance) {
+        const pnl = usdBaycValue - userUsdBalance;
+        this.updateUserCollateral(userId, pnl, 'trading loss');
+      } else if (usdBaycValue < Math.abs(userUsdBalance)) {
+        const pnl = userUsdBalance - usdBaycValue;
+        this.updateUserCollateral(userId, -pnl, 'trading profit');
+      }
+
+      // TODO: realize funding reward of user
+      this.updateUserBalance(userId, {
+        baycSize: -userBaycBalance,
+        usdSize: -userUsdBalance
+      });
+
+      const K = this.vBaycPoolSize * this.vUsdPoolSize;
+      this.vBaycPoolSize += userBaycBalance;
+      this.vUsdPoolSize = K / this.vBaycPoolSize;
     }
     const discountAmount = this.userCollateral[userId] * DISCOUNT_RATE;
     this.updateUserCollateral(userId, discountAmount, 'discount fee');
+  }
+
+  Pool.closePosition = function (baycAmount: number) {
+    const k = this.vBaycPoolSize * this.vUsdPoolSize;
+    const newvBaycPoolSize = this.vBaycPoolSize + baycAmount;
+    const newvUsdPoolSize = k / newvBaycPoolSize;
+
+    return {
+      baycSize: newvBaycPoolSize,
+      usdSize: newvUsdPoolSize,
+    }
   }
 
   Pool.collateralCheck = function () {
@@ -369,6 +417,29 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     report += `${this.userCollateral.join(' + ')} + ${this.vault} = ${this.userCollateral.reduce((a: number, b: number) => a + b, 0) + this.vault}\n`;
 
     return report;
+  }
+
+  Pool.printCurrentStatus = function() {
+    const result = [];
+    for (let i = 0; i < this.userCount; i++) {
+      const status = this.getUserStatus(i, this.poolState);
+      result.push({
+        Id: 'User' + i,
+        Collateral: roundDecimal(status.collateral),
+        AccountValue: roundDecimal(status.accountValue),
+        NotionalValue: roundDecimal(status.notionalValue),
+        PNL: roundDecimal(status.pnl),
+        Margin: roundDecimal(status.margin),
+        VirtuaUsdBalance: roundDecimal(status.vUsdBalance),
+        VirtuaBaycBalance: roundDecimal(status.vBaycBalance),
+      });
+    }
+    
+    result.push({
+      Id: 'Contract',
+      Collateral: roundDecimal(this.vault)
+    })
+    console.table(result);
   }
 
   return Pool;
