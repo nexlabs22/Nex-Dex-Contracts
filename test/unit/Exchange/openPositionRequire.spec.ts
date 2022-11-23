@@ -12,7 +12,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
 
 !developmentChains.includes(network.name)
 ? describe.skip
-: describe("Exchange Unit Tests", async function () {
+: describe("Open position in the good range", async function () {
       let exchange:any
       let nftOracle:any
       let linkToken: LinkToken
@@ -33,7 +33,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await nftOracle.updateAnswer((newPrice*10**18).toString())
         }
       
-      it("Test hard liquidate long position", async () => {
+      it("open postion in the good range", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
@@ -62,8 +62,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
         // await exchange.openShortPosition(toWei('250'))
-        await expect(exchange.openLongPosition(toWei('250'))).to.be.revertedWith("You can't open this position because you probability will be liquidated by this margin");
-        await expect(exchange.openShortPosition(toWei('250'))).to.be.revertedWith("You can't open this position because you probability will be liquidated by this margin");
+        await expect(exchange.openLongPosition(toWei('250'))).to.be.revertedWith("Insufficient margin to open position with requested size.");
+        await expect(exchange.openShortPosition(toWei('250'))).to.be.revertedWith("Insufficient margin to open position with requested size.");
         console.log('owner margin:', Number(await exchange.userMargin(owner.address)))
         
       })

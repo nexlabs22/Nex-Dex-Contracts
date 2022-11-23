@@ -12,7 +12,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
 
 !developmentChains.includes(network.name)
 ? describe.skip
-: describe("Exchange Unit Tests", async function () {
+: describe("Liquidation exchange Unit Tests", async function () {
       let exchange:any
       let nftOracle:any
       let linkToken: LinkToken

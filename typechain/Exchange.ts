@@ -61,6 +61,7 @@ export interface ExchangeInterface extends utils.Interface {
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
+    "pool()": FunctionFragment;
     "poolInitialized()": FunctionFragment;
     "positive(int256)": FunctionFragment;
     "priceFeed()": FunctionFragment;
@@ -79,6 +80,7 @@ export interface ExchangeInterface extends utils.Interface {
     "uservUsdBalance(address)": FunctionFragment;
     "vBaycPoolSize()": FunctionFragment;
     "vUsdPoolSize()": FunctionFragment;
+    "virtualBalances(address)": FunctionFragment;
     "virtualCollateral(address)": FunctionFragment;
     "withdrawCollateral(uint256)": FunctionFragment;
   };
@@ -238,6 +240,7 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(functionFragment: "pool", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "poolInitialized",
     values?: undefined
@@ -297,6 +300,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "vUsdPoolSize",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "virtualBalances",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "virtualCollateral",
@@ -459,6 +466,7 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pool", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "poolInitialized",
     data: BytesLike
@@ -511,6 +519,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "vUsdPoolSize",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "virtualBalances",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -761,6 +773,15 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
+    pool(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & {
+        vBaycPoolSize: BigNumber;
+        vUsdPoolSize: BigNumber;
+      }
+    >;
+
     poolInitialized(overrides?: CallOverrides): Promise<[boolean]>;
 
     positive(
@@ -806,12 +827,12 @@ export interface Exchange extends BaseContract {
     userMargin(_user: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     uservBaycBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     uservUsdBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -819,8 +840,19 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    virtualCollateral(
+    virtualBalances(
       arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber] & {
+        virtualCollateral: BigNumber;
+        uservUsdBalance: BigNumber;
+        uservBaycBalance: BigNumber;
+      }
+    >;
+
+    virtualCollateral(
+      _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -984,6 +1016,15 @@ export interface Exchange extends BaseContract {
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
+  pool(
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber] & {
+      vBaycPoolSize: BigNumber;
+      vUsdPoolSize: BigNumber;
+    }
+  >;
+
   poolInitialized(overrides?: CallOverrides): Promise<boolean>;
 
   positive(
@@ -1028,16 +1069,30 @@ export interface Exchange extends BaseContract {
 
   userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  uservBaycBalance(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  uservBaycBalance(
+    _user: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  uservUsdBalance(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  uservUsdBalance(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   vBaycPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
   vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-  virtualCollateral(
+  virtualBalances(
     arg0: string,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, BigNumber] & {
+      virtualCollateral: BigNumber;
+      uservUsdBalance: BigNumber;
+      uservBaycBalance: BigNumber;
+    }
+  >;
+
+  virtualCollateral(
+    _user: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -1207,6 +1262,15 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
+    pool(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber] & {
+        vBaycPoolSize: BigNumber;
+        vUsdPoolSize: BigNumber;
+      }
+    >;
+
     poolInitialized(overrides?: CallOverrides): Promise<boolean>;
 
     positive(
@@ -1245,12 +1309,12 @@ export interface Exchange extends BaseContract {
     userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     uservBaycBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     uservUsdBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1258,8 +1322,19 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-    virtualCollateral(
+    virtualBalances(
       arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber] & {
+        virtualCollateral: BigNumber;
+        uservUsdBalance: BigNumber;
+        uservBaycBalance: BigNumber;
+      }
+    >;
+
+    virtualCollateral(
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1476,6 +1551,8 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
+    pool(overrides?: CallOverrides): Promise<BigNumber>;
+
     poolInitialized(overrides?: CallOverrides): Promise<BigNumber>;
 
     positive(
@@ -1521,12 +1598,12 @@ export interface Exchange extends BaseContract {
     userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     uservBaycBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     uservUsdBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1534,8 +1611,13 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
-    virtualCollateral(
+    virtualBalances(
       arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    virtualCollateral(
+      _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1718,6 +1800,8 @@ export interface Exchange extends BaseContract {
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    pool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     poolInitialized(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     positive(
@@ -1766,12 +1850,12 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     uservBaycBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     uservUsdBalance(
-      arg0: string,
+      _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1779,8 +1863,13 @@ export interface Exchange extends BaseContract {
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    virtualCollateral(
+    virtualBalances(
       arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    virtualCollateral(
+      _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

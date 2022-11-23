@@ -33,7 +33,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await nftOracle.updateAnswer((newPrice*10**18).toString())
         }
       
-      it("Test hard liquidate long position", async () => {
+      it("Test partial liquidate long position", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
@@ -93,7 +93,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       })
 
       
-      it("Test hard liquidate short position", async () => {
+      it("Test parital liquidate short position", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
