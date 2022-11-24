@@ -110,6 +110,12 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     this.userBaycBalance[userId] += baycSize;
   }
 
+  Pool.getUserCollateral = function (userId: number) {
+    if (userId >= this.userCount) return;
+
+    return this.userCollateral[userId];
+  }
+
   Pool.updateUserCollateral = function (userId: number, amount: number, desc = '') {
     if (userId >= this.userCount) return;
 
