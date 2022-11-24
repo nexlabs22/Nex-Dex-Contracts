@@ -11,3 +11,8 @@ export const compareResult = (contractValue: any, expectedValue: number, diff = 
   }
   return true;
 }
+
+export const roundDecimal = (value: number, place = 2): number => {
+  const X = 10 ** place;
+  return Math.round((value + Number.EPSILON) * X) / X;
+}
