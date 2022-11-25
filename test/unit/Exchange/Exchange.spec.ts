@@ -238,6 +238,19 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
       console.log('Last Step Result - User1 closed position $4500');
       pool.printCurrentStatus();
+
+      let withdraw0 = pool.getUserCollateral(0) - 0.1;
+      let withdraw1 = pool.getUserCollateral(1) - 0.1;
+      let withdraw2 = pool.getUserCollateral(2) - 0.1;
+      await exchange.connect(pool.account(0)).withdrawCollateral(toWeiN(withdraw0));
+      await exchange.connect(pool.account(1)).withdrawCollateral(toWeiN(withdraw1));
+      try {
+        await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
+      } catch (err) {
+        expect((err as Error).message).to.equal("VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'");
+      }
+      // console.log(`Users withdrawed $${withdraw0 + withdraw1 + withdraw2} from contract.`);
+      // console.log(`Diff: ${withdraw0 + withdraw1 + withdraw2 - 10300}`);
     })
 
   })
