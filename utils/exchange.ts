@@ -320,12 +320,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
   Pool.calculatePartialLiquidateValue = function(userId: number, poolState: PoolType): number {
     const accountValue = this.getAccountValue(userId, poolState);
     const notionalValue = this.getNotionalValue(userId, poolState);
-
-    const _accountValue = Math.abs(accountValue);
-    const _notionalValue = notionalValue * SAFE_MARGIN;
-
-    // TODO: we can make it simple
-    const numerator = _notionalValue >_accountValue ? _notionalValue - _accountValue : _accountValue - _notionalValue;
+    const numerator = notionalValue * SAFE_MARGIN - Math.abs(accountValue);
     const denominator = SAFE_MARGIN - DISCOUNT_RATE;
     const x = numerator / denominator;
     return x;
@@ -341,7 +336,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     const userUsdBalance = this.virtualBalances[userId].uservUsdBalance;
     const userBaycBalance = this.virtualBalances[userId].uservBaycBalance;
     if (userBaycBalance > 0) {
-      const usdBaycValue = this.getShortVusdAmountOut(baycLiquidateAmount, this.poolState);
+      const usdBaycValue = this.getShortVusdAmountOut(baycLiquidateAmount);
       const userPartialvUsdBalance = userUsdBalance * baycLiquidateAmount / userBaycBalance;
 
       if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
@@ -352,9 +347,11 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
         this.updateUserCollateral(userId, pnl, 'trading loss');
       }
 
-      // TODO: realize funding reward of user
-      this.updateUserBalance(userId, -baycLiquidateAmount, Math.abs(userPartialvUsdBalance));
+      // TODO: realize funding reward of user      
+      this.virtualBalances[userId].uservBaycBalance -= baycLiquidateAmount;
+      this.virtualBalances[userId].uservUsdBalance += Math.abs(userPartialvUsdBalance);
 
+      // TODO: remove user
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += baycLiquidateAmount;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
@@ -363,7 +360,29 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
     else if (userBaycBalance < 0) {
-      // TODO: complete this part
+      const usdBaycValue = this.getLongVusdAmountOut(baycLiquidateAmount);
+      const userPartialvUsdBalance = (userUsdBalance * baycLiquidateAmount) / userBaycBalance;
+      
+      if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
+        const pnl = usdBaycValue - Math.abs(userPartialvUsdBalance);
+        this.updateUserCollateral(userId, pnl, 'trading loss');
+      }
+      if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
+        const pnl = Math.abs(userPartialvUsdBalance) - usdBaycValue;
+        this.updateUserCollateral(userId, -pnl, 'trading profit');
+      }
+      
+      // TODO: realize funding reward of user
+      this.virtualBalances[userId].uservBaycBalance += baycLiquidateAmount;
+      this.virtualBalances[userId].uservUsdBalance -= Math.abs(userPartialvUsdBalance);
+
+      // TODO: remove user
+      const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
+      this.vBaycPoolSize.value -= baycLiquidateAmount;
+      this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
+
+      vBaycNewPoolSize.value -= baycLiquidateAmount;
+      vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
     const discountAmount = liquidateAmount * DISCOUNT_RATE;
     this.updateUserCollateral(userId, discountAmount, 'discount fee');
@@ -385,7 +404,6 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     return newPoolState;
   }
 
-  // TODO: We don't need new pool size information in this function
   Pool.hardLiquidate = function (userId: number, poolState: PoolType): PoolType {
     let vBaycNewPoolSize = poolState.vBaycPoolSize;
     let vUsdNewPoolSize = poolState.vUsdPoolSize;
@@ -393,7 +411,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     const userUsdBalance = this.virtualBalances[userId].uservUsdBalance;
     const userBaycBalance = this.virtualBalances[userId].uservBaycBalance;
     if (userBaycBalance > 0) {
-      const usdBaycValue = this.getShortVusdAmountOut(userBaycBalance, this.poolState);
+      const usdBaycValue = this.getShortVusdAmountOut(userBaycBalance);
 
       if (usdBaycValue > Math.abs(userUsdBalance)) {
         const pnl = usdBaycValue - Math.abs(userUsdBalance);
@@ -404,8 +422,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       }
 
       // TODO: realize funding reward of user
-      this.updateUserBalance(userId, -userBaycBalance, -userUsdBalance);
+      this.virtualBalances[userId].uservBaycBalance -= userBaycBalance;
+      this.virtualBalances[userId].uservUsdBalance -= userUsdBalance;
 
+      // TODO: remove user
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += userBaycBalance;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
@@ -415,7 +435,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     }
     else if (userBaycBalance < 0) {
       const _assetSize = Math.abs(userBaycBalance);
-      const usdBaycValue = this.getShortVusdAmountOut(_assetSize, this.poolState);
+      const usdBaycValue = this.getShortVusdAmountOut(_assetSize);
 
       if (usdBaycValue > userUsdBalance) {
         const pnl = usdBaycValue - userUsdBalance;
@@ -426,8 +446,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       }
 
       // TODO: realize funding reward of user
-      this.updateUserBalance(userId, -userBaycBalance, -userUsdBalance);
+      this.virtualBalances[userId].uservBaycBalance -= userBaycBalance;
+      this.virtualBalances[userId].uservUsdBalance -= userUsdBalance;
 
+      // TODO: remove user
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += userBaycBalance;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
