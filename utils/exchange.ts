@@ -331,7 +331,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     return x;
   }
 
-  Pool.partialLiquidate = function (userId: number, poolState: PoolType): void {
+  Pool.partialLiquidate = function (userId: number, poolState: PoolType): PoolType {
+    let vBaycNewPoolSize = poolState.vBaycPoolSize;
+    let vUsdNewPoolSize = poolState.vUsdPoolSize;
+
     const liquidateAmount = this.calculatePartialLiquidateValue(userId, poolState);
     const baycLiquidateAmount = liquidateAmount * this.vBaycPoolSize.value / this.vUsdPoolSize.value;
 
@@ -355,28 +358,38 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += baycLiquidateAmount;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
+
+      vBaycNewPoolSize.value += baycLiquidateAmount;
+      vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
     else if (userBaycBalance < 0) {
       // TODO: complete this part
     }
     const discountAmount = liquidateAmount * DISCOUNT_RATE;
     this.updateUserCollateral(userId, discountAmount, 'discount fee');
+
+    return {
+      vBaycPoolSize: vBaycNewPoolSize,
+      vUsdPoolSize: vUsdNewPoolSize,
+    }
   }
 
-  Pool.partialLiquidateUsers = function (poolState: PoolType): boolean {
-    let isLiquidated = false;
+  Pool.partialLiquidateUsers = function (poolState: PoolType): PoolType {
+    let newPoolState = poolState;
     for (let i = 0; i < this.userCount; i++) {
       const isLiquidatable = this.isPartialLiquidatable(i, poolState);
       if (isLiquidatable) {
-        this.partialLiquidate(i, poolState);
-        isLiquidated = true;
+        newPoolState = this.partialLiquidate(i, newPoolState);
       }
     }
-    return isLiquidated;
+    return newPoolState;
   }
 
   // TODO: We don't need new pool size information in this function
-  Pool.hardLiquidate = function (userId: number, poolState: PoolType): void {
+  Pool.hardLiquidate = function (userId: number, poolState: PoolType): PoolType {
+    let vBaycNewPoolSize = poolState.vBaycPoolSize;
+    let vUsdNewPoolSize = poolState.vUsdPoolSize;
+
     const userUsdBalance = this.virtualBalances[userId].uservUsdBalance;
     const userBaycBalance = this.virtualBalances[userId].uservBaycBalance;
     if (userBaycBalance > 0) {
@@ -396,6 +409,9 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += userBaycBalance;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
+
+      vBaycNewPoolSize.value += userBaycBalance;
+      vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
     else if (userBaycBalance < 0) {
       const _assetSize = Math.abs(userBaycBalance);
@@ -415,31 +431,37 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       const K = this.vBaycPoolSize.value * this.vUsdPoolSize.value;
       this.vBaycPoolSize.value += userBaycBalance;
       this.vUsdPoolSize.value = K / this.vBaycPoolSize.value;
+
+      vBaycNewPoolSize.value -= userBaycBalance;
+      vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
     const discountAmount = this.collateral[userId].value * DISCOUNT_RATE;
     this.updateUserCollateral(userId, discountAmount, 'discount fee');
+
+    return {
+      vBaycPoolSize: vBaycNewPoolSize,
+      vUsdPoolSize: vUsdNewPoolSize,
+    }
   }
 
   Pool.hardNegativeLiquidate = function(userId: number, poolState: PoolType): void {
 
   }
 
-  Pool.hardLiquidateUsers = function (poolState: PoolType): boolean {
-    let isLiquidated = false;
+  Pool.hardLiquidateUsers = function (poolState: PoolType): PoolType {
+    let newPoolState = poolState;
     for (let i = 0; i < this.userCount; i++) {
       const isLiquidatable = this.isHardLiquidatable(i, poolState);
       if (isLiquidatable) {
         const userMargin = this.getMargin(i, poolState);
         if (userMargin > 0) {
-          this.hardLiquidate(i, poolState);
-          isLiquidated = true;
+          newPoolState = this.hardLiquidate(i, newPoolState);
         } else if (userMargin < 0) {
-          this.hardNegativeLiquidate(i, poolState);
-          isLiquidated = true;
+          newPoolState = this.hardNegativeLiquidate(i, newPoolState);
         }
       }
     }
-    return isLiquidated;
+    return newPoolState;
   }
 
   Pool.openLongPosition = function (userId: number, _usdAmount: number) {
@@ -450,12 +472,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       throw new Error("Insufficient margin to open position with requested size.");
     }
 
-    if (this.hardLiquidateUsers(newPoolState)) {
-      newPoolState = this.addVusdBalance(_usdAmount);
-    }
-    if (this.partialLiquidateUsers(newPoolState)) {
-      newPoolState = this.addVusdBalance(_usdAmount);
-    }
+    newPoolState = this.hardLiquidateUsers(newPoolState);
+    newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const userBayc = UnsignedInt(this.vBaycPoolSize.value - newPoolState.vBaycPoolSize.value);
     this.virtualBalances[userId].uservBaycBalance += userBayc.value;
@@ -477,12 +495,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       throw new Error("Insufficient margin to open position with requested size.");
     }
 
-    if (this.hardLiquidateUsers(newPoolState)) {
-      newPoolState = this.removeVusdBalance(_usdAmount);
-    }
-    if (this.partialLiquidateUsers(newPoolState)) {
-      newPoolState = this.removeVusdBalance(_usdAmount);
-    }
+    newPoolState = this.hardLiquidateUsers(newPoolState);
+    newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const userBayc = UnsignedInt(newPoolState.vBaycPoolSize.value - this.vBaycPoolSize.value);
     this.virtualBalances[userId].uservBaycBalance -= userBayc.value;
@@ -520,12 +534,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     let newPoolState = this.addBaycBalance(_assetSize);
 
-    if (this.hardLiquidateUsers(newPoolState)) {
-      newPoolState = this.addBaycBalance(_assetSize);
-    }
-    if (this.partialLiquidateUsers(newPoolState)) {
-      newPoolState = this.addBaycBalance(_assetSize);
-    }
+    newPoolState = this.hardLiquidateUsers(newPoolState);
+    newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const usdBaycValue = UnsignedInt(this.getShortVusdAmountOut(_assetSize)).value;
 
@@ -558,12 +568,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     let newPoolState = this.removeBaycBalance(_assetSize);
 
-    if (this.hardLiquidateUsers(newPoolState)) {
-      newPoolState = this.removeBaycBalance(_assetSize);
-    }
-    if (this.partialLiquidateUsers(newPoolState)) {
-      newPoolState = this.removeBaycBalance(_assetSize);
-    }
+    newPoolState = this.hardLiquidateUsers(newPoolState);
+    newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const usdBaycValue = UnsignedInt(this.getLongVusdAmountOut(_assetSize)).value;
 
@@ -591,13 +597,13 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
   Pool.collateralCheck = function () {
     for (let i = 0; i < this.userCount; i++) {
-      let temp = this.userInitCollateral[i];
+      let temp = this.userInitCollateral[i].value;
       this.logs.filter((log: LogType) => log.from === i || log.to === i)
               .forEach((log: LogType) => temp = log.from === i ? temp - log.amount : temp + log.amount);
       if (! compareResult(temp, this.collateral[i].value)) return false;
     }
 
-    const init = this.userInitCollateral.reduce((a: number, b: number) => a + b, 0);
+    const init = this.userInitCollateral.map((v: UnsignedIntType) => v.value).reduce((a: number, b: number) => a + b, 0);
     const last = this.collateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0) + this.vault;
 
     return compareResult(init, last);
@@ -618,7 +624,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     let report = "";
     for (let i = 0; i < this.userCount; i++) {
       report += `User${i}: `;
-      report += this.userInitCollateral[i] + '(init)';
+      report += this.userInitCollateral[i].value + '(init)';
       report += this.logs.filter((log: LogType) => log.from === i || log.to === i)
               .map((v: LogType) => ` ${v.from == i ? '-' : '+'} ${v.amount}${v.desc ? `(${v.desc})` : ''}`)
               .join('');
@@ -633,7 +639,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     report += ' = ' + this.vault;
     report += '\n';
 
-    report += `${this.userInitCollateral.join(' + ')} = ${this.userInitCollateral.reduce((a: number, b: number) => a + b, 0)}\n`;
+    report += `${this.userInitCollateral.map((v: UnsignedIntType) => v.value).join(' + ')} = ${this.userInitCollateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0)}\n`;
     report += `${this.collateral.map((v: UnsignedIntType) => v.value).join(' + ')} + ${this.vault} = ${this.collateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0) + this.vault}\n`;
 
     return report;
