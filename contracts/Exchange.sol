@@ -320,6 +320,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     
+    k = pool.vBaycPoolSize * pool.vUsdPoolSize;
+    newvUsdPoolSize = pool.vUsdPoolSize + _usdAmount;
+    newvBaycPoolSize = k / newvUsdPoolSize;
     uint256 userBayc = pool.vBaycPoolSize - newvBaycPoolSize;
     //update bayc and usd balance of user
     virtualBalances[msg.sender].uservBaycBalance += int256(userBayc);
