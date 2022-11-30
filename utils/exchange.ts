@@ -474,6 +474,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
+    newPoolState = this.addVusdBalance(_usdAmount);
 
     const userBayc = UnsignedInt(this.vBaycPoolSize.value - newPoolState.vBaycPoolSize.value);
     this.virtualBalances[userId].uservBaycBalance += userBayc.value;
@@ -497,6 +498,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
+    newPoolState = this.removeVusdBalance(_usdAmount);
 
     const userBayc = UnsignedInt(newPoolState.vBaycPoolSize.value - this.vBaycPoolSize.value);
     this.virtualBalances[userId].uservBaycBalance -= userBayc.value;

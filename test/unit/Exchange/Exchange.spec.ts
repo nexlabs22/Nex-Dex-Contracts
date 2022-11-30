@@ -260,43 +260,39 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       await exchange.connect(pool.account(0)).openLongPosition(toWeiN(longPositionUSD1));
       pool.openLongPosition(0, longPositionUSD1);
 
-      // compare two pool's status and user0's status
-      await compareResultExchange(pool, [0]);
-
       console.log('First Step Result - User0 opened Long Position $490');
       pool.printCurrentStatus();
-
+      // compare two pool's status and user0's status
+      await compareResultExchange(pool, [0]);
 
 
       // user1 open short position($4500) in contract's pool
       await exchange.connect(pool.account(1)).openShortPosition(toWeiN(shortPositionUSD2));
       pool.openShortPosition(1, shortPositionUSD2);
 
-      // compare two pool's status and status of user0 and user1
-      await compareResultExchange(pool, [0, 1]);
-
       console.log('Second Step Result - User1 opened Short Position $4500');
       pool.printCurrentStatus();
+      // compare two pool's status and status of user0 and user1
+      await compareResultExchange(pool, [0, 1]);
 
 
       // user2 open short position($7500) in contract's pool
       await exchange.connect(pool.account(2)).openShortPosition(toWeiN(shortPositionUSD3));
       pool.openShortPosition(2, shortPositionUSD3);
 
-      // compare two pool's status and status of user0, user1 and user2 
-      await compareResultExchange(pool, [0, 1, 2]);
-
       console.log('Third Step Result - User2 opened Short Position $7500');
       pool.printCurrentStatus();
+      // compare two pool's status and status of user0, user1 and user2 
+      await compareResultExchange(pool, [0, 1, 2]);
 
 
       await exchange.connect(pool.account(1)).closePositionComplete();
       pool.closePositionComplete(1);
 
-      await compareResultExchange(pool, [0, 1, 2]);
-
       console.log('Last Step Result - User1 closed position $4500');
       pool.printCurrentStatus();
+      await compareResultExchange(pool, [0, 1, 2]);
+
 
       let withdraw0 = pool.getUserCollateral(0) - 0.1;
       let withdraw1 = pool.getUserCollateral(1) - 0.1;
