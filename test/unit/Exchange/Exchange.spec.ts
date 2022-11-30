@@ -306,5 +306,6 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       }
       // console.log(`Users withdrawed $${withdraw0 + withdraw1 + withdraw2} from contract.`);
       // console.log(`Diff: ${withdraw0 + withdraw1 + withdraw2 - 10300}`);
+      console.log(pool.testReport());
     });
   })

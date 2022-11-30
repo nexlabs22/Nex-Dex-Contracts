@@ -701,7 +701,10 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getPNL(_user: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    getPNL(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { pnl: BigNumber }>;
 
     getPositionNotional(
       _user: string,

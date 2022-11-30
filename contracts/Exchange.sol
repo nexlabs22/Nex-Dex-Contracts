@@ -523,15 +523,15 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   currnent 2 vBayc value =  4000
   user pnl = 4000 - positive(-3000) = 1000$
   */
-  function getPNL(address _user) public view returns (int256) {
+  function getPNL(address _user) public view returns (int256 pnl) {
     if (virtualBalances[_user].uservBaycBalance > 0) {
       uint256 currentBaycValue = getShortVusdAmountOut(uint256(virtualBalances[_user].uservBaycBalance));
-      int256 pnl = int256(currentBaycValue) + (virtualBalances[_user].uservUsdBalance);
-      return pnl;
+      pnl = int256(currentBaycValue) + (virtualBalances[_user].uservUsdBalance);
     } else if (virtualBalances[_user].uservBaycBalance < 0) {
       uint256 currentBaycValue = getLongVusdAmountOut(positive(virtualBalances[_user].uservBaycBalance));
-      int256 pnl = virtualBalances[_user].uservUsdBalance - int256(currentBaycValue);
-      return pnl;
+      pnl = virtualBalances[_user].uservUsdBalance - int256(currentBaycValue);
+    }else{
+      pnl =0;
     }
   }
 
@@ -587,7 +587,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       uint256 positionNotionalValue = getShortVusdAmountOut(uint256(virtualBalances[_user].uservBaycBalance));
       return positionNotionalValue;
     } else if (virtualBalances[_user].uservBaycBalance < 0) {
-      uint256 positionNotionalValue = getLongVusdAmountOut(positive(virtualBalances[_user].uservBaycBalance));
+      uint256 positionNotionalValue = getLongVusdAmountOut(uint(absoluteInt((virtualBalances[_user].uservBaycBalance))));
       return positionNotionalValue;
     } else {
       return 0;
@@ -756,7 +756,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       vUsdNewPoolSize = k / vBaycNewPoolSize;
     } else if (virtualBalances[_user].uservBaycBalance < 0) {
       uint256 _assetSize = uint256(positive(virtualBalances[_user].uservBaycBalance));
-      uint256 usdBaycValue = getShortVusdAmountOut(_assetSize);
+      uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
       //increase or decrease the user pnl for this function
       if (usdBaycValue > uint256(virtualBalances[_user].uservUsdBalance)) {
         uint256 pnl = usdBaycValue - uint256(positive(virtualBalances[_user].uservUsdBalance));
