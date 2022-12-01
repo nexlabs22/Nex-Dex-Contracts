@@ -663,8 +663,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     report += ' = ' + this.vault;
     report += '\n';
 
-    report += `${this.userInitCollateral.map((v: UnsignedIntType) => v.value).join(' + ')} = ${this.userInitCollateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0)}\n`;
-    report += `${this.collateral.map((v: UnsignedIntType) => v.value).join(' + ')} + ${this.vault} = ${this.collateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0) + this.vault}\n`;
+    report += `${this.userInitCollateral.map((v: UnsignedIntType) => v.value).join(' + ')} = ${this.userInitCollateral.reduce((a: number, b: UnsignedIntType) => a + b.value, 0)}\n`;
+    report += `${this.collateral.map((v: UnsignedIntType) => v.value).join(' + ')} + ${this.vault} = ${this.collateral.reduce((a: number, b: UnsignedIntType) => a + b.value, 0) + this.vault}\n`;
 
     return report;
   }
