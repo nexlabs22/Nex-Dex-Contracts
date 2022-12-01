@@ -435,7 +435,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     }
     else if (userBaycBalance < 0) {
       const _assetSize = Math.abs(userBaycBalance);
-      const usdBaycValue = this.getShortVusdAmountOut(_assetSize);
+      const usdBaycValue = this.getLongVusdAmountOut(_assetSize);
 
       if (usdBaycValue > userUsdBalance) {
         const pnl = usdBaycValue - userUsdBalance;
@@ -689,6 +689,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       Id: 'Contract',
       Collateral: roundDecimal(this.vault)
     })
+    console.log(this.price);
     console.table(result);
   }
 
