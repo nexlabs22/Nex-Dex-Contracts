@@ -230,12 +230,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //give the user funding reward when position will be closed
   function _realizevirtualCollateral(address _user, int256 _amount) internal {
+    require(_amount != 0 , "Requested realize collateral amount should not be zero");
     require(_amount <= absoluteInt(virtualBalances[_user].virtualCollateral), "Requested amount is larger than the virtual collateral balance.");
     if (virtualBalances[_user].virtualCollateral > 0) {
-      collateral[usdc][_user] += uint256(_amount);
+      collateral[usdc][_user] += uint(_amount);
       virtualBalances[_user].virtualCollateral -= _amount;
     } else if (virtualBalances[_user].virtualCollateral < 0) {
-      collateral[usdc][_user] -= uint256(_amount);
+      collateral[usdc][_user] -= uint(_amount);
       virtualBalances[_user].virtualCollateral += _amount;
     }
   }
@@ -426,7 +427,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //realize funding reward of user;
     int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
       virtualBalances[_user].uservBaycBalance;
+    if(realizeVirtualCollAmount != 0){
     _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+    }
     //update user balance
     virtualBalances[_user].uservBaycBalance -= int256(_assetSize);
     virtualBalances[_user].uservUsdBalance += absoluteInt(userPartialvUsdBalance);
@@ -478,7 +481,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //realize funding reward of user;
     int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
       virtualBalances[_user].uservBaycBalance;
+    if(realizeVirtualCollAmount != 0){
     _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+    }
     //update user balance
     virtualBalances[_user].uservBaycBalance += int256(_assetSize);
     virtualBalances[_user].uservUsdBalance -= absoluteInt(userPartialvUsdBalance);
@@ -741,7 +746,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //realize funding reward of user;
       int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
         virtualBalances[_user].uservBaycBalance;
+      if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+      }
       //update user balance
       virtualBalances[_user].uservBaycBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -768,7 +775,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //realize funding reward of user;
       int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
         virtualBalances[_user].uservBaycBalance;
+      if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+      }
       //update user balance
       virtualBalances[_user].uservBaycBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -934,7 +943,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //realize funding reward of user;
       int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(baycLiquidateAmount)) /
         virtualBalances[_user].uservBaycBalance;
+      if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+      }
       //update user balance
       virtualBalances[_user].uservBaycBalance -= int256(baycLiquidateAmount);
       virtualBalances[_user].uservUsdBalance += absoluteInt(userPartialvUsdBalance);
@@ -966,7 +977,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //realize funding reward of user;
       int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(baycLiquidateAmount)) /
         virtualBalances[_user].uservBaycBalance;
+      if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
+      }
       //update user balance
       virtualBalances[_user].uservBaycBalance += int256(baycLiquidateAmount);
       virtualBalances[_user].uservUsdBalance -= absoluteInt(userPartialvUsdBalance);

@@ -48,9 +48,9 @@ export interface ExchangeInterface extends utils.Interface {
     "getShortVusdAmountOut(uint256)": FunctionFragment;
     "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
-    "isHardLiquidateable(address)": FunctionFragment;
+    "isHardLiquidatable(address)": FunctionFragment;
     "isLongInRightRange(uint256)": FunctionFragment;
-    "isPartialLiquidateable(address)": FunctionFragment;
+    "isPartialLiquidatable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
@@ -195,7 +195,7 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isHardLiquidateable",
+    functionFragment: "isHardLiquidatable",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -203,7 +203,7 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "isPartialLiquidateable",
+    functionFragment: "isPartialLiquidatable",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -421,7 +421,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isHardLiquidateable",
+    functionFragment: "isHardLiquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -429,7 +429,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPartialLiquidateable",
+    functionFragment: "isPartialLiquidatable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -728,7 +728,7 @@ export interface Exchange extends BaseContract {
 
     insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    isHardLiquidateable(
+    isHardLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -738,7 +738,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    isPartialLiquidateable(
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -971,7 +971,7 @@ export interface Exchange extends BaseContract {
 
   insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
-  isHardLiquidateable(
+  isHardLiquidatable(
     _user: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -981,7 +981,7 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  isPartialLiquidateable(
+  isPartialLiquidatable(
     _user: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -1217,7 +1217,7 @@ export interface Exchange extends BaseContract {
 
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
-    isHardLiquidateable(
+    isHardLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1227,7 +1227,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    isPartialLiquidateable(
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1506,7 +1506,7 @@ export interface Exchange extends BaseContract {
 
     insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
-    isHardLiquidateable(
+    isHardLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1516,7 +1516,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isPartialLiquidateable(
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1755,7 +1755,7 @@ export interface Exchange extends BaseContract {
 
     insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    isHardLiquidateable(
+    isHardLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1765,7 +1765,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isPartialLiquidateable(
+    isPartialLiquidatable(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
