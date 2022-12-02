@@ -52,7 +52,11 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
   Pool.userAccounts = [] as Array<SignerWithAddress>;
   Pool.userCount = 0;
   Pool.logs = [] as Array<LogType>;
-  Pool.vault = 0;
+
+  Pool.virtualCollateral = 0;
+  Pool.realCollateral = UnsignedInt(0);
+  Pool.insuranceFunds = UnsignedInt(0);
+  Pool.feeCollector = UnsignedInt(0);
 
   Pool.exchangeContract = exchangeContract;
   Pool.usdcContract = usdcContract;
@@ -160,11 +164,52 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     this.virtualBalances[userId].uservBaycBalance += vBaycSize;
   }
 
+  Pool.depositCollateral = function (userId: number, amount: UnsignedIntType, desc = 'deposit') {
+    if (userId >= this.userCount) return;
+    
+    this.addUserCollateral(userId, amount, desc);
+    this.realCollateral.value += amount.value;
+  }
+
+  Pool.withdrawCollateral = function (userId: number, amount: UnsignedIntType, desc = 'withdraw') {
+    if (userId >= this.userCount) return;
+    
+    this.reduceUserCollateral(userId, amount, desc);
+    this.realCollateral.value -= amount.value;
+  }
+
+  Pool.withdrawCollateralByFee = function (userId: number, amount: UnsignedIntType, desc = 'fee') {
+    if (userId >= this.userCount) return;
+    
+    this.reduceUserCollateral(userId, amount, desc);
+    this.feeCollector.value += amount.value;
+  }
+
+  Pool.withdrawCollateralByInsuranceFund = function (userId: number, amount: UnsignedIntType, desc = 'insurance fund') {
+    if (userId >= this.userCount) return;
+    
+    this.reduceUserCollateral(userId, amount, desc);
+    this.insuranceFunds.value += amount.value;
+  }
+
+
+  Pool.addUserCollateral = function (userId: number, amount: UnsignedIntType, desc = '') {
+    if (userId >= this.userCount) return;
+
+    this.updateUserCollateral(userId, -amount.value, desc);
+  }
+
+  Pool.reduceUserCollateral = function (userId: number, amount: UnsignedIntType, desc = '') {
+    if (userId >= this.userCount) return;
+
+    this.updateUserCollateral(userId, amount.value, desc);
+  }
+
   Pool.updateUserCollateral = function (userId: number, amount: number, desc = '') {
     if (userId >= this.userCount) return;
 
     this.collateral[userId].value -= amount;
-    this.vault += amount;
+    this.virtualCollateral += amount;
 
     // if (desc) this.logs.push(desc);
     if (amount > 0) {
@@ -341,10 +386,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
       if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
         const pnl = usdBaycValue - Math.abs(userPartialvUsdBalance);
-        this.updateUserCollateral(userId, -pnl, 'trading profit');
+        this.addUserCollateral(userId, UnsignedInt(pnl), 'trading profit');
       } else if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
         const pnl = Math.abs(userPartialvUsdBalance) - usdBaycValue;
-        this.updateUserCollateral(userId, pnl, 'trading loss');
+        this.reduceUserCollateral(userId, UnsignedInt(pnl), 'trading loss');
       }
 
       // TODO: realize funding reward of user      
@@ -365,11 +410,11 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       
       if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
         const pnl = usdBaycValue - Math.abs(userPartialvUsdBalance);
-        this.updateUserCollateral(userId, pnl, 'trading loss');
+        this.reduceUserCollateral(userId, UnsignedInt(pnl), 'trading loss');
       }
       if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
         const pnl = Math.abs(userPartialvUsdBalance) - usdBaycValue;
-        this.updateUserCollateral(userId, -pnl, 'trading profit');
+        this.addUserCollateral(userId, UnsignedInt(pnl), 'trading profit');
       }
       
       // TODO: realize funding reward of user
@@ -384,8 +429,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       vBaycNewPoolSize.value -= baycLiquidateAmount;
       vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
-    const discountAmount = liquidateAmount * DISCOUNT_RATE;
-    this.updateUserCollateral(userId, discountAmount, 'discount fee');
+    const discountAmount = UnsignedInt(liquidateAmount * DISCOUNT_RATE);
+    this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
       vBaycPoolSize: vBaycNewPoolSize,
@@ -415,10 +460,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
       if (usdBaycValue > Math.abs(userUsdBalance)) {
         const pnl = usdBaycValue - Math.abs(userUsdBalance);
-        this.updateUserCollateral(userId, -pnl, 'trading profit');
+        this.addUserCollateral(userId, UnsignedInt(pnl), 'trading profit');
       } else if (usdBaycValue < Math.abs(userUsdBalance)) {
         const pnl = Math.abs(userUsdBalance) - usdBaycValue;
-        this.updateUserCollateral(userId, pnl, 'trading loss');
+        this.reduceUserCollateral(userId, UnsignedInt(pnl), 'trading loss');
       }
 
       // TODO: realize funding reward of user
@@ -439,10 +484,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
       if (usdBaycValue > userUsdBalance) {
         const pnl = usdBaycValue - userUsdBalance;
-        this.updateUserCollateral(userId, pnl, 'trading loss');
+        this.reduceUserCollateral(userId, UnsignedInt(pnl), 'trading loss');
       } else if (usdBaycValue < Math.abs(userUsdBalance)) {
         const pnl = userUsdBalance - usdBaycValue;
-        this.updateUserCollateral(userId, -pnl, 'trading profit');
+        this.addUserCollateral(userId, UnsignedInt(pnl), 'trading profit');
       }
 
       // TODO: realize funding reward of user
@@ -457,8 +502,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       vBaycNewPoolSize.value -= userBaycBalance;
       vUsdNewPoolSize.value = K / vBaycNewPoolSize.value;
     }
-    const discountAmount = this.collateral[userId].value * DISCOUNT_RATE;
-    this.updateUserCollateral(userId, discountAmount, 'discount fee');
+    const discountAmount = UnsignedInt(this.collateral[userId].value * DISCOUNT_RATE);
+    this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
       vBaycPoolSize: vBaycNewPoolSize,
@@ -504,8 +549,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     // TODO: add active user
     
-    const fee = _usdAmount * SWAP_FEE;
-    this.updateUserCollateral(userId, fee, 'open position fee');
+    const fee = UnsignedInt(_usdAmount * SWAP_FEE);
+    this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
   }
@@ -528,8 +573,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
 
     // TODO: add active user
     
-    const fee = _usdAmount * SWAP_FEE;
-    this.updateUserCollateral(userId, fee, 'close position fee');
+    const fee = UnsignedInt(_usdAmount * SWAP_FEE);
+    this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
   }
@@ -568,10 +613,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     
     if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
       const pnl = UnsignedInt(usdBaycValue - Math.abs(userPartialvUsdBalance));
-      this.updateUserCollateral(userId, -pnl.value, 'trading profit');
+      this.addUserCollateral(userId, pnl, 'trading profit');
     } else if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
       const pnl = UnsignedInt(Math.abs(userPartialvUsdBalance) - usdBaycValue);
-      this.updateUserCollateral(userId, pnl.value, 'trading loss');
+      this.reduceUserCollateral(userId, pnl, 'trading loss');
     }
 
     // TODO: add virtual collateral
@@ -579,8 +624,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     this.virtualBalances[userId].uservBaycBalance -= _assetSize;
     this.virtualBalances[userId].uservUsdBalance += Math.abs(userPartialvUsdBalance);
 
-    const fee = usdBaycValue * SWAP_FEE;
-    this.updateUserCollateral(userId, fee, 'close position fee');
+    const fee = UnsignedInt(usdBaycValue * SWAP_FEE);
+    this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.addBaycBalance(_assetSize);
   }
@@ -602,10 +647,10 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     
     if (usdBaycValue > Math.abs(userPartialvUsdBalance)) {
       const pnl = UnsignedInt(usdBaycValue - Math.abs(userPartialvUsdBalance));
-      this.updateUserCollateral(userId, pnl.value, 'trading loss');
+      this.reduceUserCollateral(userId, pnl, 'trading loss');
     } else if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
       const pnl = UnsignedInt(Math.abs(userPartialvUsdBalance) - usdBaycValue);
-      this.updateUserCollateral(userId, -pnl.value, 'trading profit');
+      this.addUserCollateral(userId, pnl, 'trading profit');
     }
 
     // TODO: add virtual collateral
@@ -613,8 +658,8 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     this.virtualBalances[userId].uservBaycBalance += _assetSize;
     this.virtualBalances[userId].uservUsdBalance -= Math.abs(userPartialvUsdBalance);
 
-    const fee = usdBaycValue * SWAP_FEE;
-    this.updateUserCollateral(userId, fee, 'close position fee');
+    const fee = UnsignedInt(usdBaycValue * SWAP_FEE);
+    this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.removeBaycBalance(_assetSize);
   }
@@ -628,7 +673,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     }
 
     const init = this.userInitCollateral.map((v: UnsignedIntType) => v.value).reduce((a: number, b: number) => a + b, 0);
-    const last = this.collateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0) + this.vault;
+    const last = this.collateral.reduce((a: UnsignedIntType, b: UnsignedIntType) => a.value + b.value, 0) + this.virtualCollateral;
 
     return compareResult(init, last);
   }
@@ -660,11 +705,11 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     report += this.logs.filter((log: LogType) => log.from === -1 || log.to === -1)
             .map((v: LogType) => ` ${v.from == -1 ? '-' : '+'} ${v.amount}${v.desc ? `(${v.desc})` : ''}`)
             .join('');
-    report += ' = ' + this.vault;
+    report += ' = ' + this.virtualCollateral;
     report += '\n';
 
     report += `${this.userInitCollateral.map((v: UnsignedIntType) => v.value).join(' + ')} = ${this.userInitCollateral.reduce((a: number, b: UnsignedIntType) => a + b.value, 0)}\n`;
-    report += `${this.collateral.map((v: UnsignedIntType) => v.value).join(' + ')} + ${this.vault} = ${this.collateral.reduce((a: number, b: UnsignedIntType) => a + b.value, 0) + this.vault}\n`;
+    report += `${this.collateral.map((v: UnsignedIntType) => v.value).join(' + ')} + ${this.virtualCollateral} = ${this.collateral.reduce((a: number, b: UnsignedIntType) => a + b.value, 0) + this.virtualCollateral}\n`;
 
     return report;
   }
@@ -687,7 +732,7 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
     
     result.push({
       Id: 'Contract',
-      Collateral: roundDecimal(this.vault)
+      Collateral: roundDecimal(this.virtualCollateral)
     })
     console.log(this.price);
     console.table(result);
