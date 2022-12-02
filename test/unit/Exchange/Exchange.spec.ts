@@ -134,9 +134,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
         longPositionUSD1 * (-1)
       );
       // calculate fee of opened position
-      const swapFee1 = longPositionUSD1 * SWAP_FEE;
+      const swapFee1 = UnsignedInt(longPositionUSD1 * SWAP_FEE);
       // reduce the fee from user0's collateral
-      pool.updateUserCollateral(0, swapFee1, 'open position fee');
+      pool.withdrawCollateralByFee(0, swapFee1);
       // update test pool state
       pool.poolState = newPoolState;
 
@@ -167,9 +167,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
         shortPositionUSD2
       );
       // calculate fee of opened position
-      const swapFee2 = shortPositionUSD2 * SWAP_FEE;
+      const swapFee2 = UnsignedInt(shortPositionUSD2 * SWAP_FEE);
       // reduce the fee from user1's collateral
-      pool.updateUserCollateral(1, swapFee2, 'open position fee');
+      pool.withdrawCollateralByFee(1, swapFee2);
       // update test pool state
       pool.poolState = newPoolState;
 
@@ -199,9 +199,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
         shortPositionUSD3
       );
       // calculate fee of opened position
-      const swapFee3 = shortPositionUSD3 * SWAP_FEE;
+      const swapFee3 = UnsignedInt(shortPositionUSD3 * SWAP_FEE);
       // reduce the fee from user2's collateral
-      pool.updateUserCollateral(2, swapFee3, 'open position fee');
+      pool.withdrawCollateralByFee(2, swapFee3);
       // update test pool state
       pool.poolState = newPoolState;
 
@@ -226,15 +226,15 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       let usdBalance = pool.getUservUsdBalance(1); // 4500
 
       expect(usdBaycValue < usdBalance).to.equal(true);
-      let pnl = usdBalance - usdBaycValue;
-      pool.updateUserCollateral(1, -pnl, 'trading profit');
+      const pnl = UnsignedInt(usdBalance - usdBaycValue);
+      pool.addUserCollateral(1, pnl, 'trading profit');
       pool.updateUserBalance(
         1, 
         - pool.getUservBaycBalance(1),
         - pool.getUservUsdBalance(1)
       );
-      const swapFee4 = usdBaycValue * SWAP_FEE;
-      pool.updateUserCollateral(1, swapFee4, 'close position fee');
+      const swapFee4 = UnsignedInt(usdBaycValue * SWAP_FEE);
+      pool.withdrawCollateralByFee(1, swapFee4);
       pool.poolState = newPoolState;
       await compareResultExchange(pool, [0, 1, 2]);
 
@@ -246,13 +246,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       let withdraw2 = pool.getUserCollateral(2) - 0.1;
       await exchange.connect(pool.account(0)).withdrawCollateral(toWeiN(withdraw0));
       await exchange.connect(pool.account(1)).withdrawCollateral(toWeiN(withdraw1));
-      try {
-        await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
-      } catch (err) {
-        expect((err as Error).message).to.equal("VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'");
-      }
-      // console.log(`Users withdrawed $${withdraw0 + withdraw1 + withdraw2} from contract.`);
-      // console.log(`Diff: ${withdraw0 + withdraw1 + withdraw2 - 10300}`);
+      await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
+
+      console.log(pool.testReport());
     });
 
     it("Test hard and partial liquidate for long position", async () => {
@@ -299,13 +295,8 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       let withdraw2 = pool.getUserCollateral(2) - 0.1;
       await exchange.connect(pool.account(0)).withdrawCollateral(toWeiN(withdraw0));
       await exchange.connect(pool.account(1)).withdrawCollateral(toWeiN(withdraw1));
-      try {
-        await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
-      } catch (err) {
-        expect((err as Error).message).to.equal("VM Exception while processing transaction: reverted with reason string 'ERC20: transfer amount exceeds balance'");
-      }
-      // console.log(`Users withdrawed $${withdraw0 + withdraw1 + withdraw2} from contract.`);
-      // console.log(`Diff: ${withdraw0 + withdraw1 + withdraw2 - 10300}`);
+      await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
+
       console.log(pool.testReport());
     });
   })
