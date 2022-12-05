@@ -148,8 +148,6 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('insurance funds 1 :', toEther(await exchange.insuranceFunds()))
         await exchange.removeInsuranceFunds(toWei('10'))
         console.log('insurance funds 2 :', toEther(await exchange.insuranceFunds()))
-        await usdc.approve(exchange.address, toWei('100'));
-        
       })
       
     })

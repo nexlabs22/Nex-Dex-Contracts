@@ -425,8 +425,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       collateral[usdc][_user] -= pnl;
     }
     //realize funding reward of user;
-    int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
-      virtualBalances[_user].uservBaycBalance;
+    int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
     if(realizeVirtualCollAmount != 0){
     _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
     }
@@ -479,8 +478,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       collateral[usdc][_user] += pnl;
     }
     //realize funding reward of user;
-    int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
-      virtualBalances[_user].uservBaycBalance;
+    int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
     if(realizeVirtualCollAmount != 0){
     _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
     }
@@ -744,8 +742,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         collateral[usdc][_user] -= pnl;
       }
       //realize funding reward of user;
-      int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
-        virtualBalances[_user].uservBaycBalance;
+      int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
       if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
@@ -773,8 +770,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         collateral[usdc][_user] += pnl;
       }
       //realize funding reward of user;
-      int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(_assetSize)) /
-        virtualBalances[_user].uservBaycBalance;
+      int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
       if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
@@ -941,8 +937,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         collateral[usdc][_user] -= pnl;
       }
       //realize funding reward of user;
-      int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(baycLiquidateAmount)) /
-        virtualBalances[_user].uservBaycBalance;
+      int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
       if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
@@ -975,8 +970,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
         collateral[usdc][_user] += pnl;
       }
       //realize funding reward of user;
-      int256 realizeVirtualCollAmount = (virtualBalances[_user].virtualCollateral * int256(baycLiquidateAmount)) /
-        virtualBalances[_user].uservBaycBalance;
+      int256 realizeVirtualCollAmount = virtualBalances[_user].virtualCollateral;
       if(realizeVirtualCollAmount != 0){
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
