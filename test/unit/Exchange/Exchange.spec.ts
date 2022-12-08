@@ -248,7 +248,11 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       await exchange.connect(pool.account(1)).withdrawCollateral(toWeiN(withdraw1));
       await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
 
-      console.log(pool.testReport());
+      pool.withdrawCollateral(0, UnsignedInt(withdraw0));
+      pool.withdrawCollateral(1, UnsignedInt(withdraw1));
+      pool.withdrawCollateral(2, UnsignedInt(withdraw2));
+
+      pool.printCurrentStatus();    
     });
 
     it("Test hard and partial liquidate for long position", async () => {
@@ -297,6 +301,10 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       await exchange.connect(pool.account(1)).withdrawCollateral(toWeiN(withdraw1));
       await exchange.connect(pool.account(2)).withdrawCollateral(toWeiN(withdraw2));
 
-      console.log(pool.testReport());
+      pool.withdrawCollateral(0, UnsignedInt(withdraw0));
+      pool.withdrawCollateral(1, UnsignedInt(withdraw1));
+      pool.withdrawCollateral(2, UnsignedInt(withdraw2));
+
+      pool.printCurrentStatus();
     });
   })

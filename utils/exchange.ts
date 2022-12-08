@@ -83,13 +83,14 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
   Pool.addUser = function (address: SignerWithAddress, collateral: number) {
     this.userCount++;
     this.userAccounts.push(address);
-    this.collateral.push(UnsignedInt(collateral));
+    this.collateral.push(UnsignedInt(0));
     this.userInitCollateral.push(UnsignedInt(collateral));
     this.virtualBalances.push({
       virtualCollateral: 0,
       uservUsdBalance: 0,
       uservBaycBalance: 0,
-    })
+    });
+    this.depositCollateral(this.userCount - 1, UnsignedInt(collateral));
   };
 
   Pool.userDetail = function () {
@@ -167,66 +168,63 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
   Pool.depositCollateral = function (userId: number, amount: UnsignedIntType, desc = 'deposit') {
     if (userId >= this.userCount) return;
     
-    this.addUserCollateral(userId, amount, desc);
+    this.collateral[userId].value += amount.value;
     this.realCollateral.value += amount.value;
+    this.virtualCollateral += amount.value;
   }
 
   Pool.withdrawCollateral = function (userId: number, amount: UnsignedIntType, desc = 'withdraw') {
     if (userId >= this.userCount) return;
     
-    this.reduceUserCollateral(userId, amount, desc);
+    this.collateral[userId].value -= amount.value;
     this.realCollateral.value -= amount.value;
+    this.virtualCollateral -= amount.value;
   }
 
   Pool.withdrawCollateralByFee = function (userId: number, amount: UnsignedIntType, desc = 'fee') {
     if (userId >= this.userCount) return;
     
-    this.reduceUserCollateral(userId, amount, desc);
     this.feeCollector.value += amount.value;
+    this.collateral[userId].value -= amount.value;
+    this.realCollateral.value -= amount.value;
+    this.virtualCollateral -= amount.value;
   }
 
   Pool.withdrawCollateralByInsuranceFund = function (userId: number, amount: UnsignedIntType, desc = 'insurance fund') {
     if (userId >= this.userCount) return;
     
-    this.reduceUserCollateral(userId, amount, desc);
     this.insuranceFunds.value += amount.value;
+    this.collateral[userId].value -= amount.value;
+    this.virtualCollateral -= amount.value;
   }
 
 
   Pool.addUserCollateral = function (userId: number, amount: UnsignedIntType, desc = '') {
     if (userId >= this.userCount) return;
 
-    this.updateUserCollateral(userId, -amount.value, desc);
+    this.collateral[userId].value += amount.value;
+    this.virtualCollateral -= amount.value;
+
+    this.logs.push({
+      from: -1,   // contract
+      to: userId,
+      amount: -amount.value,
+      desc
+    });
   }
 
   Pool.reduceUserCollateral = function (userId: number, amount: UnsignedIntType, desc = '') {
     if (userId >= this.userCount) return;
 
-    this.updateUserCollateral(userId, amount.value, desc);
-  }
+    this.collateral[userId].value -= amount.value;
+    this.virtualCollateral += amount.value;
 
-  Pool.updateUserCollateral = function (userId: number, amount: number, desc = '') {
-    if (userId >= this.userCount) return;
-
-    this.collateral[userId].value -= amount;
-    this.virtualCollateral += amount;
-
-    // if (desc) this.logs.push(desc);
-    if (amount > 0) {
-      this.logs.push({
-        from: userId,
-        to: -1,   // contract
-        amount,
-        desc
-      });
-    } else {
-      this.logs.push({
-        from: -1,   // contract
-        to: userId,
-        amount: -amount,
-        desc
-      });
-    }
+    this.logs.push({
+      from: userId,
+      to: -1,   // contract
+      amount: amount.value,
+      desc
+    });
   }
 
   Pool.getLongBaycAmountOut = function (_vUsdAmount: number, poolState: PoolType | undefined): number {
@@ -730,11 +728,26 @@ export function organizeTestPool(price: number, poolsize: number, exchangeContra
       });
     }
     
+    result.push({});
+    
+    result.push({
+      Collateral: 'Virtual Collateral',
+      AccountValue: 'Insurance Fund',
+      NotionalValue: 'Total Fee',
+      PNL: 'Contract Collateral',
+      Margin: 'Price',
+    })
+
     result.push({
       Id: 'Contract',
-      Collateral: roundDecimal(this.virtualCollateral)
+      Collateral: roundDecimal(this.virtualCollateral),
+      AccountValue: roundDecimal(this.insuranceFunds),
+      NotionalValue: roundDecimal(this.feeCollector),
+      PNL: roundDecimal(this.realCollateral),
+      Margin: roundDecimal(this.price),
     })
-    console.log(this.price);
+    
+
     console.table(result);
   }
 
