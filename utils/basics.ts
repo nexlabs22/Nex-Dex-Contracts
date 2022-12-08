@@ -1,6 +1,8 @@
-import { ethers } from "hardhat"
+import { ethers } from "hardhat";
+import BigNumber from "bignumber.js";
 
-export const toEther = (e: any) => Number(ethers.utils.formatEther(e));
+export const toBigNumber = (e: any): BigNumber => (BigNumber(e.toString() as string).dividedBy(1e+18));
+export const toEther = (e: any): number => Number(ethers.utils.formatEther(e));
 export const toWei = (e: string) => ethers.utils.parseEther(e);
 export const toWeiN = (e: number) => ethers.utils.parseEther(e + '');
 
@@ -22,7 +24,7 @@ export const roundDecimal = (v: number | UnsignedIntType, place = 2): number => 
   return Math.round((value + Number.EPSILON) * X) / X;
 }
 
-export const checkUnsignedInt = (value: number) => {
+export const checkUnsignedInt = (value: number): number => {
   if (value < 0)
     throw new Error("VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)");
   return value;
