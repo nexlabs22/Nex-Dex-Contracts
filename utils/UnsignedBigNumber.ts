@@ -30,6 +30,12 @@ export function instanceOfUnSignedBigNumber(data: any): data is UnsignedBigNumbe
 }
 
 export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10): UnsignedBigNumberType => {
+	const helper = (func: any, args: Array<any>): any => {
+		if (instanceOfUnSignedBigNumber(args[1])) 
+			args[1] = args[1].value;
+		return func.call(...args);
+	}
+
 	const obj = Object.create(null);
 	obj._v = checkUnsignedBigNumber(BigNumber(value, base));
 	obj.discriminator = DISCRIMINDATOR;
@@ -43,65 +49,48 @@ export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10)
 		}
 	});
 
+	obj._helper = function(funcPrototype: any, args: Array<any>):any {
+		return helper(funcPrototype, [this.value, ...args]);
+	}
+
 	obj.plus = function (bigNumber: UnsignedBigNumberType | BigNumber | number | string, base = 10): BigNumber {
-		console.log("HERE!", instanceOfUnSignedBigNumber(bigNumber));
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.plus(bigNumber.value, base);
-		return this.value.plus(bigNumber, base);
+		return this._helper(BigNumber.prototype.plus, [bigNumber, base]);
 	}
 
 	obj.minus = function (bigNumber: BigNumber | number | string, base = 10): BigNumber {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.minus(bigNumber.value, base);
-		return this.value.minus(bigNumber, base);
+		return this._helper(BigNumber.prototype.minus, [bigNumber, base]);
 	}
 
 	obj.dividedBy = function (bigNumber: BigNumber | number | string, base = 10): BigNumber {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.dividedBy(bigNumber.value, base);
-		return this.value.dividedBy(bigNumber, base);
+		return this._helper(BigNumber.prototype.dividedBy, [bigNumber, base]);
 	}
 
 	obj.multipliedBy = function (bigNumber: BigNumber | number | string, base = 10): BigNumber {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.multipliedBy(bigNumber.value, base);
-		return this.value.multipliedBy(bigNumber, base);
+		return this._helper(BigNumber.prototype.multipliedBy, [bigNumber, base]);
 	}
 
 	obj.times = function (bigNumber: BigNumber | number | string, base = 10): BigNumber {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.times(bigNumber.value, base);
-		return this.value.times(bigNumber, base);
+		return this._helper(BigNumber.prototype.times, [bigNumber, base]);
 	}
 
 	obj.eq = function (bigNumber: BigNumber | number | string, base = 10): boolean {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.eq(bigNumber.value, base);
-		return this.value.eq(bigNumber, base);
+		return this._helper(BigNumber.prototype.eq, [bigNumber, base]);
 	}
 
 	obj.gt = function (bigNumber: BigNumber | number | string, base = 10): boolean {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.gt(bigNumber.value, base);
-		return this.value.gt(bigNumber, base);
+		return this._helper(BigNumber.prototype.gt, [bigNumber, base]);
 	}
 
 	obj.gte = function (bigNumber: BigNumber | number | string, base = 10): boolean {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.gte(bigNumber.value, base);
-		return this.value.gte(bigNumber, base);
+		return this._helper(BigNumber.prototype.gte, [bigNumber, base]);
 	}
 
 	obj.lt = function (bigNumber: BigNumber | number | string, base = 10): boolean {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.lt(bigNumber.value, base);
-		return this.value.lt(bigNumber, base);
+		return this._helper(BigNumber.prototype.lt, [bigNumber, base]);
 	}
 
 	obj.lte = function (bigNumber: BigNumber | number | string, base = 10): boolean {
-		if (instanceOfUnSignedBigNumber(bigNumber)) 
-			return this.value.lte(bigNumber.value, base);
-		return this.value.lte(bigNumber, base);
+		return this._helper(BigNumber.prototype.lte, [bigNumber, base]);
 	}
 
 	obj.isNegative = function (): boolean {
