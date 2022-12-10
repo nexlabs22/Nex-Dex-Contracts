@@ -61,7 +61,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        await exchange.openLongPosition(toWei('1100'))
+        let minimumBayc = await exchange.getMinimumLongBaycOut(toWei('1100'))
+        await exchange.openLongPosition(toWei('1100'), minimumBayc)
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
@@ -71,9 +72,14 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        await exchange.connect(account1).openShortPosition(toWei('1200'))
-        await exchange.connect(account2).openShortPosition(toWei('1200'))
-        await exchange.connect(account3).openShortPosition(toWei('1000'))
+        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('1200'))
+        await exchange.connect(account1).openShortPosition(toWei('1200'), minimumBayc)
+
+        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('1200'))
+        await exchange.connect(account2).openShortPosition(toWei('1200'), minimumBayc)
+
+        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('1000'))
+        await exchange.connect(account3).openShortPosition(toWei('1000'), minimumBayc)
         
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner position national 2 :',toEther(await exchange.getPositionNotional(owner.address)));
@@ -90,7 +96,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       })
 
       
-      it("Test open and close short position", async () => {
+      it("Test hard liquidate short position", async () => {
         const [owner, account1, account2, account3] = await ethers.getSigners();
         await setOraclePrice(1.5);
         // console.log(toEther(await exchange.showPriceETH()))
@@ -118,7 +124,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        await exchange.openShortPosition(toWei('700'))
+        let minimumBayc = await exchange.getMinimumShortBaycOut(toWei('700'))
+        await exchange.openShortPosition(toWei('700'), minimumBayc)
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
@@ -128,8 +135,10 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1.8);
-        await exchange.connect(account1).openLongPosition(toWei('500'))
-        await exchange.connect(account2).openLongPosition(toWei('700'))
+        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('500'))
+        await exchange.connect(account1).openLongPosition(toWei('500'), minimumBayc)
+        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('700'))
+        await exchange.connect(account2).openLongPosition(toWei('700'), minimumBayc)
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         // console.log('is hard liquidatable ? :', await exchange.isHardLiquidateable2(owner.address))
         // await exchange.hardLiquidate(owner.address);
@@ -139,7 +148,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // console.log('owner unrealized pnl :', toEther(await exchange.))
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
         console.log(toEther(await exchange.uservUsdBalance(owner.address)));
-        await exchange.connect(account3).openLongPosition(toWei('400'))
+        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('400'))
+        await exchange.connect(account3).openLongPosition(toWei('400'), minimumBayc)
         // await exchange.closePosition(ownerAssetSize);
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('final collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));

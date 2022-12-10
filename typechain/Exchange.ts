@@ -42,6 +42,8 @@ export interface ExchangeInterface extends utils.Interface {
     "getLatestNftPrice()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
+    "getMinimumLongBaycOut(uint256)": FunctionFragment;
+    "getMinimumShortBaycOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
     "getPositionNotional(address)": FunctionFragment;
     "getShortBaycAmountOut(uint256)": FunctionFragment;
@@ -56,8 +58,8 @@ export interface ExchangeInterface extends utils.Interface {
     "latestFeeUpdate()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "marketPrice()": FunctionFragment;
-    "openLongPosition(uint256)": FunctionFragment;
-    "openShortPosition(uint256)": FunctionFragment;
+    "openLongPosition(uint256,uint256)": FunctionFragment;
+    "openShortPosition(uint256,uint256)": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
@@ -173,6 +175,14 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "getLongVusdAmountOut",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "getMinimumLongBaycOut",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMinimumShortBaycOut",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "getPNL", values: [string]): string;
   encodeFunctionData(
     functionFragment: "getPositionNotional",
@@ -228,11 +238,11 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "openLongPosition",
-    values: [BigNumberish]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "openShortPosition",
-    values: [BigNumberish]
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "oraclePrice",
@@ -397,6 +407,14 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getLongVusdAmountOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMinimumLongBaycOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMinimumShortBaycOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPNL", data: BytesLike): Result;
@@ -701,6 +719,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    getMinimumLongBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getMinimumShortBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     getPNL(
       _user: string,
       overrides?: CallOverrides
@@ -762,11 +790,13 @@ export interface Exchange extends BaseContract {
 
     openLongPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -947,6 +977,16 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  getMinimumLongBaycOut(
+    _usdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getMinimumShortBaycOut(
+    _usdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   getPositionNotional(
@@ -1005,11 +1045,13 @@ export interface Exchange extends BaseContract {
 
   openLongPosition(
     _usdAmount: BigNumberish,
+    _minimumBaycAmountOut: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortPosition(
     _usdAmount: BigNumberish,
+    _minimumBaycAmountOut: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1193,6 +1235,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getMinimumLongBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getMinimumShortBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     getPositionNotional(
@@ -1251,11 +1303,13 @@ export interface Exchange extends BaseContract {
 
     openLongPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1482,6 +1536,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getMinimumLongBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getMinimumShortBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     getPositionNotional(
@@ -1540,11 +1604,13 @@ export interface Exchange extends BaseContract {
 
     openLongPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1728,6 +1794,16 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getMinimumLongBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getMinimumShortBaycOut(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getPNL(
       _user: string,
       overrides?: CallOverrides
@@ -1789,11 +1865,13 @@ export interface Exchange extends BaseContract {
 
     openLongPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
+      _minimumBaycAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

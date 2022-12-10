@@ -94,19 +94,26 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await printCurrentStatus()
         
         console.log("First, user0 will open Long Position with $490.")
-        await exchange.openLongPosition(toWei('490'))
+        const minimumBayc = await exchange.getMinimumLongBaycOut(toWei('490'))
+        console.log("minimumBayc :", toEther(minimumBayc))
+        await exchange.openLongPosition(toWei('490'), minimumBayc)
         console.log('price:', toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
-
+        
         console.log("Second, user1 will open Short Position with $4500. At that time, user0 will be liquidated partially because his margin is 50% for new pool state.")
-        await exchange.connect(account1).openShortPosition(toWei('4500'))
+        const minimumBayc1 = await exchange.getMinimumShortBaycOut(toWei('4500'))
+        console.log("minimumBayc :", toEther(minimumBayc1))
+        await exchange.connect(account1).openShortPosition(toWei('4500'), minimumBayc1)
         console.log('price:', toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
 
         console.log("Third, user2 will open Short Position with $7000 and user0 will be liquidated hardly.")
-        await exchange.connect(account2).openShortPosition(toWei('7000'))
+        const minimumBayc2 = await exchange.getMinimumShortBaycOut(toWei('7000'))
+        console.log("minimumBayc :", toEther(minimumBayc2))
+        await exchange.connect(account2).openShortPosition(toWei('7000'), minimumBayc2)
         console.log('price:', toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
+        
 
         console.log("Finally, user1 will close Position completely, and user2 will be liquidated hardly because of this.")
         await exchange.connect(account1).closePositionComplete()

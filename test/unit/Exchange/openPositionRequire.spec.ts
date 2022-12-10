@@ -62,8 +62,10 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
         // await exchange.openShortPosition(toWei('250'))
-        await expect(exchange.openLongPosition(toWei('250'))).to.be.revertedWith("Insufficient margin to open position with requested size.");
-        await expect(exchange.openShortPosition(toWei('250'))).to.be.revertedWith("Insufficient margin to open position with requested size.");
+        let minimumBayc = await exchange.getMinimumLongBaycOut(toWei('250'))
+        await expect(exchange.openLongPosition(toWei('250'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
+        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('250'))
+        await expect(exchange.openShortPosition(toWei('250'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
         console.log('owner margin:', Number(await exchange.userMargin(owner.address)))
         
       })
