@@ -6,9 +6,9 @@ export const toEther = (e: any): number => Number(ethers.utils.formatEther(e));
 export const toWei = (e: string) => ethers.utils.parseEther(e);
 export const toWeiN = (e: number) => ethers.utils.parseEther(e + '');
 
-export const compareResult = (contractValue: any, expectedValue: number, diff = 0.0000000001): boolean => {
-  if (Math.abs(Number(contractValue) - expectedValue) > diff) {
-    console.log("Not equal! - ", Number(contractValue), expectedValue);
+export const compareResult = (contractValue: any, expectedValue: any, diff = 0.0000000001): boolean => {
+  if (BigNumber(contractValue).minus(expectedValue).abs().gt(diff)) {
+    console.log("Not equal! - ", BigNumber(contractValue).toPrecision(), BigNumber(expectedValue).toPrecision());
     return false;
   }
   return true;
