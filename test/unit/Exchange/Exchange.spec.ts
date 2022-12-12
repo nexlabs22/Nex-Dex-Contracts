@@ -254,7 +254,7 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       pool.printCurrentStatus();    
     });
 
-    it.skip("Test hard and partial liquidate for long position", async () => {
+    it("Test hard and partial liquidate for long position", async () => {
       // user0 open long position($490) in contract's pool
       await exchange.connect(pool.account(0)).openLongPosition(toWeiN(longPositionUSD1.toNumber()));
       pool.openLongPosition(0, BigNumber(longPositionUSD1));

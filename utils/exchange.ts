@@ -736,8 +736,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     result.push({
       Collateral: 'Virtual Collateral',
       AccountValue: 'Insurance Fund',
-      NotionalValue: 'Total Fee',
-      PNL: 'Contract Collateral',
+      NotionalValue: 'Contract Collateral',
+      PNL: 'Total Fee',
       Margin: 'Price',
     })
 
@@ -745,8 +745,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       Id: 'Contract',
       Collateral: +this.virtualCollateral.toFixed(2),
       AccountValue: +this.insuranceFunds.toFixed(2),
-      NotionalValue: +this.feeCollector.toFixed(2),
-      PNL: +this.realCollateral.toFixed(2),
+      NotionalValue: +this.realCollateral.toFixed(2),
+      PNL: +this.feeCollector.toFixed(2),
       Margin: +this.price.toFixed(2),
     })
     
