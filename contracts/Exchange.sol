@@ -1065,7 +1065,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-  //get minimum long bayc amount that user receives
+  //get minimum long usd amount that user receives
   function getMinimumLongUsdOut(uint256 _BaycAmount) public view returns (uint256) {
     int256 vBaycPoolSize = int256(pool.vBaycPoolSize);
     int256 vUsdPoolSize = int256(pool.vUsdPoolSize);
@@ -1140,7 +1140,7 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   }
 
 
-  //get minimum long bayc amount that user receives
+  //get minimum short usd amount that user receives
   function getMinimumShortUsdOut(uint256 _BaycAmount) public view returns (uint256) {
     int256 vBaycPoolSize = int256(pool.vBaycPoolSize);
     int256 vUsdPoolSize = int256(pool.vUsdPoolSize);
