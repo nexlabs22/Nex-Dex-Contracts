@@ -116,7 +116,13 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         
 
         console.log("Finally, user1 will close Position completely, and user2 will be liquidated hardly because of this.")
-        await exchange.connect(account1).closePositionComplete()
+        const account1BaycBalance = await exchange.uservBaycBalance(account1.address)
+        console.log(account1BaycBalance.abs())
+        const minimumUsdOut = await exchange.getMinimumLongUsdOut(account1BaycBalance.abs());
+        console.log('by liq:', toEther(minimumUsdOut))
+        console.log('without liq:',toEther(await exchange.getLongVusdAmountOut(account1BaycBalance.abs())))
+        //return
+        await exchange.connect(account1).closePositionComplete(minimumUsdOut)
         console.log('price:', toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
 

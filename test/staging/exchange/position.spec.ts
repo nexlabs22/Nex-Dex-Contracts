@@ -75,7 +75,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('owner position national 2 :',toEther(await exchange.getPositionNotional(owner.address)));
         // console.log('owner unrealized pnl :', toEther(await exchange.))
-        await exchange.closePosition(ownerAssetSize);
+        const ownerBaycBalance = await exchange.uservBaycBalance(owner.address);
+        const minimumUsdOut = await exchange.getMinimumShortUsdOut(ownerBaycBalance.abs());
+        await exchange.closePosition(ownerAssetSize, minimumUsdOut);
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
@@ -131,7 +133,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('positive asset size :', Math.abs(Number(ownerAssetSize)).toString())
         // await exchange.closePosition(Math.abs(Number(ownerAssetSize)).toString());
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
-        await exchange.closePositionComplete();
+        const ownerBaycBalance = await exchange.uservBaycBalance(owner.address);
+        const minimumUsdOut = await exchange.getMinimumLongUsdOut(ownerBaycBalance.abs());
+        await exchange.closePositionComplete(minimumUsdOut);
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
