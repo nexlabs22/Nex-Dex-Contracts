@@ -1,12 +1,13 @@
 import { ethers } from "hardhat";
 import BigNumber from "bignumber.js";
 
+export const BN = BigNumber.clone({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
 export const toBigNumber = (e: any): BigNumber => (BigNumber(e.toString() as string).dividedBy(1e+18));
 export const toEther = (e: any): number => Number(ethers.utils.formatEther(e));
 export const toWei = (e: string) => ethers.utils.parseEther(e);
 export const toWeiN = (e: number) => ethers.utils.parseEther(e + '');
 
-export const compareResult = (contractValue: any, expectedValue: any, diff = 0.0000000001): boolean => {
+export const compareResult = (contractValue: any, expectedValue: any, diff = 0): boolean => {
   if (BigNumber(contractValue).minus(expectedValue).abs().gt(diff)) {
     console.log("Not equal! - ", BigNumber(contractValue).toPrecision(), BigNumber(expectedValue).toPrecision());
     return false;

@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { BN } from './basics';
 
 export const checkUnsignedBigNumber = (value: BigNumber): BigNumber => {
 	if (value.lt(0))
@@ -13,11 +14,11 @@ export interface UnsignedBigNumberType {
 
 export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10): UnsignedBigNumberType => {
 	const obj = Object.create(null);
-	obj._v = checkUnsignedBigNumber(BigNumber(value, base));
+	obj._v = checkUnsignedBigNumber(BN(value, base));
 
 	Object.defineProperty(obj, "value", {
 		set: function (value: BigNumber | number | string) {
-			this._v = checkUnsignedBigNumber(BigNumber(value));
+			this._v = checkUnsignedBigNumber(BN(value));
 		},
 		get: function () {
 			return this._v;

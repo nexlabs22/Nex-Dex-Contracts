@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import BigNumber from "bignumber.js";
-import { compareResult, roundDecimal } from "./basics";
+import { compareResult, roundDecimal, BN } from "./basics";
 import { UnsignedBigNumber } from "./UnsignedBigNumber";
 
 import type { UnsignedBigNumberType } from "./UnsignedBigNumber";
@@ -56,7 +56,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.userCount = 0;
   Pool.logs = [] as Array<LogType>;
 
-  Pool.virtualCollateral = BigNumber(0);
+  Pool.virtualCollateral = BN(0);
   Pool.realCollateral = UnsignedBigNumber(0);
   Pool.insuranceFunds = UnsignedBigNumber(0);
   Pool.feeCollector = UnsignedBigNumber(0);
@@ -89,9 +89,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     this.collateral.push(UnsignedBigNumber(0));
     this.userInitCollateral.push(UnsignedBigNumber(collateral));
     this.virtualBalances.push({
-      virtualCollateral: BigNumber(0),
-      uservUsdBalance: BigNumber(0),
-      uservBaycBalance: BigNumber(0),
+      virtualCollateral: BN(0),
+      uservUsdBalance: BN(0),
+      uservBaycBalance: BN(0),
     });
     this.depositCollateral(this.userCount - 1, UnsignedBigNumber(collateral));
   };
@@ -112,19 +112,19 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.getUserCollateral = function (userId: number): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     return this.collateral[userId].value;
   }
 
   Pool.getUservUsdBalance = function (userId: number): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     return this.virtualBalances[userId].uservUsdBalance;
   }
     
   Pool.getUservBaycBalance = function (userId: number): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     return this.virtualBalances[userId].uservBaycBalance;
   }
@@ -257,11 +257,11 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.getVusdAmountOut = function (baycAmount: BigNumber, poolState: PoolType): BigNumber {
     if (baycAmount.gt(0))      return this.getShortVusdAmountOut(baycAmount, poolState);
     else if (baycAmount.lt(0)) return this.getLongVusdAmountOut(baycAmount.abs(), poolState);
-    return BigNumber(0);
+    return BN(0);
   }
 
   Pool.getNotionalValue = function (userId: number, poolState: PoolType): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     const baycBalance = this.virtualBalances[userId].uservBaycBalance;
     
@@ -269,13 +269,13 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.getPNL = function (userId: number, poolState: PoolType): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     const notionalValue = this.getNotionalValue(userId, poolState);
     const usdBalance = this.virtualBalances[userId].uservUsdBalance;
     const baycBalance = this.virtualBalances[userId].uservBaycBalance;
 
-    let pnl = BigNumber(0);
+    let pnl = BN(0);
     if (baycBalance.gt(0))      pnl = notionalValue.plus(usdBalance);
     else if (baycBalance.lt(0)) pnl = usdBalance.minus(notionalValue);
 
@@ -283,13 +283,13 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.getAccountValue = function (userId: number, poolState: PoolType): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     const pnl = this.getPNL(userId, poolState);
     const baycBalance = this.virtualBalances[userId].uservBaycBalance;
     const collateral = this.collateral[userId].value;
 
-    let accountValue = BigNumber(collateral);
+    let accountValue = BN(collateral);
     // TODO: add virtual collateral
     if (! baycBalance.eq(0)) accountValue = collateral.plus(pnl);
 
@@ -297,13 +297,13 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.getMargin = function (userId: number, poolState: PoolType): BigNumber {
-    if (userId >= this.userCount) return BigNumber(0);
+    if (userId >= this.userCount) return BN(0);
 
     const accountValue = this.getAccountValue(userId, poolState);
     const notionalValue = this.getNotionalValue(userId, poolState);
     const baycBalance = this.virtualBalances[userId].uservBaycBalance;
 
-    let margin = BigNumber(0);
+    let margin = BN(0);
     if (baycBalance != 0) margin = accountValue.dividedBy(notionalValue).multipliedBy(100.0);
 
     return margin;
@@ -366,8 +366,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.calculatePartialLiquidateValue = function(userId: number, poolState: PoolType): BigNumber {
     const accountValue = this.getAccountValue(userId, poolState);
     const notionalValue = this.getNotionalValue(userId, poolState);
-    const numerator = notionalValue.multipliedBy(SAFE_MARGIN).minus(accountValue.abs());
-    const denominator = SAFE_MARGIN - DISCOUNT_RATE;
+    const numerator = notionalValue.multipliedBy(SAFE_MARGIN).minus(accountValue.abs()).decimalPlaces(18, 1);
+    const denominator = BigNumber(SAFE_MARGIN).minus(DISCOUNT_RATE);
     const x = numerator.dividedBy(denominator);
     return x;
   }
@@ -721,7 +721,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       const status = this.getUserStatus(i, this.poolState);
       result.push({
         Id: 'User' + i,
-        Collateral: +status.collateral.toFixed(2),
+        Collateral: +status.collateral.toFixed(),
         AccountValue: +status.accountValue.toFixed(2),
         NotionalValue: +status.notionalValue.toFixed(2),
         PNL: +status.pnl.toFixed(2),
@@ -743,7 +743,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
     result.push({
       Id: 'Contract',
-      Collateral: +this.virtualCollateral.toFixed(2),
+      Collateral: +this.virtualCollateral.toFixed(),
       AccountValue: +this.insuranceFunds.toFixed(2),
       NotionalValue: +this.realCollateral.toFixed(2),
       PNL: +this.feeCollector.toFixed(2),
