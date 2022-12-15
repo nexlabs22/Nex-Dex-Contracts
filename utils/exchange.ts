@@ -398,10 +398,11 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(userPartialvUsdBalance.abs());
 
       // TODO: remove user
-      const K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
+      let K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
       this.vBaycPoolSize.value = this.vBaycPoolSize.value.plus(baycLiquidateAmount);
       this.vUsdPoolSize.value = K.dividedBy(this.vBaycPoolSize.value);
 
+      K = vBaycNewPoolSize.value.multipliedBy(vUsdNewPoolSize.value);
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(baycLiquidateAmount);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
@@ -423,10 +424,11 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(userPartialvUsdBalance.abs());
 
       // TODO: remove user
-      const K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
+      let K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
       this.vBaycPoolSize.value = this.vBaycPoolSize.value.minus(baycLiquidateAmount);
       this.vUsdPoolSize.value = K.dividedBy(this.vBaycPoolSize.value);
 
+      K = vBaycNewPoolSize.value.multipliedBy(vUsdNewPoolSize.value);
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.minus(baycLiquidateAmount);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
@@ -472,10 +474,11 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(userUsdBalance);
 
       // TODO: remove user
-      const K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
+      let K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
       this.vBaycPoolSize.value = this.vBaycPoolSize.value.plus(userBaycBalance);
       this.vUsdPoolSize.value = K.dividedBy(this.vBaycPoolSize.value);
 
+      K = vBaycNewPoolSize.value.multipliedBy(vUsdNewPoolSize.value);
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(userBaycBalance);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
@@ -496,10 +499,11 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(userUsdBalance);
 
       // TODO: remove user
-      const K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
+      let K = this.vBaycPoolSize.value.multipliedBy(this.vUsdPoolSize.value);
       this.vBaycPoolSize.value = this.vBaycPoolSize.value.plus(userBaycBalance);
       this.vUsdPoolSize.value = K.dividedBy(this.vBaycPoolSize.value);
 
+      K = vBaycNewPoolSize.value.multipliedBy(vUsdNewPoolSize.value);
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(userBaycBalance);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
@@ -532,7 +536,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     return newPoolState;
   }
 
-  Pool.openLongPosition = function (userId: number, _usdAmount: BigNumber) {
+  Pool.openLongPosition = function (userId: number, _usdAmount: BigNumber, _minimumBaycAmountOut: BigNumber) {
     let newPoolState = this.addVusdBalance(_usdAmount);
 
     const isNewMarginHardLiquidatable = this.isNewMarginLiquidatable(userId, _usdAmount, newPoolState);
@@ -545,6 +549,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     newPoolState = this.addVusdBalance(_usdAmount);
 
     const userBayc = UnsignedBigNumber(this.vBaycPoolSize.value.minus(newPoolState.vBaycPoolSize.value));
+    if (!(userBayc.value.gte(_minimumBaycAmountOut))) {
+      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
+    }
     this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(userBayc.value);
     this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(_usdAmount);
 
@@ -556,7 +563,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     this.poolState = newPoolState;
   }
 
-  Pool.openShortPosition = function (userId: number, _usdAmount: BigNumber) {
+  Pool.openShortPosition = function (userId: number, _usdAmount: BigNumber, _minimumBaycAmountOut: BigNumber) {
     let newPoolState = this.removeVusdBalance(_usdAmount);
 
     const isNewMarginHardLiquidatable = this.isNewMarginLiquidatable(userId, _usdAmount, newPoolState);
@@ -569,6 +576,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     newPoolState = this.removeVusdBalance(_usdAmount);
 
     const userBayc = UnsignedBigNumber(newPoolState.vBaycPoolSize.value.minus(this.vBaycPoolSize.value));
+    if (!(userBayc.value.gte(_minimumBaycAmountOut))) {
+      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
+    }
     this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(userBayc.value);
     this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(_usdAmount);
 
@@ -580,24 +590,24 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     this.poolState = newPoolState;
   }
 
-  Pool.closePositionComplete = function (userId: number) {
+  Pool.closePositionComplete = function (userId: number, _minimumUsdOut: BigNumber) {
     const assetSize = this.virtualBalances[userId].uservBaycBalance.abs();
-    this.closePosition(userId, assetSize);
+    this.closePosition(userId, assetSize, _minimumUsdOut);
   }
 
-  Pool.closePosition = function (userId: number, _assetSize: BigNumber) {
+  Pool.closePosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
     if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
       throw new Error("Reduce only order can only close size equal or less than the outstanding asset size.");
     }
 
     if (this.virtualBalances[userId].uservBaycBalance.gt(0)) {
-      this.closeLongPosition(userId, _assetSize);
+      this.closeLongPosition(userId, _assetSize, _minimumUsdOut);
     } else if (this.virtualBalances[userId].uservBaycBalance.lt(0)) {
-      this.closeShortPosition(userId, _assetSize);
+      this.closeShortPosition(userId, _assetSize, _minimumUsdOut);
     }
   }
 
-  Pool.closeLongPosition = function (userId: number, _assetSize: BigNumber) {
+  Pool.closeLongPosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
     if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
       throw new Error("Reduce only order can only close long size equal or less than the outstanding asset size.");
     }
@@ -608,7 +618,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const usdBaycValue = UnsignedBigNumber(this.getShortVusdAmountOut(_assetSize)).value;
-
+    if (!(usdBaycValue.gte(_minimumUsdOut))) {
+      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
+    }
     const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(_assetSize)
         .dividedBy(this.virtualBalances[userId].uservBaycBalance);
     
@@ -631,7 +643,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     this.poolState = this.addBaycBalance(_assetSize);
   }
 
-  Pool.closeShortPosition = function (userId: number, _assetSize: BigNumber) {
+  Pool.closeShortPosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
     if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
       throw new Error("Reduce only order can only close long size equal or less than the outstanding asset size.");
     }
@@ -642,7 +654,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     newPoolState = this.partialLiquidateUsers(newPoolState);
 
     const usdBaycValue = UnsignedBigNumber(this.getLongVusdAmountOut(_assetSize)).value;
-
+    if (!(usdBaycValue.gte(_minimumUsdOut))) {
+      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
+    }
     const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(_assetSize)
       .dividedBy(this.virtualBalances[userId].uservBaycBalance);
     
@@ -663,6 +677,291 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.removeBaycBalance(_assetSize);
+  }
+
+  //get minimum long bayc amount that user receives
+  Pool.getMinimumLongBaycOut = function (_usdAmount: UnsignedBigNumberType): UnsignedBigNumberType {
+    let vBaycPoolSize = this.vBaycPoolSize.value;
+    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvUsdPoolSize = vUsdPoolSize.plus(_usdAmount.value);
+    let newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isHardLiquidatable = this.isHardLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {          
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.multipliedBy(this.virtualBalances[i].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      // }
+    }
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isPartialLiquidatable = this.isPartialLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
+            i,
+            UnsignedBigNumber(newvBaycPoolSize),
+            UnsignedBigNumber(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize * vUsdPoolSize;
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      // }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvUsdPoolSize = vUsdPoolSize.plus(_usdAmount.value);
+    const finalvBaycPoolSize = k.dividedBy(finalvUsdPoolSize);
+    const userBaycOut = vBaycPoolSize.minus(finalvBaycPoolSize);
+    return UnsignedBigNumber(userBaycOut);
+  }
+
+  //get minimum short bayc amount that user receives
+  Pool.getMinimumShortBaycOut = function (_usdAmount: UnsignedBigNumberType): UnsignedBigNumberType {
+    let vBaycPoolSize = this.vBaycPoolSize.value;
+    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvUsdPoolSize = vUsdPoolSize.minus(_usdAmount.value);
+    let newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isHardLiquidatable = this.isHardLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) { 
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      // }
+    }
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isPartialLiquidatable = this.isPartialLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {          
+          const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
+            i,
+            UnsignedBigNumber(newvBaycPoolSize),
+            UnsignedBigNumber(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      // }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvUsdPoolSize = vUsdPoolSize.minus(_usdAmount.value);
+    const finalvBaycPoolSize = k.dividedBy(finalvUsdPoolSize);
+    const userBaycOut = finalvBaycPoolSize.minus(vBaycPoolSize);
+    return UnsignedBigNumber(userBaycOut);
+  }
+
+  //get minimum long usd amount that user receives
+  Pool.getMinimumLongUsdOut = function (_BaycAmount: UnsignedBigNumberType): UnsignedBigNumberType {
+    let vBaycPoolSize = this.vBaycPoolSize.value;
+    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvBaycPoolSize = vBaycPoolSize.minus(_BaycAmount.value);
+    let newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isHardLiquidatable = this.isHardLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      // }
+    }
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isPartialLiquidatable = this.isPartialLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
+            i,
+            UnsignedBigNumber(newvBaycPoolSize),
+            UnsignedBigNumber(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      // }
+    }
+
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvBaycPoolSize = vBaycPoolSize.minus(_BaycAmount.value);
+    const finalvUsdPoolSize = k.dividedBy(finalvBaycPoolSize);
+    const userUsdOut = finalvUsdPoolSize.minus(vUsdPoolSize);
+    return UnsignedBigNumber(userUsdOut);
+  }
+
+  //get minimum short usd amount that user receives
+  Pool.getMinimumShortUsdOut = function (_BaycAmount: UnsignedBigNumberType): UnsignedBigNumberType {
+    let vBaycPoolSize = this.vBaycPoolSize.value;
+    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvBaycPoolSize = vBaycPoolSize.plus(_BaycAmount.value);
+    let newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isHardLiquidatable = this.isHardLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[i].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      // }
+    }
+
+    for (let i = 0; i < this.userCount; i++) {
+      // if (activeUsers[i] != address(0)) {
+        const isPartialLiquidatable = this.isPartialLiquidatable(
+          i,
+          UnsignedBigNumber(newvBaycPoolSize),
+          UnsignedBigNumber(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
+            i,
+            UnsignedBigNumber(newvBaycPoolSize),
+            UnsignedBigNumber(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      // }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvBaycPoolSize = vBaycPoolSize.plus(_BaycAmount.value);
+    const finalvUsdPoolSize = k.dividedBy(finalvBaycPoolSize);
+    const userUsdOut = vUsdPoolSize.minus(finalvUsdPoolSize);
+    return UnsignedBigNumber(userUsdOut);
   }
 
   // Pool.collateralCheck = function () {
