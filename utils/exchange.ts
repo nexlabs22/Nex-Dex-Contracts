@@ -377,12 +377,14 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     let vUsdNewPoolSize = poolState.vUsdPoolSize;
 
     const liquidateAmount = this.calculatePartialLiquidateValue(userId, poolState);
-    const baycLiquidateAmount = liquidateAmount.multipliedBy(this.vBaycPoolSize.value).dividedBy(this.vUsdPoolSize.value);
+    // const baycLiquidateAmount = liquidateAmount.multipliedBy(this.vBaycPoolSize.value).dividedBy(this.vUsdPoolSize.value);
 
     const userUsdBalance = this.virtualBalances[userId].uservUsdBalance;
     const userBaycBalance = this.virtualBalances[userId].uservBaycBalance;
     if (userBaycBalance.gt(0)) {
-      const usdBaycValue = this.getShortVusdAmountOut(baycLiquidateAmount);
+      // const usdBaycValue = this.getShortVusdAmountOut(baycLiquidateAmount);
+      const usdBaycValue = liquidateAmount;
+      const baycLiquidateAmount = this.getShortBaycAmountOut(usdBaycValue);
       const userPartialvUsdBalance = userUsdBalance.multipliedBy(baycLiquidateAmount).dividedBy(userBaycBalance);
 
       if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
@@ -406,15 +408,16 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(baycLiquidateAmount);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
-    else if (userBaycBalance < 0) {
-      const usdBaycValue = this.getLongVusdAmountOut(baycLiquidateAmount);
+    else if (userBaycBalance.lt(0)) {
+      const usdBaycValue = liquidateAmount;
+      const baycLiquidateAmount = this.getLongVusdAmountOut(usdBaycValue);
       const userPartialvUsdBalance = userUsdBalance.multipliedBy(baycLiquidateAmount).dividedBy(userBaycBalance);
       
       if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
         const pnl = usdBaycValue.minus(userPartialvUsdBalance.abs());
         this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
       }
-      if (usdBaycValue < Math.abs(userPartialvUsdBalance)) {
+      if (usdBaycValue.lt(userPartialvUsdBalance.abs())) {
         const pnl = userPartialvUsdBalance.abs().minus(usdBaycValue);
         this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
       }
@@ -464,7 +467,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       if (usdBaycValue.gt(userUsdBalance.abs())) {
         const pnl = usdBaycValue.minus(userUsdBalance.abs());
         this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
-      } else if (usdBaycValue < Math.abs(userUsdBalance)) {
+      } else if (usdBaycValue.lt(userUsdBalance.abs())) {
         const pnl = userUsdBalance.abs().minus(usdBaycValue);
         this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
       }
@@ -526,9 +529,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       const isLiquidatable = this.isHardLiquidatable(i, poolState);
       if (isLiquidatable) {
         const userMargin = this.getMargin(i, poolState);
-        if (userMargin > 0) {
+        if (userMargin.gt(0)) {
           newPoolState = this.hardLiquidate(i, newPoolState);
-        } else if (userMargin < 0) {
+        } else if (userMargin.lt(0)) {
           newPoolState = this.hardNegativeLiquidate(i, newPoolState);
         }
       }
@@ -691,8 +694,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isHardLiquidatable == true) {          
           //update new pool
@@ -711,32 +716,36 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
-            UnsignedBigNumber(newvBaycPoolSize),
-            UnsignedBigNumber(newvUsdPoolSize)
+            {
+              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize * vUsdPoolSize;
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -762,8 +771,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isHardLiquidatable == true) { 
           //update new pool
@@ -781,32 +792,36 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isPartialLiquidatable == true) {          
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
-            UnsignedBigNumber(newvBaycPoolSize),
-            UnsignedBigNumber(newvUsdPoolSize)
+            {
+              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -833,8 +848,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isHardLiquidatable == true) {
           //update new pool
@@ -853,32 +870,36 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
-            UnsignedBigNumber(newvBaycPoolSize),
-            UnsignedBigNumber(newvUsdPoolSize)
+            {
+              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            }
           );
           if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -905,8 +926,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isHardLiquidatable == true) {
           //update new pool
@@ -925,32 +948,36 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // if (activeUsers[i] != address(0)) {
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
-          UnsignedBigNumber(newvBaycPoolSize),
-          UnsignedBigNumber(newvUsdPoolSize)
+          {
+            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+          }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
-            UnsignedBigNumber(newvBaycPoolSize),
-            UnsignedBigNumber(newvUsdPoolSize)
+            {
+              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
+              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount.value);
+            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -1020,7 +1047,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       const status = this.getUserStatus(i, this.poolState);
       result.push({
         Id: 'User' + i,
-        Collateral: +status.collateral.toFixed(),
+        Collateral: +status.collateral.toFixed(2),
         AccountValue: +status.accountValue.toFixed(2),
         NotionalValue: +status.notionalValue.toFixed(2),
         PNL: +status.pnl.toFixed(2),
@@ -1042,7 +1069,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
     result.push({
       Id: 'Contract',
-      Collateral: +this.virtualCollateral.toFixed(),
+      Collateral: +this.virtualCollateral.toFixed(2),
       AccountValue: +this.insuranceFunds.toFixed(2),
       NotionalValue: +this.realCollateral.toFixed(2),
       PNL: +this.feeCollector.toFixed(2),
