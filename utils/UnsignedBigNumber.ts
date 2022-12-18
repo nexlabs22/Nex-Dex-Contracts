@@ -7,14 +7,21 @@ export const checkUnsignedBigNumber = (value: BigNumber): BigNumber => {
 	return value;
 }
 
+export const DISCRIMINDATOR = 'UNSIGNED-BIGNUMBER';
 export interface UnsignedBigNumberType {
+	discriminator: string;
 	value: BigNumber;
 	toFixed: (dp?: number, rm?: number) => string;
+}
+
+export function instanceOfUnSignedBigNumber(data: any): data is UnsignedBigNumberType {
+	return data.discriminator === DISCRIMINDATOR;
 }
 
 export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10): UnsignedBigNumberType => {
 	const obj = Object.create(null);
 	obj._v = checkUnsignedBigNumber(BN(value, base));
+	obj.discriminator = DISCRIMINDATOR;
 
 	Object.defineProperty(obj, "value", {
 		set: function (value: BigNumber | number | string) {

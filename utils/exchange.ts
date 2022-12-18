@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import BigNumber from "bignumber.js";
-import { compareResult, roundDecimal, BN } from "./basics";
+import { compareResult, roundDecimal, BN, uint256, int256, Require } from "./basics";
 import { UnsignedBigNumber } from "./UnsignedBigNumber";
 
 import type { UnsignedBigNumberType } from "./UnsignedBigNumber";
@@ -46,8 +46,8 @@ export const ATUO_CLOSE_MARGIN = 0.4;
 export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchangeContract: any, usdcContract: any) {
   const Pool = Object.create(null);
 
-  Pool.vBaycPoolSize = UnsignedBigNumber(poolsize);
-  Pool.vUsdPoolSize = UnsignedBigNumber(price.multipliedBy(poolsize));
+  Pool.vBaycPoolSize = uint256(poolsize);
+  Pool.vUsdPoolSize = uint256(price.multipliedBy(poolsize));
 
   Pool.userInitCollateral = [] as Array<UnsignedBigNumberType>;
   Pool.collateral = [] as Array<UnsignedBigNumberType>;
@@ -57,9 +57,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.logs = [] as Array<LogType>;
 
   Pool.virtualCollateral = BN(0);
-  Pool.realCollateral = UnsignedBigNumber(0);
-  Pool.insuranceFunds = UnsignedBigNumber(0);
-  Pool.feeCollector = UnsignedBigNumber(0);
+  Pool.realCollateral = uint256(0);
+  Pool.insuranceFunds = uint256(0);
+  Pool.feeCollector = uint256(0);
 
   Pool.exchangeContract = exchangeContract;
   Pool.usdcContract = usdcContract;
@@ -78,22 +78,22 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       }
     },
     set: function ({ vBaycPoolSize, vUsdPoolSize }: PoolType): void {
-      this.vBaycPoolSize = UnsignedBigNumber(vBaycPoolSize.value);
-      this.vUsdPoolSize = UnsignedBigNumber(vUsdPoolSize.value);
+      this.vBaycPoolSize = uint256(vBaycPoolSize.value);
+      this.vUsdPoolSize = uint256(vUsdPoolSize.value);
     }
   });
 
   Pool.addUser = function (address: SignerWithAddress, collateral: BigNumber) {
     this.userCount++;
     this.userAccounts.push(address);
-    this.collateral.push(UnsignedBigNumber(0));
-    this.userInitCollateral.push(UnsignedBigNumber(collateral));
+    this.collateral.push(uint256(0));
+    this.userInitCollateral.push(uint256(collateral));
     this.virtualBalances.push({
       virtualCollateral: BN(0),
       uservUsdBalance: BN(0),
       uservBaycBalance: BN(0),
     });
-    this.depositCollateral(this.userCount - 1, UnsignedBigNumber(collateral));
+    this.depositCollateral(this.userCount - 1, uint256(collateral));
   };
 
   Pool.userDetail = function () {
@@ -136,8 +136,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     const newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
 
     return {
-      vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-      vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize),
+      vBaycPoolSize: uint256(newvBaycPoolSize),
+      vUsdPoolSize: uint256(newvUsdPoolSize),
     }
   }
 
@@ -152,8 +152,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     const newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
 
     return {
-      vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-      vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize),
+      vBaycPoolSize: uint256(newvBaycPoolSize),
+      vUsdPoolSize: uint256(newvUsdPoolSize),
     }
   }
 
@@ -171,33 +171,33 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.depositCollateral = function (userId: number, amount: UnsignedBigNumberType, desc = 'deposit') {
     if (userId >= this.userCount) return;
     
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.plus(amount.value));
-    this.realCollateral = UnsignedBigNumber(this.realCollateral.value.plus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.plus(amount.value));
+    this.realCollateral = uint256(this.realCollateral.value.plus(amount.value));
     this.virtualCollateral = this.virtualCollateral.plus(amount.value);
   }
 
   Pool.withdrawCollateral = function (userId: number, amount: UnsignedBigNumberType, desc = 'withdraw') {
     if (userId >= this.userCount) return;
     
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.minus(amount.value));
-    this.realCollateral = UnsignedBigNumber(this.realCollateral.value.minus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.minus(amount.value));
+    this.realCollateral = uint256(this.realCollateral.value.minus(amount.value));
     this.virtualCollateral = this.virtualCollateral.minus(amount.value);
   }
 
   Pool.withdrawCollateralByFee = function (userId: number, amount: UnsignedBigNumberType, desc = 'fee') {
     if (userId >= this.userCount) return;
     
-    this.feeCollector = UnsignedBigNumber(this.feeCollector.value.plus(amount.value));
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.minus(amount.value));
-    this.realCollateral = UnsignedBigNumber(this.realCollateral.value.minus(amount.value));
+    this.feeCollector = uint256(this.feeCollector.value.plus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.minus(amount.value));
+    this.realCollateral = uint256(this.realCollateral.value.minus(amount.value));
     this.virtualCollateral = this.virtualCollateral.minus(amount.value);
   }
 
   Pool.withdrawCollateralByInsuranceFund = function (userId: number, amount: UnsignedBigNumberType, desc = 'insurance fund') {
     if (userId >= this.userCount) return;
     
-    this.insuranceFunds = UnsignedBigNumber(this.insuranceFunds.value.plus(amount.value));
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.minus(amount.value));
+    this.insuranceFunds = uint256(this.insuranceFunds.value.plus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.minus(amount.value));
     this.virtualCollateral = this.virtualCollateral.minus(amount.value);
   }
 
@@ -205,7 +205,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.addUserCollateral = function (userId: number, amount: UnsignedBigNumberType, desc = '') {
     if (userId >= this.userCount) return;
 
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.plus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.plus(amount.value));
     this.virtualCollateral = this.virtualCollateral.minus(amount.value);
 
     this.logs.push({
@@ -219,7 +219,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   Pool.reduceUserCollateral = function (userId: number, amount: UnsignedBigNumberType, desc = '') {
     if (userId >= this.userCount) return;
 
-    this.collateral[userId] = UnsignedBigNumber(this.collateral[userId].value.minus(amount.value));
+    this.collateral[userId] = uint256(this.collateral[userId].value.minus(amount.value));
     this.virtualCollateral = this.virtualCollateral.plus(amount.value);
 
     this.logs.push({
@@ -336,9 +336,9 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
   Pool.isNewMarginLiquidatable = function(userId: number, _usdAmount: BigNumber, poolState: PoolType): boolean {
     const accountValue = this.getAccountValue(userId, poolState);
-    const positionNotional = UnsignedBigNumber(this.getNotionalValue(userId, poolState));
-    const newPositionNotional = UnsignedBigNumber(positionNotional.value.plus(_usdAmount));
-    const newMargin = accountValue.dividedBy(newPositionNotional.value).multipliedBy(100);
+    const positionNotional = uint256(this.getNotionalValue(userId, poolState));
+    const newPositionNotional = uint256(positionNotional.value.plus(_usdAmount));
+    const newMargin = accountValue.dividedBy(int256(newPositionNotional)).multipliedBy(100);
     
     if (!newMargin.eq(0) && newMargin.lte(SAFE_MARGIN)) {
       return true;
@@ -385,18 +385,18 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       // const usdBaycValue = this.getShortVusdAmountOut(baycLiquidateAmount);
       const usdBaycValue = liquidateAmount;
       const baycLiquidateAmount = this.getShortBaycAmountOut(usdBaycValue);
-      const userPartialvUsdBalance = userUsdBalance.multipliedBy(baycLiquidateAmount).dividedBy(userBaycBalance);
+      const userPartialvUsdBalance = userUsdBalance.multipliedBy(int256(baycLiquidateAmount)).dividedBy(userBaycBalance);
 
       if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
         const pnl = usdBaycValue.minus(userPartialvUsdBalance.abs());
-        this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
+        this.addUserCollateral(userId, uint256(pnl), 'trading profit');
       } else if (usdBaycValue.lt(userPartialvUsdBalance.abs())) {
         const pnl = userPartialvUsdBalance.abs().minus(usdBaycValue);
-        this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
+        this.reduceUserCollateral(userId, uint256(pnl), 'trading loss');
       }
 
       // TODO: realize funding reward of user      
-      this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(baycLiquidateAmount);
+      this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(int256(baycLiquidateAmount));
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(userPartialvUsdBalance.abs());
 
       // TODO: remove user
@@ -411,19 +411,19 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     else if (userBaycBalance.lt(0)) {
       const usdBaycValue = liquidateAmount;
       const baycLiquidateAmount = this.getLongVusdAmountOut(usdBaycValue);
-      const userPartialvUsdBalance = userUsdBalance.multipliedBy(baycLiquidateAmount).dividedBy(userBaycBalance);
+      const userPartialvUsdBalance = userUsdBalance.multipliedBy(int256(baycLiquidateAmount)).dividedBy(userBaycBalance);
       
       if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
         const pnl = usdBaycValue.minus(userPartialvUsdBalance.abs());
-        this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
+        this.reduceUserCollateral(userId, uint256(pnl), 'trading loss');
       }
       if (usdBaycValue.lt(userPartialvUsdBalance.abs())) {
         const pnl = userPartialvUsdBalance.abs().minus(usdBaycValue);
-        this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
+        this.addUserCollateral(userId, uint256(pnl), 'trading profit');
       }
       
       // TODO: realize funding reward of user
-      this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(baycLiquidateAmount);
+      this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(int256(baycLiquidateAmount));
       this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(userPartialvUsdBalance.abs());
 
       // TODO: remove user
@@ -435,7 +435,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.minus(baycLiquidateAmount);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
-    const discountAmount = UnsignedBigNumber(liquidateAmount.multipliedBy(DISCOUNT_RATE));
+    const discountAmount = uint256(liquidateAmount.multipliedBy(DISCOUNT_RATE));
     this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
@@ -466,10 +466,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
       if (usdBaycValue.gt(userUsdBalance.abs())) {
         const pnl = usdBaycValue.minus(userUsdBalance.abs());
-        this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
+        this.addUserCollateral(userId, uint256(pnl), 'trading profit');
       } else if (usdBaycValue.lt(userUsdBalance.abs())) {
         const pnl = userUsdBalance.abs().minus(usdBaycValue);
-        this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
+        this.reduceUserCollateral(userId, uint256(pnl), 'trading loss');
       }
 
       // TODO: realize funding reward of user
@@ -491,10 +491,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
       if (usdBaycValue.gt(userUsdBalance)) {
         const pnl = usdBaycValue.minus(userUsdBalance);
-        this.reduceUserCollateral(userId, UnsignedBigNumber(pnl), 'trading loss');
+        this.reduceUserCollateral(userId, uint256(pnl), 'trading loss');
       } else if (usdBaycValue.lt(Math.abs(userUsdBalance))) {
         const pnl = userUsdBalance.minus(usdBaycValue);
-        this.addUserCollateral(userId, UnsignedBigNumber(pnl), 'trading profit');
+        this.addUserCollateral(userId, uint256(pnl), 'trading profit');
       }
 
       // TODO: realize funding reward of user
@@ -510,7 +510,7 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(userBaycBalance);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
-    const discountAmount = UnsignedBigNumber(this.collateral[userId].value.multipliedBy(DISCOUNT_RATE));
+    const discountAmount = uint256(this.collateral[userId].value.multipliedBy(DISCOUNT_RATE));
     this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
@@ -543,24 +543,23 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     let newPoolState = this.addVusdBalance(_usdAmount);
 
     const isNewMarginHardLiquidatable = this.isNewMarginLiquidatable(userId, _usdAmount, newPoolState);
-    if (isNewMarginHardLiquidatable) {
-      throw new Error("Insufficient margin to open position with requested size.");
-    }
+    Require(
+      isNewMarginHardLiquidatable == false, 
+      "Insufficient margin to open position with requested size."
+    );
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
     newPoolState = this.addVusdBalance(_usdAmount);
 
-    const userBayc = UnsignedBigNumber(this.vBaycPoolSize.value.minus(newPoolState.vBaycPoolSize.value));
-    if (!(userBayc.value.gte(_minimumBaycAmountOut))) {
-      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
-    }
-    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(userBayc.value);
-    this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(_usdAmount);
+    const userBayc = uint256(this.vBaycPoolSize.value.minus(newPoolState.vBaycPoolSize.value));
+    Require(userBayc.value.gte(_minimumBaycAmountOut), "INSUFFICIENT_OUTPUT_AMOUNT");
+    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(int256(userBayc));
+    this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(int256(_usdAmount));
 
     // TODO: add active user
     
-    const fee = UnsignedBigNumber(_usdAmount.multipliedBy(SWAP_FEE));
+    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
@@ -570,24 +569,23 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     let newPoolState = this.removeVusdBalance(_usdAmount);
 
     const isNewMarginHardLiquidatable = this.isNewMarginLiquidatable(userId, _usdAmount, newPoolState);
-    if (isNewMarginHardLiquidatable) {
-      throw new Error("Insufficient margin to open position with requested size.");
-    }
+    Require(
+      isNewMarginHardLiquidatable == false, 
+      "Insufficient margin to open position with requested size."
+    );
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
     newPoolState = this.removeVusdBalance(_usdAmount);
 
-    const userBayc = UnsignedBigNumber(newPoolState.vBaycPoolSize.value.minus(this.vBaycPoolSize.value));
-    if (!(userBayc.value.gte(_minimumBaycAmountOut))) {
-      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
-    }
-    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(userBayc.value);
-    this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(_usdAmount);
+    const userBayc = uint256(newPoolState.vBaycPoolSize.value.minus(this.vBaycPoolSize.value));
+    Require(userBayc.value.gte(_minimumBaycAmountOut), "INSUFFICIENT_OUTPUT_AMOUNT");
+    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(int256(userBayc));
+    this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(int256(_usdAmount));
 
     // TODO: add active user
     
-    const fee = UnsignedBigNumber(_usdAmount.multipliedBy(SWAP_FEE));
+    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
@@ -599,9 +597,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.closePosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
-    if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
-      throw new Error("Reduce only order can only close size equal or less than the outstanding asset size.");
-    }
+    Require(
+      _assetSize.lte(this.virtualBalances[userId].uservBaycBalance.abs()), 
+      "Reduce only order can only close size equal or less than the outstanding asset size."
+    );
 
     if (this.virtualBalances[userId].uservBaycBalance.gt(0)) {
       this.closeLongPosition(userId, _assetSize, _minimumUsdOut);
@@ -611,72 +610,70 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
   }
 
   Pool.closeLongPosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
-    if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
-      throw new Error("Reduce only order can only close long size equal or less than the outstanding asset size.");
-    }
+    Require(
+      _assetSize.lte(this.virtualBalances[userId].uservBaycBalance.abs()), 
+      "Reduce only order can only close long size equal or less than the outstanding asset size."
+    );
 
     let newPoolState = this.addBaycBalance(_assetSize);
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
 
-    const usdBaycValue = UnsignedBigNumber(this.getShortVusdAmountOut(_assetSize)).value;
-    if (!(usdBaycValue.gte(_minimumUsdOut))) {
-      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
-    }
-    const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(_assetSize)
+    const usdBaycValue = uint256(this.getShortVusdAmountOut(_assetSize)).value;
+    Require(usdBaycValue.gte(_minimumUsdOut), "INSUFFICIENT_OUTPUT_AMOUNT");
+    const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(int256(_assetSize))
         .dividedBy(this.virtualBalances[userId].uservBaycBalance);
     
     if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
-      const pnl = UnsignedBigNumber(usdBaycValue.minus(userPartialvUsdBalance.abs()));
+      const pnl = uint256(usdBaycValue.minus(userPartialvUsdBalance.abs()));
       this.addUserCollateral(userId, pnl, 'trading profit');
     } else if (usdBaycValue.lt(userPartialvUsdBalance.abs())) {
-      const pnl = UnsignedBigNumber(userPartialvUsdBalance.abs().minus(usdBaycValue));
+      const pnl = uint256(userPartialvUsdBalance.abs().minus(usdBaycValue));
       this.reduceUserCollateral(userId, pnl, 'trading loss');
     }
 
     // TODO: add virtual collateral
 
-    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(_assetSize);
+    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.minus(int256(_assetSize));
     this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.plus(userPartialvUsdBalance.abs());
 
-    const fee = UnsignedBigNumber(usdBaycValue.multipliedBy(SWAP_FEE));
+    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.addBaycBalance(_assetSize);
   }
 
   Pool.closeShortPosition = function (userId: number, _assetSize: BigNumber, _minimumUsdOut: BigNumber) {
-    if (_assetSize.gt(this.virtualBalances[userId].uservBaycBalance.abs())) {
-      throw new Error("Reduce only order can only close long size equal or less than the outstanding asset size.");
-    }
+    Require(
+      _assetSize.lte(this.virtualBalances[userId].uservBaycBalance.abs()), 
+      "Reduce only order can only close long size equal or less than the outstanding asset size."
+    );
 
     let newPoolState = this.removeBaycBalance(_assetSize);
 
     newPoolState = this.hardLiquidateUsers(newPoolState);
     newPoolState = this.partialLiquidateUsers(newPoolState);
 
-    const usdBaycValue = UnsignedBigNumber(this.getLongVusdAmountOut(_assetSize)).value;
-    if (!(usdBaycValue.gte(_minimumUsdOut))) {
-      throw new Error("INSUFFICIENT_OUTPUT_AMOUNT");
-    }
-    const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(_assetSize)
+    const usdBaycValue = uint256(this.getLongVusdAmountOut(_assetSize)).value;
+    Require(usdBaycValue.gte(_minimumUsdOut), "INSUFFICIENT_OUTPUT_AMOUNT");
+    const userPartialvUsdBalance = this.virtualBalances[userId].uservUsdBalance.multipliedBy(int256(_assetSize))
       .dividedBy(this.virtualBalances[userId].uservBaycBalance);
     
     if (usdBaycValue.gt(userPartialvUsdBalance.abs())) {
-      const pnl = UnsignedBigNumber(usdBaycValue.minus(userPartialvUsdBalance.abs()));
+      const pnl = uint256(usdBaycValue.minus(userPartialvUsdBalance.abs()));
       this.reduceUserCollateral(userId, pnl, 'trading loss');
     } else if (usdBaycValue.lt(userPartialvUsdBalance.abs())) {
-      const pnl = UnsignedBigNumber(userPartialvUsdBalance.abs().minus(usdBaycValue));
+      const pnl = uint256(userPartialvUsdBalance.abs().minus(usdBaycValue));
       this.addUserCollateral(userId, pnl, 'trading profit');
     }
 
     // TODO: add virtual collateral
 
-    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(_assetSize);
+    this.virtualBalances[userId].uservBaycBalance = this.virtualBalances[userId].uservBaycBalance.plus(int256(_assetSize));
     this.virtualBalances[userId].uservUsdBalance = this.virtualBalances[userId].uservUsdBalance.minus(userPartialvUsdBalance.abs());
 
-    const fee = UnsignedBigNumber(usdBaycValue.multipliedBy(SWAP_FEE));
+    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.removeBaycBalance(_assetSize);
@@ -684,10 +681,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
   //get minimum long bayc amount that user receives
   Pool.getMinimumLongBaycOut = function (_usdAmount: UnsignedBigNumberType): UnsignedBigNumberType {
-    let vBaycPoolSize = this.vBaycPoolSize.value;
-    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let vBaycPoolSize = int256(this.vBaycPoolSize);
+    let vUsdPoolSize = int256(this.vUsdPoolSize);
     let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    let newvUsdPoolSize = vUsdPoolSize.plus(_usdAmount.value);
+    let newvUsdPoolSize = vUsdPoolSize.plus(int256(_usdAmount));
     let newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
 
     for (let i = 0; i < this.userCount; i++) {
@@ -695,8 +692,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isHardLiquidatable == true) {          
@@ -717,35 +714,35 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
             {
-              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+              vBaycPoolSize: uint256(newvBaycPoolSize),
+              vUsdPoolSize: uint256(newvUsdPoolSize)
             }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -753,18 +750,18 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     }
 
     k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    const finalvUsdPoolSize = vUsdPoolSize.plus(_usdAmount.value);
+    const finalvUsdPoolSize = vUsdPoolSize.plus(int256(_usdAmount));
     const finalvBaycPoolSize = k.dividedBy(finalvUsdPoolSize);
     const userBaycOut = vBaycPoolSize.minus(finalvBaycPoolSize);
-    return UnsignedBigNumber(userBaycOut);
+    return uint256(userBaycOut);
   }
 
   //get minimum short bayc amount that user receives
   Pool.getMinimumShortBaycOut = function (_usdAmount: UnsignedBigNumberType): UnsignedBigNumberType {
-    let vBaycPoolSize = this.vBaycPoolSize.value;
-    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let vBaycPoolSize = int256(this.vBaycPoolSize);
+    let vUsdPoolSize = int256(this.vUsdPoolSize);
     let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    let newvUsdPoolSize = vUsdPoolSize.minus(_usdAmount.value);
+    let newvUsdPoolSize = vUsdPoolSize.minus(int256(_usdAmount));
     let newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
 
     for (let i = 0; i < this.userCount; i++) {
@@ -772,8 +769,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isHardLiquidatable == true) { 
@@ -793,35 +790,35 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isPartialLiquidatable == true) {          
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
             {
-              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+              vBaycPoolSize: uint256(newvBaycPoolSize),
+              vUsdPoolSize: uint256(newvUsdPoolSize)
             }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -829,18 +826,18 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     }
 
     k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    const finalvUsdPoolSize = vUsdPoolSize.minus(_usdAmount.value);
+    const finalvUsdPoolSize = vUsdPoolSize.minus(int256(_usdAmount));
     const finalvBaycPoolSize = k.dividedBy(finalvUsdPoolSize);
     const userBaycOut = finalvBaycPoolSize.minus(vBaycPoolSize);
-    return UnsignedBigNumber(userBaycOut);
+    return uint256(userBaycOut);
   }
 
   //get minimum long usd amount that user receives
   Pool.getMinimumLongUsdOut = function (_BaycAmount: UnsignedBigNumberType): UnsignedBigNumberType {
-    let vBaycPoolSize = this.vBaycPoolSize.value;
-    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let vBaycPoolSize = int256(this.vBaycPoolSize);
+    let vUsdPoolSize = int256(this.vUsdPoolSize);
     let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    let newvBaycPoolSize = vBaycPoolSize.minus(_BaycAmount.value);
+    let newvBaycPoolSize = vBaycPoolSize.minus(int256(_BaycAmount));
     let newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
 
 
@@ -849,8 +846,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isHardLiquidatable == true) {
@@ -871,35 +868,35 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
             {
-              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+              vBaycPoolSize: uint256(newvBaycPoolSize),
+              vUsdPoolSize: uint256(newvUsdPoolSize)
             }
           );
           if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -908,18 +905,18 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
 
 
     k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    const finalvBaycPoolSize = vBaycPoolSize.minus(_BaycAmount.value);
+    const finalvBaycPoolSize = vBaycPoolSize.minus(int256(_BaycAmount));
     const finalvUsdPoolSize = k.dividedBy(finalvBaycPoolSize);
     const userUsdOut = finalvUsdPoolSize.minus(vUsdPoolSize);
-    return UnsignedBigNumber(userUsdOut);
+    return uint256(userUsdOut);
   }
 
   //get minimum short usd amount that user receives
   Pool.getMinimumShortUsdOut = function (_BaycAmount: UnsignedBigNumberType): UnsignedBigNumberType {
-    let vBaycPoolSize = this.vBaycPoolSize.value;
-    let vUsdPoolSize = this.vUsdPoolSize.value;
+    let vBaycPoolSize = int256(this.vBaycPoolSize);
+    let vUsdPoolSize = int256(this.vUsdPoolSize);
     let k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    let newvBaycPoolSize = vBaycPoolSize.plus(_BaycAmount.value);
+    let newvBaycPoolSize = vBaycPoolSize.plus(int256(_BaycAmount));
     let newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
 
     for (let i = 0; i < this.userCount; i++) {
@@ -927,8 +924,8 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isHardLiquidatable = this.isHardLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isHardLiquidatable == true) {
@@ -949,35 +946,35 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
         const isPartialLiquidatable = this.isPartialLiquidatable(
           i,
           {
-            vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-            vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+            vBaycPoolSize: uint256(newvBaycPoolSize),
+            vUsdPoolSize: uint256(newvUsdPoolSize)
           }
         );
         if (isPartialLiquidatable == true) {
           const vUsdPartialLiquidateAmount = this.calculatePartialLiquidateValue(
             i,
             {
-              vBaycPoolSize: UnsignedBigNumber(newvBaycPoolSize),
-              vUsdPoolSize: UnsignedBigNumber(newvUsdPoolSize)
+              vBaycPoolSize: uint256(newvBaycPoolSize),
+              vUsdPoolSize: uint256(newvUsdPoolSize)
             }
           );
           if (this.virtualBalances[i].uservBaycBalance.gt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.minus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           } else if (this.virtualBalances[i].uservBaycBalance.lt(0)) {
             //update new pool
             k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
-            newvUsdPoolSize = newvUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
             //update pool
             k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-            vUsdPoolSize = vUsdPoolSize.plus(vUsdPartialLiquidateAmount);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
             vBaycPoolSize = k.dividedBy(vUsdPoolSize);
           }
         }
@@ -985,10 +982,10 @@ export function organizeTestPool(price: BigNumber, poolsize: BigNumber, exchange
     }
 
     k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
-    const finalvBaycPoolSize = vBaycPoolSize.plus(_BaycAmount.value);
+    const finalvBaycPoolSize = vBaycPoolSize.plus(int256(_BaycAmount));
     const finalvUsdPoolSize = k.dividedBy(finalvBaycPoolSize);
     const userUsdOut = vUsdPoolSize.minus(finalvUsdPoolSize);
-    return UnsignedBigNumber(userUsdOut);
+    return uint256(userUsdOut);
   }
 
   // Pool.collateralCheck = function () {

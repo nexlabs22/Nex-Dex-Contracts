@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import BigNumber from "bignumber.js";
+import { UnsignedBigNumber, UnsignedBigNumberType, instanceOfUnSignedBigNumber } from "./UnsignedBigNumber";
 
 export const BN = BigNumber.clone({ DECIMAL_PLACES: 18, ROUNDING_MODE: 1 });
 export const toBigNumber = (e: any): BigNumber => (BN(e.toString() as string).dividedBy(1e+18));
@@ -36,13 +37,27 @@ export const UnsignedInt = (value: number): UnsignedIntType => {
   obj._v = checkUnsignedInt(value);
 
   Object.defineProperty(obj, "value", {
-    set: function(value: number) {
+    set: function (value: number) {
       this._v = checkUnsignedInt(value);
     },
-    get: function() {
+    get: function () {
       return this._v;
     }
   });
 
   return obj;
+}
+
+export const uint256 = (value: number | string | BigNumber): UnsignedBigNumberType => {
+  return UnsignedBigNumber(value);
+}
+
+export const int256 = (value: number | string | BigNumber | UnsignedBigNumberType): BigNumber => {
+  if (typeof value === 'number' || typeof value === 'string') return BN(value);
+  if (instanceOfUnSignedBigNumber(value)) return value.value;
+  return value;
+}
+
+export const Require = (condition: boolean, desc = ''): void => {
+  if (!condition) throw new Error(desc);
 }
