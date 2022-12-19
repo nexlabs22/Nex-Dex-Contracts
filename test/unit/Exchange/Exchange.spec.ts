@@ -1,21 +1,18 @@
 import { expect } from "chai";
 import { network, deployments, ethers, run } from "hardhat";
 import { BigNumber as EtherBigNumber } from "ethers";
-import BigNumber from "bignumber.js";
 import { developmentChains } from "../../../helper-hardhat-config";
 import { LinkToken, Exchange, MockV3Aggregator } from "../../../typechain";
 import {
   organizeTestPool,
-  SWAP_FEE,
-  PoolType
 } from '../../../utils/exchange';
 import {
   compareResult,
   toWeiN,
-  toBigNumber,
-  BN
+  toBigNumber
 } from '../../../utils/basics';
-import { UnsignedBigNumber } from "../../../utils/UnsignedBigNumber";
+import uint256 from "../../../utils/uint256";
+import int256 from "../../../utils/int256";
 
 async function compareResultExchange(pool: any, users?: Array<number>) {
   // in this function, compare the actual value of the smart contract with the expected value of the test pool
@@ -59,9 +56,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
 
     let pool: any
-    const longPositionUSD1 =  BN(490)
-    const shortPositionUSD2 =  BN(4500)
-    const shortPositionUSD3 =  BN(7500)
+    const longPositionUSD1 =  int256(490)
+    const shortPositionUSD2 =  int256(4500)
+    const shortPositionUSD3 =  int256(7500)
 
     beforeEach(async () => {
       await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
@@ -88,15 +85,15 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       // organize virtual pool to expect smart contract results
       // 2000 - pool price
       // 20 - pool size
-      pool = organizeTestPool( BN(2000),  BN(20), exchange, usdc);
+      pool = organizeTestPool( int256(2000),  int256(20), exchange, usdc);
       // get 3 account addresses for test
       const [_, account0, account1, account2] = await ethers.getSigners();
 
       // add three users with $300, $5000, $5000 collateral
       // in this test, should consider first user
-      pool.addUser(account0,  BN(300));
-      pool.addUser(account1,  BN(5000));
-      pool.addUser(account2,  BN(5000));
+      pool.addUser(account0,  int256(300));
+      pool.addUser(account1,  int256(5000));
+      pool.addUser(account2,  int256(5000));
 
       // set the mock price - 2000
       await setOraclePrice(pool.price);
@@ -137,7 +134,7 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     //     longPositionUSD1.negated()
     //   );
     //   // calculate fee of opened position
-    //   const swapFee1 = UnsignedBigNumber(longPositionUSD1.multipliedBy(SWAP_FEE));
+    //   const swapFee1 = uint256(longPositionUSD1.multipliedBy(SWAP_FEE));
     //   // reduce the fee from user0's collateral
     //   pool.withdrawCollateralByFee(0, swapFee1);
     //   // update test pool state
@@ -169,7 +166,7 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     //     shortPositionUSD2
     //   );
     //   // calculate fee of opened position
-    //   const swapFee2 = UnsignedBigNumber(shortPositionUSD2.multipliedBy(SWAP_FEE));
+    //   const swapFee2 = uint256(shortPositionUSD2.multipliedBy(SWAP_FEE));
     //   // reduce the fee from user1's collateral
     //   pool.withdrawCollateralByFee(1, swapFee2);
     //   // update test pool state
@@ -200,7 +197,7 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     //     shortPositionUSD3
     //   );
     //   // calculate fee of opened position
-    //   const swapFee3 = UnsignedBigNumber(shortPositionUSD3.multipliedBy(SWAP_FEE));
+    //   const swapFee3 = uint256(shortPositionUSD3.multipliedBy(SWAP_FEE));
     //   // reduce the fee from user2's collateral
     //   pool.withdrawCollateralByFee(2, swapFee3);
     //   // update test pool state
@@ -222,18 +219,18 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
     //   newPoolState = pool.addBaycBalance(pool.getUservBaycBalance(1));
 
-    //   let usdBaycValue: BigNumber = pool.getVusdAmountOut(pool.getUservBaycBalance(1), pool.poolState); // 4415.8664
-    //   let usdBalance: BigNumber = pool.getUservUsdBalance(1); // 4500
+    //   let usdBaycValue: int256 = pool.getVusdAmountOut(pool.getUservBaycBalance(1), pool.poolState); // 4415.8664
+    //   let usdBalance: int256 = pool.getUservUsdBalance(1); // 4500
 
     //   expect(usdBaycValue.lt(usdBalance)).to.equal(true);
-    //   const pnl = UnsignedBigNumber(usdBalance.minus(usdBaycValue));
+    //   const pnl = uint256(usdBalance.minus(usdBaycValue));
     //   pool.addUserCollateral(1, pnl, 'trading profit');
     //   pool.updateUserBalance(
     //     1, 
     //     pool.getUservBaycBalance(1).negated(),
     //     pool.getUservUsdBalance(1).negated()
     //   );
-    //   const swapFee4 = UnsignedBigNumber(usdBaycValue.multipliedBy(SWAP_FEE));
+    //   const swapFee4 = uint256(usdBaycValue.multipliedBy(SWAP_FEE));
     //   pool.withdrawCollateralByFee(1, swapFee4);
     //   pool.poolState = newPoolState;
 
@@ -249,9 +246,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     //   await exchange.connect(pool.account(1)).withdrawCollateral(EtherBigNumber.from(withdraw1.multipliedBy(10**18).toFixed(0)));
     //   await exchange.connect(pool.account(2)).withdrawCollateral(EtherBigNumber.from(withdraw2.multipliedBy(10**18).toFixed(0)));
 
-    //   pool.withdrawCollateral(0, UnsignedBigNumber(withdraw0));
-    //   pool.withdrawCollateral(1, UnsignedBigNumber(withdraw1));
-    //   pool.withdrawCollateral(2, UnsignedBigNumber(withdraw2));
+    //   pool.withdrawCollateral(0, uint256(withdraw0));
+    //   pool.withdrawCollateral(1, uint256(withdraw1));
+    //   pool.withdrawCollateral(2, uint256(withdraw2));
 
     //   pool.printCurrentStatus();
     // });
@@ -259,11 +256,11 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
     it("Test hard and partial liquidate for long position", async () => {
       // user0 open long position($490) in contract's pool
       let minimumBayc1 = await exchange.getMinimumLongBaycOut(toWeiN(longPositionUSD1.toNumber()));
-      let minimumBayc2 = pool.getMinimumLongBaycOut(UnsignedBigNumber(longPositionUSD1));
+      let minimumBayc2 = pool.getMinimumLongBaycOut(uint256(longPositionUSD1));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
 
       await exchange.connect(pool.account(0)).openLongPosition(toWeiN(longPositionUSD1.toNumber()), minimumBayc1);
-      pool.openLongPosition(0, BN(longPositionUSD1), minimumBayc2.value);
+      pool.openLongPosition(0, int256(longPositionUSD1), minimumBayc2.value);
 
       console.log('First Step Result - User0 opened Long Position $490');
       pool.printCurrentStatus();
@@ -272,11 +269,11 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
       // user1 open short position($4500) in contract's pool
       minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
-      minimumBayc2 = pool.getMinimumShortBaycOut(UnsignedBigNumber(shortPositionUSD2));
+      minimumBayc2 = pool.getMinimumShortBaycOut(uint256(shortPositionUSD2));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
 
       await exchange.connect(pool.account(1)).openShortPosition(toWeiN(shortPositionUSD2.toNumber()), minimumBayc1);
-      pool.openShortPosition(1, BN(shortPositionUSD2), minimumBayc2.value);
+      pool.openShortPosition(1, int256(shortPositionUSD2), minimumBayc2.value);
 
       console.log('Second Step Result - User1 opened Short Position $4500');
       pool.printCurrentStatus();
@@ -286,11 +283,11 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
       // user2 open short position($7500) in contract's pool
       minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
-      minimumBayc2 = pool.getMinimumShortBaycOut(UnsignedBigNumber(shortPositionUSD3));
+      minimumBayc2 = pool.getMinimumShortBaycOut(uint256(shortPositionUSD3));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
 
       await exchange.connect(pool.account(2)).openShortPosition(toWeiN(shortPositionUSD3.toNumber()), minimumBayc1);
-      pool.openShortPosition(2, BN(shortPositionUSD3), minimumBayc2.value);
+      pool.openShortPosition(2, int256(shortPositionUSD3), minimumBayc2.value);
 
       console.log('Third Step Result - User2 opened Short Position $7500');
       pool.printCurrentStatus();
@@ -299,7 +296,7 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
 
       minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
-      minimumBayc2 = pool.getMinimumShortBaycOut(UnsignedBigNumber(shortPositionUSD3));
+      minimumBayc2 = pool.getMinimumShortBaycOut(uint256(shortPositionUSD3));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
 
       await exchange.connect(pool.account(1)).closePositionComplete(minimumBayc1);
@@ -317,9 +314,9 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
       await exchange.connect(pool.account(1)).withdrawCollateral(EtherBigNumber.from(withdraw1.multipliedBy(10**18).toFixed(0)));
       await exchange.connect(pool.account(2)).withdrawCollateral(EtherBigNumber.from(withdraw2.multipliedBy(10**18).toFixed(0)));
 
-      pool.withdrawCollateral(0, UnsignedBigNumber(withdraw0));
-      pool.withdrawCollateral(1, UnsignedBigNumber(withdraw1));
-      pool.withdrawCollateral(2, UnsignedBigNumber(withdraw2));
+      pool.withdrawCollateral(0, uint256(withdraw0));
+      pool.withdrawCollateral(1, uint256(withdraw1));
+      pool.withdrawCollateral(2, uint256(withdraw2));
 
       pool.printCurrentStatus();
     });

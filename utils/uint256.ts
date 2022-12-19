@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { BN } from './basics';
+import int256 from './int256';
 
 export const checkUnsignedBigNumber = (value: BigNumber): BigNumber => {
 	if (value.lt(0))
@@ -20,12 +20,12 @@ export function instanceOfUnSignedBigNumber(data: any): data is UnsignedBigNumbe
 
 export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10): UnsignedBigNumberType => {
 	const obj = Object.create(null);
-	obj._v = checkUnsignedBigNumber(BN(value, base));
+	obj._v = checkUnsignedBigNumber(int256(value, base));
 	obj.discriminator = DISCRIMINDATOR;
 
 	Object.defineProperty(obj, "value", {
 		set: function (value: BigNumber | number | string) {
-			this._v = checkUnsignedBigNumber(BN(value));
+			this._v = checkUnsignedBigNumber(int256(value));
 		},
 		get: function () {
 			return this._v;
@@ -37,4 +37,12 @@ export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10)
 	}
 
 	return obj as UnsignedBigNumberType;
+}
+
+export default uint256;
+
+export declare interface uint256 extends UnsignedBigNumberType {};
+
+export function uint256(value: number | string | BigNumber): UnsignedBigNumberType {
+  return UnsignedBigNumber(value);
 }
