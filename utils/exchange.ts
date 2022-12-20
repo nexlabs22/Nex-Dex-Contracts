@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { compareResult, Require } from "./basics";
+import { compareResult, Require, toNumber } from "./basics";
 
 import address from "./address";
 import int256 from "./int256";
@@ -31,17 +31,17 @@ export interface AddressToUint256 {
   [index: string]: uint256;
 }
 
-export const SWAP_FEE = 10 / 10000;
-export const DISCOUNT_RATE = 0.2;
-export const SAFE_MARGIN = 0.6;
-export const MAINTENANCE_MARGIN = 0.5;
-export const ATUO_CLOSE_MARGIN = 0.4;
+export const SWAP_FEE = 10;
+export const DISCOUNT_RATE = 20;
+export const SAFE_MARGIN = 60;
+export const MAINTENANCE_MARGIN = 50;
+export const ATUO_CLOSE_MARGIN = 40;
 
 export function organizeTestPool(price: int256, poolsize: int256, exchangeContract: any, usdcContract: any) {
   const Pool = Object.create(null);
 
   Pool.vBaycPoolSize = uint256(poolsize);
-  Pool.vUsdPoolSize = uint256(price.multipliedBy(poolsize));
+  Pool.vUsdPoolSize = uint256(price.multipliedBy(poolsize).dividedBy(1e+18));
 
   Pool.userInitCollateral = {} as AddressToUint256;
   Pool.collateral = {} as AddressToUint256;
@@ -61,7 +61,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
 
   Object.defineProperty(Pool, 'price', {
     get: function () {
-      return this.vUsdPoolSize.value.dividedBy(this.vBaycPoolSize.value);
+      return this.vUsdPoolSize.value.multipliedBy(1e18).dividedBy(this.vBaycPoolSize.value);
     }
   });
 
@@ -299,7 +299,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
     const baycBalance = this.virtualBalances[userId].uservBaycBalance;
 
     let margin = int256(0);
-    if (baycBalance != 0) margin = accountValue.dividedBy(notionalValue).multipliedBy(100.0);
+    if (baycBalance != 0) margin = accountValue.multipliedBy(100.0).dividedBy(notionalValue);
 
     return margin;
   }
@@ -340,14 +340,14 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
   }
 
   Pool.isPartialLiquidatable = function (userId: string, poolState: PoolType): boolean {
-    const margin = Number(this.getMargin(userId, poolState).toFixed(0, 1)) / 100;
+    const margin = Number(this.getMargin(userId, poolState).toFixed(0, 1));
 
     if (ATUO_CLOSE_MARGIN <= margin && margin <= MAINTENANCE_MARGIN) return true;
     return false;
   }
 
   Pool.isHardLiquidatable = function (userId: string, poolState: PoolType): boolean {
-    const margin = Number(this.getMargin(userId, poolState).toFixed(0, 1)) / 100;
+    const margin = Number(this.getMargin(userId, poolState).toFixed(0, 1));
 
     if (margin != 0 && margin <= ATUO_CLOSE_MARGIN) return true;
     return false;
@@ -356,9 +356,9 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
   Pool.calculatePartialLiquidateValue = function(userId: string, poolState: PoolType): int256 {
     const accountValue = this.getAccountValue(userId, poolState);
     const notionalValue = this.getNotionalValue(userId, poolState);
-    const numerator = notionalValue.multipliedBy(SAFE_MARGIN).minus(accountValue.abs()).decimalPlaces(18, 1);
+    const numerator = notionalValue.multipliedBy(SAFE_MARGIN).dividedBy(100).minus(accountValue.abs()).decimalPlaces(0, 1);
     const denominator = int256(SAFE_MARGIN).minus(DISCOUNT_RATE);
-    const x = numerator.dividedBy(denominator);
+    const x = numerator.multipliedBy(100).dividedBy(denominator);
     return x;
   }
 
@@ -435,7 +435,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.minus(baycLiquidateAmount);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
-    const discountAmount = uint256(liquidateAmount.multipliedBy(DISCOUNT_RATE));
+    const discountAmount = uint256(liquidateAmount.multipliedBy(DISCOUNT_RATE).dividedBy(100));
     this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
@@ -514,7 +514,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       vBaycNewPoolSize.value = vBaycNewPoolSize.value.plus(userBaycBalance);
       vUsdNewPoolSize.value = K.dividedBy(vBaycNewPoolSize.value);
     }
-    const discountAmount = uint256(this.collateral[userId].value.multipliedBy(DISCOUNT_RATE));
+    const discountAmount = uint256(this.collateral[userId].value.multipliedBy(DISCOUNT_RATE).dividedBy(100));
     this.withdrawCollateralByInsuranceFund(userId, discountAmount);
 
     return {
@@ -565,7 +565,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
 
     this._addActiveUser(userId);
     
-    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE));
+    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE).dividedBy(10000));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
@@ -591,7 +591,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
 
     this._addActiveUser(userId);
     
-    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE));
+    const fee = uint256(_usdAmount.multipliedBy(SWAP_FEE).dividedBy(10000));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = newPoolState;
@@ -650,7 +650,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       this._removeActiveUser(userId);
     }
 
-    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE));
+    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE).dividedBy(10000));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.addBaycBalance(_assetSize);
@@ -691,7 +691,7 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       this._removeActiveUser(userId);
     }
 
-    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE));
+    const fee = uint256(usdBaycValue.multipliedBy(SWAP_FEE).dividedBy(10000));
     this.withdrawCollateralByFee(userId, fee);
 
     this.poolState = this.removeBaycBalance(_assetSize);
@@ -1063,13 +1063,13 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       const status = this.getUserStatus(this.userAccounts[i].address, this.poolState);
       result.push({
         Id: "User" + i,
-        Collateral: +status.collateral.toFixed(2),
-        AccountValue: +status.accountValue.toFixed(2),
-        NotionalValue: +status.notionalValue.toFixed(2),
-        PNL: +status.pnl.toFixed(2),
-        Margin: +status.margin.toFixed(2),
-        VirtuaUsdBalance: +status.vUsdBalance.toFixed(2),
-        VirtuaBaycBalance: +status.vBaycBalance.toFixed(2),
+        Collateral: toNumber(status.collateral),
+        AccountValue: toNumber(status.accountValue),
+        NotionalValue: toNumber(status.notionalValue),
+        PNL: toNumber(status.pnl),
+        Margin: toNumber(status.margin),
+        VirtuaUsdBalance: toNumber(status.vUsdBalance),
+        VirtuaBaycBalance: toNumber(status.vBaycBalance),
       });
     }
     
@@ -1085,11 +1085,11 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
 
     result.push({
       Id: 'Contract',
-      Collateral: +this.virtualCollateral.toFixed(2),
-      AccountValue: +this.insuranceFunds.toFixed(2),
-      NotionalValue: +this.realCollateral.toFixed(2),
-      PNL: +this.feeCollector.toFixed(2),
-      Margin: +this.price.toFixed(2),
+      Collateral: toNumber(this.virtualCollateral),
+      AccountValue: toNumber(this.insuranceFunds),
+      NotionalValue: toNumber(this.realCollateral),
+      PNL: toNumber(this.feeCollector),
+      Margin: toNumber(this.price),
     })
     
 

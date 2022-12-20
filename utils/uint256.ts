@@ -46,3 +46,5 @@ export declare interface uint256 extends UnsignedBigNumberType {};
 export function uint256(value: number | string | BigNumber): UnsignedBigNumberType {
   return UnsignedBigNumber(value);
 }
+
+export const isUint256 = instanceOfUnSignedBigNumber;
