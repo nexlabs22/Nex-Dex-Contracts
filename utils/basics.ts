@@ -1,7 +1,10 @@
 import { ethers } from "hardhat";
-import int256 from "./int256";
+import int256 from "./solidity/int256";
 import { BigNumber as EtherBigNumber } from "ethers";
-import uint256, { isUint256 } from "./uint256";
+import { 
+  uint256,
+  isUint256, 
+} from "./solidity";
 import BigNumber from "bignumber.js";
 
 export const toBigNumber = (e: EtherBigNumber): int256 => (int256(e.toString() as string));

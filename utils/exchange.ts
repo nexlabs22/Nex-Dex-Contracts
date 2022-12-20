@@ -1,9 +1,17 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { compareResult, Require, toNumber } from "./basics";
+import { 
+  TYPE_CONTRACT,
+  ATTR_TYPE, 
+  ATTR_NAME,
+  CONTRACT_DEX,
+} from "./constant";
 
-import address from "./address";
-import int256 from "./int256";
-import uint256 from "./uint256";
+import  { 
+  int256,
+  uint256,
+  address,
+} from "./solidity";
 
 export interface PoolType {
   vBaycPoolSize: uint256;
@@ -39,6 +47,9 @@ export const ATUO_CLOSE_MARGIN = 40;
 
 export function organizeTestPool(price: int256, poolsize: int256, exchangeContract: any, usdcContract: any) {
   const Pool = Object.create(null);
+
+  Pool[ATTR_TYPE] = TYPE_CONTRACT;
+  Pool[ATTR_NAME] = CONTRACT_DEX;
 
   Pool.vBaycPoolSize = uint256(poolsize);
   Pool.vUsdPoolSize = uint256(price.multipliedBy(poolsize).dividedBy(1e+18));

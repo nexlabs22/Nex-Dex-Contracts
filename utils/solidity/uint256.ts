@@ -1,5 +1,9 @@
 import BigNumber from "bignumber.js";
 import int256 from './int256';
+import {
+	ATTR_TYPE,
+	SOLIDITY_UINT256
+} from '../constant';
 
 export const checkUnsignedBigNumber = (value: BigNumber): BigNumber => {
 	if (value.lt(0))
@@ -9,19 +13,19 @@ export const checkUnsignedBigNumber = (value: BigNumber): BigNumber => {
 
 export const DISCRIMINDATOR = 'UNSIGNED-BIGNUMBER';
 export interface UnsignedBigNumberType {
-	discriminator: string;
+	[ATTR_TYPE]: string;
 	value: BigNumber;
 	toFixed: (dp?: number, rm?: number) => string;
 }
 
 export function instanceOfUnSignedBigNumber(data: any): data is UnsignedBigNumberType {
-	return data.discriminator === DISCRIMINDATOR;
+	return data[ATTR_TYPE] === SOLIDITY_UINT256;
 }
 
 export const UnsignedBigNumber = (value: BigNumber | number | string, base = 10): UnsignedBigNumberType => {
 	const obj = Object.create(null);
 	obj._v = checkUnsignedBigNumber(int256(value, base));
-	obj.discriminator = DISCRIMINDATOR;
+	obj[ATTR_TYPE] = SOLIDITY_UINT256;
 
 	Object.defineProperty(obj, "value", {
 		set: function (value: BigNumber | number | string) {

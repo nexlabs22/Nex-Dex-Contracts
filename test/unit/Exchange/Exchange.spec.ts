@@ -13,8 +13,11 @@ import {
   toWeiBigNumber,
   toEtherBigNumber
 } from '../../../utils/basics';
-import uint256 from "../../../utils/uint256";
-import int256 from "../../../utils/int256";
+
+import {
+  uint256, 
+  int256,
+} from "../../../utils/solidity";
 
 async function compareResultExchange(pool: any, users?: Array<number>) {
   // in this function, compare the actual value of the smart contract with the expected value of the test pool
