@@ -24,7 +24,7 @@ interface AddressToAddressToUint256 {
 }
 
 interface AddressToVirtualBalance {
-  [index: string]: uint256;
+  [index: string]: VirtualBalance;
 }
 
 // TODO: add msg.sender feature
@@ -49,7 +49,7 @@ export default function(contract: any) {
   contract.maintenanceMargin = uint256(50); //50%
   contract.AutoCloseMargin = uint256(40); //40%
 
-  contract.this.swapFee = uint256(10); //=> 10/10000 = 0.1%
+  contract.swapFee = uint256(10); //=> 10/10000 = 0.1%
   contract.latestFeeUpdate = uint256(0);
 
   contract.liquidateList = [] as Array<string>;
@@ -132,7 +132,7 @@ export default function(contract: any) {
     return nftFloorPrice;
   }
 
-  //check is user exist in activeUsers array
+  //check is user exist in this.activeUsers array
   contract.doesUserExist = function(_user: string): boolean {
     for (let i = 0; i < this.activeUsers.length; i++) {
       if (this.activeUsers[i] == _user) {
@@ -163,7 +163,7 @@ export default function(contract: any) {
   }
 
   //return all active users in one array
-  contract.getAllActiveUsers = function(): Array<string> {
+  contract.getAllthis.activeUsers = function(): Array<string> {
     return this.activeUsers;
   }
 
@@ -193,39 +193,35 @@ export default function(contract: any) {
 
   //deposit collateral
   contract.depositCollateral = function(_amount: uint256) {
-    // TODO: msg.sender
-    // SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(0), _amount);
-    // this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].add(_amount);
-    // emit Deposit(usdc, msg.sender, _amount, this.collateral[usdc][msg.sender]);
+    SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(0), _amount);
+    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].add(_amount);
+    // emit Deposit(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }
 
   //withdraw collateral
   //befor that the contract.check user margin
   contract.withdrawCollateral = function(_amount: uint256) {
     //check new margin
-    // TODO: msg.sender
-    // const totalPositionNotional: uint256 = this.getPositionNotional(msg.sender);
-    // const totalAccountValue: int256 = this.getAccountValue(msg.sender);
-    // if (totalPositionNotional.gt(0)) {
-    //   const newAccountValue: int256 = totalAccountValue.minus(int256(_amount));
-    //   const newMargin: int256 = (newAccountValue.multipliedBy(100)).dividedBy(int256(totalPositionNotional));
-    //   Require(
-    //     newMargin.gt(int256(this.saveLevelMargin)),
-    //     "You cannot withdraw because your margin is lower than the saveMargin level"
-    //   );
-    // }
-    //check user has enough collateral
-    // TODO: msg.sender
-    // Require(
-    //   this.collateral[this.usdc][msg.sender] >= _amount,
-    //   "Requested withdrawal amount is larger than the collateral balance."
-    // );
-    //transfer tokens to the user
+    const totalPositionNotional: uint256 = this.getPositionNotional(msg.sender);
+    const totalAccountValue: int256 = this.getAccountValue(msg.sender);
+    if (totalPositionNotional.gt(0)) {
+      const newAccountValue: int256 = totalAccountValue.minus(int256(_amount));
+      const newMargin: int256 = (newAccountValue.multipliedBy(100)).dividedBy(int256(totalPositionNotional));
+      Require(
+        newMargin.gt(int256(this.saveLevelMargin)),
+        "You cannot withdraw because your margin is lower than the saveMargin level"
+      );
+    }
+    // check user has enough collateral
+    Require(
+      this.collateral[this.usdc][msg.sender].gte(_amount),
+      "Requested withdrawal amount is larger than the collateral balance."
+    );
+    // transfer tokens to the user
 
-    // TODO: msg.sender
-    // SafeERC20.safeTransfer(IERC20(this.usdc), msg.sender, _amount);
-    // this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].sub(_amount);
-    // emit Withdraw(usdc, msg.sender, _amount, this.collateral[usdc][msg.sender]);
+    SafeERC20.safeTransfer(IERC20(this.usdc), msg.sender, _amount);
+    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].sub(_amount);
+    // emit Withdraw(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }
 
   //give the user funding reward when position will be closed
@@ -282,7 +278,7 @@ export default function(contract: any) {
 
   //I use int for negative/positve numbers for user bayc and usd balance(wich might be negative)
   //so for some point we need to convert them to uint so they should be positive
-  //f.e positive(-1)=1
+  //f.e this.positive(-1)=1
   contract.positive = function(_amount: int256): uint256 {
     if (_amount.lt(0)) {
       const posAmount: int256 = _amount.negated();
@@ -427,7 +423,7 @@ export default function(contract: any) {
     //increase or decrease the user pnl for this function
     if (usdBaycValue.gt(uint256(this.positive(userPartialvUsdBalance)))) {
       const pnl: uint256 = usdBaycValue.minus(uint256(this.positive(userPartialvUsdBalance)));
-      // this.collateral[usdc][_user] += pnl;
+      // this.collateral[this.usdc][_user] += pnl;
       this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].plus(pnl);
     } else if (usdBaycValue.lt(uint256(this.positive(userPartialvUsdBalance)))) {
       const pnl: uint256 = uint256(this.positive(userPartialvUsdBalance).minus(usdBaycValue));
@@ -540,7 +536,7 @@ export default function(contract: any) {
   user vBayc balance = 2Bayc
   user vUsd balance = -3000
   currnent 2 vBayc value =  4000
-  user pnl = 4000 - positive(-3000) = 1000$
+  user pnl = 4000 - this.positive(-3000) = 1000$
   */
   contract.getPNL = function(_user: string): int256 {
     let pnl: int256;
@@ -685,6 +681,872 @@ export default function(contract: any) {
     } else {
       return false;
     }
+  }
+
+
+  //ckeck that is user can be liquidated according to the new price
+  contract._isHardLiquidatable = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): boolean {
+    const userMargin: int256 = this._userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    if (!userMargin.eq(0) && userMargin.lte(int256(this.AutoCloseMargin))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  contract._isNewMarginLiquidatable = function(
+    _user: string,
+    _usdAmount: uint256,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): boolean {
+    const accountValue: int256 = this._getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    const positionNotional: uint256 = this._getNewPositionNotional(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    const newPositionNotional: uint256 = positionNotional.plus(_usdAmount);
+    const newMargin: int256 = (accountValue.multipliedBy(100)).dividedBy(int256(newPositionNotional));
+    if (!newMargin.eq(0) && newMargin.lte(int256(this.saveLevelMargin))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  contract.isPartialLiquidatable = function(_user: string): boolean {
+    const userMargin: int256 = this.userMargin(_user);
+    if (int256(this.AutoCloseMargin).lte(userMargin) && userMargin.lte(int256(this.maintenanceMargin))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //ckeck that is user can be partialy liquidated according to the new price
+  contract._isPartialLiquidatable = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): boolean {
+    const userMargin: int256 = this._userNewMargin(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    // if ( 40 < userMargin < 50 ) => user is partial liquidatable
+    if (int256(this.AutoCloseMargin).lte(userMargin) && userMargin.lte(int256(this.maintenanceMargin))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //this contract.is called if user should be liquidated by new price
+  contract._hardLiquidate = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): Array<uint256> {
+    Require(
+      this._isHardLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "User is not hard liquidatable."
+    );
+    let vBaycNewPoolSize = _vBaycNewPoolSize;
+    let vUsdNewPoolSize = _vUsdNewPoolSize;
+    if (this.virtualBalances[_user].uservBaycBalance.gt(0)) {
+      // _closeLongPosition(_user, uint256(uservBaycBalance[_user]));
+      const _assetSize: uint256 = uint256(this.virtualBalances[_user].uservBaycBalance);
+      const usdBaycValue: uint256 = this.getShortVusdAmountOut(_assetSize);
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue.gt(this.positive(this.virtualBalances[_user].uservUsdBalance))) {
+        const pnl: uint256 = usdBaycValue.minus(this.positive(this.virtualBalances[_user].uservUsdBalance));
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].plus(pnl);
+      } else if (usdBaycValue.lt(this.positive(this.virtualBalances[_user].uservUsdBalance))) {
+        const pnl: uint256 = this.positive(this.virtualBalances[_user].uservUsdBalance).minus(usdBaycValue);
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(pnl);
+      }
+      //realize funding reward of user;
+      const realizeVirtualCollAmount: int256 = this.virtualBalances[_user].virtualCollateral;
+      if (!realizeVirtualCollAmount.eq(0)) {
+        this._realizevirtualCollateral(_user, this.absoluteInt(realizeVirtualCollAmount));
+      }
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = 0;
+      this.virtualBalances[_user].uservUsdBalance = 0;
+      // if user has not vbalance so he is not active
+      this._removeActiveUser(_user);
+      //update the pool
+      let k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.plus(_assetSize);
+      this.pool.vUsdPoolSize = k.dividedBy(this.pool.vBaycPoolSize);
+      //update the new pool size
+      k = vBaycNewPoolSize.multipliedBy(vUsdNewPoolSize);
+      vBaycNewPoolSize = vBaycNewPoolSize.plus(_assetSize);
+      vUsdNewPoolSize = k.dividedBy(vBaycNewPoolSize);
+    } else if (this.virtualBalances[_user].uservBaycBalance.lt(0)) {
+      const _assetSize: uint256 = this.positive(this.virtualBalances[_user].uservBaycBalance);
+      const usdBaycValue: uint256 = this.getLongVusdAmountOut(_assetSize);
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue.gt(uint256(this.virtualBalances[_user].uservUsdBalance))) {
+        const pnl: uint256 = usdBaycValue.minus(this.positive(this.virtualBalances[_user].uservUsdBalance));
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(pnl);
+      } else if (usdBaycValue.lt(uint256(this.virtualBalances[_user].uservUsdBalance))) {
+        const pnl: uint256 = this.positive(this.virtualBalances[_user].uservUsdBalance).minus(usdBaycValue);
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].plus(pnl);
+      }
+      //realize funding reward of user;
+      const realizeVirtualCollAmount: int256 = this.virtualBalances[_user].virtualCollateral;
+      if (!realizeVirtualCollAmount.eq(0)) {
+        this._realizevirtualCollateral(_user, this.absoluteInt(realizeVirtualCollAmount));
+      }
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = int256(0);
+      this.virtualBalances[_user].uservUsdBalance = int256(0);
+      // if user has not vbalance so he is not active
+      this._removeActiveUser(_user);
+      //update the pool
+      let k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.minus(_assetSize);
+      this.pool.vUsdPoolSize = k.dividedBy(this.pool.vBaycPoolSize);
+      //update the new pool size
+      k = vBaycNewPoolSize.multipliedBy(vUsdNewPoolSize);
+      vBaycNewPoolSize = vBaycNewPoolSize.minus(_assetSize);
+      vUsdNewPoolSize = k.dividedBy(vBaycNewPoolSize);
+    }
+    const collateralValue: uint256 = this.collateral[this.usdc][_user];
+    const discountAmount: uint256 = (this.discountRate.multipliedBy(collateralValue)).dividedBy(100);
+    this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(discountAmount);
+    this.insuranceFunds = this.insuranceFunds.plus(discountAmount);
+
+    return [
+      vBaycNewPoolSize,
+      vUsdNewPoolSize
+    ];
+  }
+
+  //this contract.is called if user should be liquidated by new price
+  contract._hardNegativeLiquidate = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): Array<uint256> {
+    Require(
+      this._isHardLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "User is not hard liquidatable."
+    );
+    let vBaycNewPoolSize = _vBaycNewPoolSize;
+    let vUsdNewPoolSize = _vUsdNewPoolSize;
+    if (this.virtualBalances[_user].uservBaycBalance.gt(0)) {
+      const _assetSize: uint256 = uint256(this.virtualBalances[_user].uservBaycBalance);
+      const negativeValue: int256 = this._getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+
+      this.collateral[this.usdc][_user] = uint256(0);
+      this.virtualBalances[_user].virtualCollateral = int256(0);
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = int256(0);
+      this.virtualBalances[_user].uservUsdBalance = int256(0);
+      // if user has not vbalance so he is not active
+      this._removeActiveUser(_user);
+      //update the pool
+      const k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.plus(_assetSize);
+      this.pool.vUsdPoolSize = k.dividedBy(this.pool.vBaycPoolSize);
+      //update the new pool size
+      vBaycNewPoolSize = vBaycNewPoolSize.plus(_assetSize);
+      vUsdNewPoolSize = k.dividedBy(vBaycNewPoolSize);
+      // reduce short users virtual collateral
+      const allShortBaycBalance: int256 = this.getAllShortvBaycBalance();
+      for (let i = 0; i < this.activeUsers.length; i++) {
+        const user: string = this.activeUsers[i];
+        if (this.virtualBalances[_user].uservBaycBalance.lt(0)) {
+          const liquidationCover: uint256 = (uint256(negativeValue).multipliedBy(
+            this.positive(this.virtualBalances[_user].uservBaycBalance))).dividedBy(this.positive(allShortBaycBalance));
+          this.virtualBalances[_user].virtualCollateral = this.virtualBalances[_user].virtualCollateral.minus(int256(liquidationCover));
+        }
+      }
+    } else if (this.virtualBalances[_user].uservBaycBalance.lt(0)) {
+      const _assetSize: uint256 = uint256(this.positive(this.virtualBalances[_user].uservBaycBalance));
+      const negativeValue: int256 = this._getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+
+      this.collateral[this.usdc][_user] = uint256(0);
+      this.virtualBalances[_user].virtualCollateral = int256(0);
+
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = int256(0);
+      this.virtualBalances[_user].uservUsdBalance = int256(0);
+      // if user has not vbalance so he is not active
+      this._removeActiveUser(_user);
+      //update the pool
+      const k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.minus(_assetSize);
+      this.pool.vUsdPoolSize = k.dividedBy(this.pool.vBaycPoolSize);
+      //update the new pool size
+      vBaycNewPoolSize = vBaycNewPoolSize.minus(_assetSize);
+      vUsdNewPoolSize = k.dividedBy(vBaycNewPoolSize);
+      // reduce long users virtual collateral
+      const allLongvBaycBalance: int256 = this.getAllLongvBaycBalance();
+      for (let i = 0; i < this.activeUsers.length; i++) {
+        const user: string = this.activeUsers[i];
+        if (this.virtualBalances[_user].uservBaycBalance.gt(0)) {
+          const liquidationCover: uint256 = (uint256(negativeValue).multipliedBy(
+            uint256(this.virtualBalances[_user].uservBaycBalance))).dividedBy(uint256(allLongvBaycBalance));
+          this.virtualBalances[_user].virtualCollateral = this.virtualBalances[_user].virtualCollateral.minus(int256(liquidationCover));
+        }
+      }
+    }
+
+    return [
+      vBaycNewPoolSize,
+      vUsdNewPoolSize
+    ];
+  }
+
+  //calculate liquidation amount to turn back the user margin to the save level(60%)
+  contract.calculatePartialLiquidateValue = function(_user: string): uint256 {
+    const totalAccountValue: int256 = this.getAccountValue(_user);
+    const totalPositionNotional: uint256 = this.getPositionNotional(_user);
+    const numerator: uint256 = (totalPositionNotional.multipliedBy(this.saveLevelMargin)).dividedBy(100).minus(
+      this.positive(totalAccountValue));
+    const denominator: uint256 = this.saveLevelMargin.minus(this.discountRate);
+    const x: uint256 = (numerator.multipliedBy(100)).dividedBy(denominator);
+    return x;
+  }
+
+  //calculate liquidation amount to turn back the user margin to the save level(60%) according to the new price
+  contract._calculatePartialLiquidateValue = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): uint256 {
+    const totalAccountValue: int256 = this._getNewAccountValue(_user, _vBaycNewPoolSize, _vUsdNewPoolSize);
+    const totalPositionNotional: uint256 = this._getNewPositionNotional(
+      _user,
+      _vBaycNewPoolSize,
+      _vUsdNewPoolSize
+    );
+    const numerator: uint256 = (totalPositionNotional.multipliedBy(this.saveLevelMargin)).dividedBy(100).minus(
+      this.positive(totalAccountValue));
+    const denominator: uint256 = this.saveLevelMargin.minus(this.discountRate);
+    const x: uint256 = (numerator.multipliedBy(100)).dividedBy(denominator);
+    return x;
+  }
+
+  //get minimum long bayc amount that user receives
+  contract.getMinimumLongBaycOut = function(_usdAmount: uint256): uint256 {
+    let vBaycPoolSize: int256 = int256(this.pool.vBaycPoolSize);
+    let vUsdPoolSize: int256 = int256(this.pool.vUsdPoolSize);
+    let k: int256 = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvUsdPoolSize: int256 = vUsdPoolSize.plus(int256(_usdAmount));
+    let newvBaycPoolSize: int256 = k.dividedBy(newvUsdPoolSize);
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isHardLiquidatable: boolean = this._isHardLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      }
+    }
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isPartialLiquidatable: boolean = this._isPartialLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount: uint256 = this._calculatePartialLiquidateValue(
+            this.activeUsers[i],
+            uint256(newvBaycPoolSize),
+            uint256(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvUsdPoolSize: int256 = vUsdPoolSize.plus(int256(_usdAmount));
+    const finalvBaycPoolSize: int256 = k.dividedBy(finalvUsdPoolSize);
+    const userBaycOut: int256 = vBaycPoolSize.minus(finalvBaycPoolSize);
+    return uint256(userBaycOut);
+  }
+
+  //get minimum short bayc amount that user receives
+  contract.getMinimumShortBaycOut = function(_usdAmount: uint256): uint256 {
+    let vBaycPoolSize: int256 = int256(this.pool.vBaycPoolSize);
+    let vUsdPoolSize: int256 = int256(this.pool.vUsdPoolSize);
+    let k: int256 = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvUsdPoolSize: int256 = vUsdPoolSize.minus(int256(_usdAmount));
+    let newvBaycPoolSize: int256 = k.dividedBy(newvUsdPoolSize);
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isHardLiquidatable: boolean = this._isHardLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) { 
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+          
+        }
+      }
+    }
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isPartialLiquidatable: boolean = this._isPartialLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          
+          const vUsdPartialLiquidateAmount: uint256 = this._calculatePartialLiquidateValue(
+            this.activeUsers[i],
+            uint256(newvBaycPoolSize),
+            uint256(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvUsdPoolSize: int256 = vUsdPoolSize.minus(int256(_usdAmount));
+    const finalvBaycPoolSize: int256 = k.dividedBy(finalvUsdPoolSize);
+    const userBaycOut: int256 = finalvBaycPoolSize.minus(vBaycPoolSize);
+
+    return uint256(userBaycOut);
+
+  }
+
+
+  //get minimum long usd amount that user receives
+  contract.getMinimumLongUsdOut = function(_BaycAmount: uint256): uint256 {
+    let vBaycPoolSize: int256 = int256(this.pool.vBaycPoolSize);
+    let vUsdPoolSize: int256 = int256(this.pool.vUsdPoolSize);
+    let k: int256 = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvBaycPoolSize: int256 = vBaycPoolSize.minus(int256(_BaycAmount));
+    let newvUsdPoolSize: int256 = k.dividedBy(newvBaycPoolSize);
+
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isHardLiquidatable: boolean = this._isHardLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      }
+    }
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isPartialLiquidatable: boolean = this._isPartialLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount: uint256 = this._calculatePartialLiquidateValue(
+            this.activeUsers[i],
+            uint256(newvBaycPoolSize),
+            uint256(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      }
+    }
+
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvBaycPoolSize: int256 = vBaycPoolSize.minus(int256(_BaycAmount));
+    const finalvUsdPoolSize: int256 = k.dividedBy(finalvBaycPoolSize);
+    const userUsdOut: int256 = finalvUsdPoolSize.minus(vUsdPoolSize);
+    return uint256(userUsdOut);
+  }
+
+
+  //get minimum short usd amount that user receives
+  contract.getMinimumShortUsdOut = function(_BaycAmount: uint256): uint256 {
+    let vBaycPoolSize: int256 = int256(this.pool.vBaycPoolSize);
+    let vUsdPoolSize: int256 = int256(this.pool.vUsdPoolSize);
+    let k: int256 = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    let newvBaycPoolSize: int256 = vBaycPoolSize.plus(int256(_BaycAmount));
+    let newvUsdPoolSize: int256 = k.dividedBy(newvBaycPoolSize);
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isHardLiquidatable: boolean = this._isHardLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          
+          //update new pool
+          k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+          newvBaycPoolSize = newvBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          newvUsdPoolSize = k.dividedBy(newvBaycPoolSize);
+          //update pool
+          k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+          vBaycPoolSize = vBaycPoolSize.plus(this.virtualBalances[this.activeUsers[i]].uservBaycBalance);
+          vUsdPoolSize = k.dividedBy(vBaycPoolSize);
+        }
+      }
+    }
+
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isPartialLiquidatable: boolean = this._isPartialLiquidatable(
+          this.activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          const vUsdPartialLiquidateAmount: uint256 = this._calculatePartialLiquidateValue(
+            this.activeUsers[i],
+            uint256(newvBaycPoolSize),
+            uint256(newvUsdPoolSize)
+          );
+          if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.gt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.minus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          } else if (this.virtualBalances[this.activeUsers[i]].uservBaycBalance.lt(0)) {
+            //update new pool
+            k = newvBaycPoolSize.multipliedBy(newvUsdPoolSize);
+            newvUsdPoolSize = newvUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
+            //update pool
+            k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+            vUsdPoolSize = vUsdPoolSize.plus(int256(vUsdPartialLiquidateAmount));
+            vBaycPoolSize = k.dividedBy(vUsdPoolSize);
+          }
+        }
+      }
+    }
+
+    k = vBaycPoolSize.multipliedBy(vUsdPoolSize);
+    const finalvBaycPoolSize: int256 = vBaycPoolSize.plus(int256(_BaycAmount));
+    const finalvUsdPoolSize: int256 = k.dividedBy(finalvBaycPoolSize);
+    const userUsdOut: int256 = vUsdPoolSize.minus(finalvUsdPoolSize);
+    return uint256(userUsdOut);
+  }
+
+  //Liquidate user partialy according to the new price
+  contract._partialLiquidate = function(
+    _user: string,
+    _vBaycNewPoolSize: uint256,
+    _vUsdNewPoolSize: uint256
+  ): Array<uint256> {
+    Require(
+      this._isPartialLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
+      "user can not be partially liquidated"
+    );
+    let vBaycNewPoolSize = _vBaycNewPoolSize;
+    let vUsdNewPoolSize = _vUsdNewPoolSize;
+
+    const liquidateAmount: uint256 = this._calculatePartialLiquidateValue(
+      _user,
+      _vBaycNewPoolSize,
+      _vUsdNewPoolSize
+    );
+    //uint baycLiquidateAmount = liquidateAmount*this.pool.vBaycPoolSize/this.pool.vUsdPoolSize;
+    // return BaycLiquidateAmount;
+    if (this.virtualBalances[_user].uservBaycBalance.gt(0)) {
+      // _closeLongPosition(_user, baycLiquidateAmount);
+
+      //get the output usd of closing position
+      // const usdBaycValue: uint256 = getShortVusdAmountOut(baycLiquidateAmount);
+      const usdBaycValue: uint256 = liquidateAmount;
+      const baycLiquidateAmount: uint256 = this.getShortBaycAmountOut(usdBaycValue);
+      const userPartialvUsdBalance: int256 = (this.virtualBalances[_user].uservUsdBalance.multipliedBy(
+        int256(baycLiquidateAmount))).dividedBy(this.virtualBalances[_user].uservBaycBalance);
+
+      //increase or decrease the user pnl for this function
+      if (usdBaycValue.gt(this.positive(userPartialvUsdBalance))) {
+        const pnl: uint256 = usdBaycValue.minus(this.positive(userPartialvUsdBalance));
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].plus(pnl);
+      } else if (usdBaycValue.lt(this.positive(userPartialvUsdBalance))) {
+        const pnl: uint256 = this.positive(userPartialvUsdBalance).minus(usdBaycValue);
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(pnl);
+      }
+      //realize funding reward of user;
+      const realizeVirtualCollAmount: int256 = this.virtualBalances[_user].virtualCollateral;
+      if (!realizeVirtualCollAmount.eq(0)) {
+        this._realizevirtualCollateral(_user, this.absoluteInt(realizeVirtualCollAmount));
+      }
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = this.virtualBalances[_user].uservBaycBalance.minus(int256(baycLiquidateAmount));
+      this.virtualBalances[_user].uservUsdBalance = this.virtualBalances[_user].uservUsdBalance.plus(this.absoluteInt(userPartialvUsdBalance));
+      // if user has not vbalance so he is not active
+      if (
+        this.virtualBalances[_user].uservBaycBalance.eq(0) && this.virtualBalances[_user].uservUsdBalance.eq(0)
+      ) {
+        this._removeActiveUser(_user);
+      }
+      //update the pool
+      const k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.plus(baycLiquidateAmount);
+      this.pool.vUsdPoolSize = k.dividedBy(this.pool.vBaycPoolSize);
+      //update the newPoolSize
+      vBaycNewPoolSize = vBaycNewPoolSize.plus(baycLiquidateAmount);
+      vUsdNewPoolSize = k.dividedBy(vBaycNewPoolSize);
+    } else if (this.virtualBalances[_user].uservBaycBalance.lt(0)) {
+      //get the output usd of closing position
+      const usdBaycValue: uint256 = liquidateAmount;
+      const baycLiquidateAmount: uint256 = this.getLongBaycAmountOut(usdBaycValue);
+      const userPartialvUsdBalance: int256 = (this.virtualBalances[_user].uservUsdBalance.multipliedBy(
+        int256(baycLiquidateAmount))).dividedBy(this.virtualBalances[_user].uservBaycBalance);
+      //increase or decrease pnl of the user
+      if (usdBaycValue.gt(uint256(this.positive(userPartialvUsdBalance)))) {
+        const pnl: uint256 = usdBaycValue.minus(uint256(this.positive(userPartialvUsdBalance)));
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(pnl);
+      }
+      if (usdBaycValue.lt(this.positive(userPartialvUsdBalance))) {
+        const pnl: uint256 = this.positive(userPartialvUsdBalance).minus(usdBaycValue);
+        this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].plus(pnl);
+      }
+      //realize funding reward of user;
+      const realizeVirtualCollAmount: int256 = this.virtualBalances[_user].virtualCollateral;
+      if (!realizeVirtualCollAmount.eq(0)) {
+        this._realizevirtualCollateral(_user, this.absoluteInt(realizeVirtualCollAmount));
+      }
+      //update user balance
+      this.virtualBalances[_user].uservBaycBalance = this.virtualBalances[_user].uservBaycBalance.plus(int256(baycLiquidateAmount));
+      this.virtualBalances[_user].uservUsdBalance = this.virtualBalances[_user].uservUsdBalance.minus(this.absoluteInt(userPartialvUsdBalance));
+      // if user has not vbalance so he is not active
+      if (
+        this.virtualBalances[_user].uservBaycBalance == 0 && this.virtualBalances[_user].uservUsdBalance == 0
+      ) {
+        this._removeActiveUser(_user);
+      }
+      //update pool
+      const k2: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+      this.pool.vBaycPoolSize = this.pool.vBaycPoolSize.minus(baycLiquidateAmount);
+      this.pool.vUsdPoolSize = k2.dividedBy(this.pool.vBaycPoolSize);
+      //update the newPoolSize
+      vBaycNewPoolSize = vBaycNewPoolSize.minus(baycLiquidateAmount);
+      vUsdNewPoolSize = k2.dividedBy(vBaycNewPoolSize);
+    }
+    const discountAmount: uint256 = (liquidateAmount.multipliedBy(this.discountRate)).dividedBy(100);
+    this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(discountAmount);
+    this.insuranceFunds = this.insuranceFunds.plus(discountAmount);
+
+    return [
+      vBaycNewPoolSize,
+      vUsdNewPoolSize,
+    ];
+  }
+
+  //liquidate users according to the new price (is used only in trade trade functions)
+  contract._hardLiquidateUsers = function(_vBaycNewPoolSize: uint256, _vUsdNewPoolSize: uint256)
+    : Array<uint256>
+  {
+    let vBaycNewPoolSize = _vBaycNewPoolSize;
+    let vUsdNewPoolSize = _vUsdNewPoolSize;
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isLiquidatable: boolean = this._isHardLiquidatable(
+          this.activeUsers[i],
+          vBaycNewPoolSize,
+          vUsdNewPoolSize
+        );
+        if (isLiquidatable == true) {
+          const userMargin: int256 = this._userNewMargin(this.activeUsers[i], vBaycNewPoolSize, vUsdNewPoolSize);
+          if (userMargin.gt(0)) {
+            [vBaycNewPoolSize, vUsdNewPoolSize] = this._hardLiquidate(
+              this.activeUsers[i],
+              vBaycNewPoolSize,
+              vUsdNewPoolSize
+            );
+          } else if (userMargin.lt(0)) {
+            [vBaycNewPoolSize, vUsdNewPoolSize] = this._hardNegativeLiquidate(
+              this.activeUsers[i],
+              vBaycNewPoolSize,
+              vUsdNewPoolSize
+            );
+          }
+        }
+      }
+    }
+
+    return [
+      vBaycNewPoolSize,
+      vUsdNewPoolSize,
+    ];
+  }
+
+  //liquidate users partialy according to the new price (is used only in trade trade functions)
+  contract._partialLiquidateUsers = function(_vBaycNewPoolSize: uint256, _vUsdNewPoolSize: uint256)
+    : Array<uint256>
+  {
+    let vBaycNewPoolSize = _vBaycNewPoolSize;
+    let vUsdNewPoolSize = _vUsdNewPoolSize;
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      if (this.activeUsers[i] != address(0)) {
+        const isPartialLiquidatable: boolean = this._isPartialLiquidatable(
+          this.activeUsers[i],
+          vBaycNewPoolSize,
+          vUsdNewPoolSize
+        );
+        if (isPartialLiquidatable == true) {
+          [vBaycNewPoolSize, vUsdNewPoolSize] = this._partialLiquidate(
+            this.activeUsers[i],
+            vBaycNewPoolSize,
+            vUsdNewPoolSize
+          );
+        }
+      }
+    }
+
+    return [
+      vBaycNewPoolSize,
+      vUsdNewPoolSize,
+    ];
+  }
+
+  contract.getAllLongvBaycBalance = function(): int256 {
+    let allLongBaycBalance = int256(0);
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      const user: string = this.activeUsers[i];
+      const vBaycBalance: int256 = this.virtualBalances[user].uservBaycBalance;
+      if (vBaycBalance.gt(0)) {
+        allLongBaycBalance = allLongBaycBalance.plus(vBaycBalance);
+      }
+    }
+    return allLongBaycBalance;
+  }
+
+  contract.getAllShortvBaycBalance = function(): int256 {
+    let allShortBaycBalance = int256(0);
+    for (let i = 0; i < this.activeUsers.length; i++) {
+      const user: string = this.activeUsers[i];
+      const vBaycBalance: int256 = this.virtualBalances[user].uservBaycBalance;
+      if (vBaycBalance.lt(0)) {
+        allShortBaycBalance = allShortBaycBalance.plus(vBaycBalance);
+      }
+    }
+    return allShortBaycBalance;
+  }
+
+  contract.setFundingRate = function(){
+    const currentPrice: uint256 = (this.pool.vUsdPoolSize.multipliedBy(1e18)).dividedBy(this.pool.vBaycPoolSize);
+    const oraclePrice: uint256 = this.showPriceUSD();
+
+    //first the contract check actual vBayc positions balance of users
+    const allLongvBaycBalance: int256 = this.getAllLongvBaycBalance();
+    const allShortBaycBalance: int256 = this.getAllShortvBaycBalance();
+
+    //check if we dont have one side(long or short balance = 0) this funding action will not run
+    if (allLongvBaycBalance.gt(0) && allShortBaycBalance.lt(0)) {
+      if (currentPrice.gt(oraclePrice)) {
+        const minOpenInterest: int256 = (
+          this.absoluteInt(allLongvBaycBalance).gt(this.absoluteInt(allShortBaycBalance))
+            ? this.absoluteInt(allShortBaycBalance)
+            : this.absoluteInt(allLongvBaycBalance)
+        );
+        const difference: uint256 = currentPrice.minus(oraclePrice);
+        const fundingFee: uint256 = (uint256(minOpenInterest).multipliedBy(difference)).dividedBy(24e18);
+        for (let i = 0; i < this.activeUsers.length; i++) {
+          const user: string = this.activeUsers[i];
+          if (this.virtualBalances[user].uservBaycBalance.gt(0)) {
+            //change vitraul collateral of user
+            const userFundingFee: uint256 = (fundingFee.multipliedBy(
+              uint256(this.virtualBalances[user].uservBaycBalance))).dividedBy(uint256(allLongvBaycBalance));
+            this.virtualBalances[user].virtualCollateral = this.virtualBalances[user].virtualCollateral.minus(int256(userFundingFee));
+          } else if (this.virtualBalances[user].uservBaycBalance.lt(0)) {
+            //change vitraul collateral of user
+            const userFundingFee: uint256 = (fundingFee.multipliedBy(
+              this.positive(this.virtualBalances[user].uservBaycBalance))).dividedBy(this.positive(allShortBaycBalance));
+            this.virtualBalances[user].virtualCollateral = this.virtualBalances[user].virtualCollateral.plus(int256(userFundingFee));
+          }
+        }
+      } else if (currentPrice.lt(oraclePrice)) {
+        const minOpenInterest: int256 = (
+          this.absoluteInt(allLongvBaycBalance).gt(this.absoluteInt(allShortBaycBalance))
+            ? this.absoluteInt(allShortBaycBalance)
+            : this.absoluteInt(allLongvBaycBalance)
+        );
+        const difference: uint256 = oraclePrice.minus(currentPrice);
+        const fundingFee: uint256 = (uint256(minOpenInterest).multipliedBy(difference)).dividedBy(24e18);
+        for (let i = 0; i < this.activeUsers.length; i++) {
+          const user: string = this.activeUsers[i];
+          if (this.virtualBalances[user].uservBaycBalance.gt(0)) {
+            //change vitraul collateral of user
+            const userFundingFee: uint256 = (fundingFee.multipliedBy(
+              uint256(this.virtualBalances[user].uservBaycBalance))).dividedBy(uint256(allLongvBaycBalance));
+            this.virtualBalances[user].virtualCollateral = this.virtualBalances[user].virtualCollateral.plus(int256(userFundingFee));
+          } else if (this.virtualBalances[user].uservBaycBalance.lt(0)) {
+            //change vitraul collateral of user
+            const userFundingFee: uint256 = (fundingFee.multipliedBy(
+              this.positive(this.virtualBalances[user].uservBaycBalance))).dividedBy(this.positive(allShortBaycBalance));
+            this.virtualBalances[user].virtualCollateral = this.virtualBalances[user].virtualCollateral.minus(int256(userFundingFee));
+          }
+        }
+      }
+    }
+  }
+
+  //return positive int
+  contract.this.absoluteInt = function(_value: int256): int256 {
+    if (_value.gt(0)) {
+      return _value.negated();
+    } else {
+      return _value;
+    }
+  }
+
+  //return false if new price go further than the oracle price
+  contract.isPriceIntheRightRange = function(_vBaycNewPoolSize: uint256, _vUsdNewPoolSize: uint256): boolean
+  {
+    const currentPrice: uint256 = (this.pool.vUsdPoolSize.multipliedBy(1e18)).dividedBy(this.pool.vBaycPoolSize);
+    const oraclePrice: uint256 = this.showPriceUSD();
+    const newPrice: uint256 = (_vUsdNewPoolSize.multipliedBy(1e18)).dividedBy(_vBaycNewPoolSize);
+
+    const currentDifference: int256 = int256(oraclePrice).minus(int256(currentPrice));
+    const currentDifferencePercentage: int256 = (currentDifference.multipliedBy(100)).dividedBy(int256(currentPrice));
+    const currentDifferenceDistance: int256 = this.absoluteInt(currentDifferencePercentage).minus(10);
+
+    const newDifference: int256 = int256(oraclePrice).minus(int256(newPrice));
+    const newDifferencePercentage: int256 = (newDifference.multipliedBy(100)).dividedBy(int256(newPrice));
+    const newDifferenceDistance: int256 = this.absoluteInt(newDifferencePercentage).minus(10);
+
+    if (currentDifferenceDistance.gt(0)) {
+      //we are outside the target range and need to be brought back
+      if (newDifferenceDistance.lt(currentDifferenceDistance)) {
+        return true; //trade allowed, we move closer
+      } else {
+        return false; //trade is not allowed, we move more distant
+      }
+    } else {
+      //we are inside the target range
+      if (newDifferenceDistance.lt(10)) {
+        return true; //trade allowed we stay within target range.
+      } else {
+        return false;
+      }
+    }
+  }
+
+  // remove insurance funds from contract to owner account
+  contract.removeInsuranceFunds = function(_amount: uint256) {
+    Require(
+      _amount.lte(this.insuranceFunds),
+      "Requested collect amount is largser than the ContractFee balance."
+    );
+    SafeERC20.safeTransfer(IERC20(this.usdc), msg.sender, _amount);
+    this.insuranceFunds = this.insuranceFunds.minus(_amount);
+  }
+
+  contract.isLongInRightRange = function(_usdAmount: uint256): boolean {
+    const k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+    let newvUsdPoolSize: uint256 = this.pool.vUsdPoolSize.plus(_usdAmount);
+    let newvBaycPoolSize: uint256 = k.dividedBy(newvUsdPoolSize);
+    const isInTheRightRange: boolean = this.isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    return isInTheRightRange;
+  }
+
+  contract.isShortInRightRange = function(_usdAmount: uint256): boolean {
+    const k: uint256 = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
+    let newvUsdPoolSize: uint256 = this.pool.vUsdPoolSize.minus(_usdAmount);
+    let newvBaycPoolSize: uint256 = k.dividedBy(newvUsdPoolSize);
+    const isInTheRightRange: boolean = this.isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
+    return isInTheRightRange;
+  }
+
+  contract.marketPrice = function(): uint256 {
+    return (this.pool.vUsdPoolSize.multipliedBy(1e18)).dividedBy(this.pool.vBaycPoolSize);
   }
 
   return contract;
