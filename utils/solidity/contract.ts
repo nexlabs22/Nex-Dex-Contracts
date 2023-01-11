@@ -9,7 +9,13 @@ export declare interface Contract {
   [ATTR_CONTRACT_ADDRESS]: string
 }
 
-export function Contract() {}
+export function Contract(name: string, address: string) {
+  return {
+    [ATTR_TYPE]: TYPE_CONTRACT,
+    [ATTR_NAME]: name,
+    [ATTR_CONTRACT_ADDRESS]: address
+  }
+}
 
 export const isContract = (e: any): boolean => e[ATTR_TYPE] === TYPE_CONTRACT
 

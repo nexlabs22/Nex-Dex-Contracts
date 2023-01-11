@@ -27,7 +27,9 @@ interface AddressToVirtualBalance {
   [index: string]: VirtualBalance;
 }
 
-// TODO: add msg.sender feature
+/////////////////////////////////////////////////////////////////////////////////
+//// Should be fixed later...
+/////////////////////////////////////////////////////////////////////////////////
 const msg = {
   sender: ''
 }
@@ -35,6 +37,38 @@ const msg = {
 function Owner() {
   return '123';
 }
+
+function AggregatorV3Interface(type: boolean) {
+  // now we are testing contract with temp price - $2000
+  if (type === true) // nftFloorPriceFeed
+  {
+    return {
+      latestRoundData: function() {
+        return [
+          uint256(0), /*uint80 roundID*/
+          int256(1).multipliedBy(1e18),  /*uint startedAt*/
+          uint256(0), /*uint timeStamp*/
+          uint256(0), /*uint80 answeredInRound*/
+        ]
+      }
+    }
+  }
+  
+  else // priceFeed
+  {
+    return {
+      latestRoundData: function() {
+        return [
+          uint256(0), /*uint80 roundID*/
+          int256(2000).multipliedBy(1e8),  /*uint startedAt*/
+          uint256(0), /*uint timeStamp*/
+          uint256(0), /*uint80 answeredInRound*/
+        ]
+      }
+    }
+  }
+}
+/////////////////////////////////////////////////////////////////////////////////
 
 export default function(contract: any) {
 
@@ -72,8 +106,12 @@ export default function(contract: any) {
     _priceFeed: string,
     _usdc: string
   ) {
-    // nftFloorPriceFeed = AggregatorV3Interface(_nftOracleAddress);
-    // priceFeed = AggregatorV3Interface(_priceFeed);
+    // TODO: implement AggregatorV3Interface
+    // this.nftFloorPriceFeed = AggregatorV3Interface(_nftOracleAddress);
+    // this.priceFeed = AggregatorV3Interface(_priceFeed);
+
+    this.nftFloorPriceFeed = AggregatorV3Interface(true);
+    this.priceFeed = AggregatorV3Interface(false);
     this.usdc = _usdc;
   }
 
@@ -163,7 +201,7 @@ export default function(contract: any) {
   }
 
   //return all active users in one array
-  contract.getAllthis.activeUsers = function(): Array<string> {
+  contract.activeUsers = function(): Array<string> {
     return this.activeUsers;
   }
 
@@ -182,7 +220,7 @@ export default function(contract: any) {
   }
 
   //Notice: newFee should be between 1 to 500 (0.01% - 5%)
-  contract.setthis.swapFee = function(_newFee: uint256) {
+  contract.swapFee = function(_newFee: uint256) {
     // TODO: block.timestamp
     // const distance: uint256 = block.timestamp - this.latestFeeUpdate;
     // Require(distance / 60 / 60 > 12, "You should wait at least 12 hours after the latest update");
@@ -1479,7 +1517,7 @@ export default function(contract: any) {
   }
 
   //return positive int
-  contract.this.absoluteInt = function(_value: int256): int256 {
+  contract.absoluteInt = function(_value: int256): int256 {
     if (_value.gt(0)) {
       return _value.negated();
     } else {
