@@ -3,8 +3,14 @@ import { Contract } from "../../solidity"
 import AddSmartContractFunctions from "./contract"
 import AddDebugFunctions from "./debug"
 
-export default function ({ address, usdc }: { address: string; usdc: string }) {
-  let contract = Contract(CONTRACT_DEX, address) as any
+export default function ({ address, usdc, account }: { address: string; usdc: string, account: string }) {
+  let contract = Contract(
+    {
+      name: CONTRACT_DEX,
+      address,
+      owner: account
+    }
+  ) as any
 
   contract = AddSmartContractFunctions(contract)
   contract = AddDebugFunctions(contract)
