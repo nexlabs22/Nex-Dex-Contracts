@@ -4,35 +4,40 @@ import Contract from "../solidity/contract"
 export type ContractEvent = {
   contract: string
   funcName: string
-  called: boolean
 }
 
 export type WokerStatus = {
   contracts: Array<Contract>
-  latestEvent: ContractEvent
+  events: Array<ContractEvent>
   mainAccount: string
   sender: string | undefined
 }
 
-export let WorkerStatus: WokerStatus
+export let workerStatus: WokerStatus
 
 export function InitWorker({ account }: { account: string }) {
-  WorkerStatus = {
+  workerStatus = {
     contracts: [],
-    latestEvent: {
-      contract: "",
-      funcName: "",
-      called: false,
-    },
+    events: [],
     mainAccount: account,
     sender: undefined,
   }
 }
 
-export function ContractDeployed({contract}: { contract: Contract}) {
-  WorkerStatus.contracts.push(contract);
+export function ContractDeployed({ contract }: { contract: Contract }) {
+  workerStatus.contracts.push(contract)
 }
 
-export function ContractFunctionCalled({ contract, funcName }: { contract: string; funcName }) {}
+export function ContractFunctionCalled({ contract, funcName }: { contract: string; funcName }) {
+  workerStatus.events.push({
+    contract,
+    funcName,
+  })
+}
 
-export function ContractFunctionEnded({ contract, funcName }: { contract: string; funcName }) {}
+export function ContractFunctionEnded({ contract, funcName }: { contract: string; funcName }) {
+  const e = workerStatus.events.pop()
+  if (!e || e.contract !== contract || e.funcName !== funcName) {
+    throw new Error("Error occurred on ContractFunctionEnded.")
+  }
+}
