@@ -6,6 +6,7 @@ import {
   TYPE_CONTRACT,
 } from "../constant"
 import address from "./address"
+import AddContractProxy from "../core/contractProxy"
 
 export default Contract
 
@@ -20,17 +21,27 @@ export function Contract({
   name,
   address,
   owner,
+  AddSmartContractFunctions,
+  AddDebugFunctions,
 }: {
   name: string
   address: string
   owner: string
+  AddSmartContractFunctions: (contract: any) => any
+  AddDebugFunctions: (contract: any) => any
 }) {
-  return {
+  let contract = {
     [ATTR_TYPE]: TYPE_CONTRACT,
     [ATTR_NAME]: name,
     [ATTR_CONTRACT_ADDRESS]: address,
     [ATTR_OWNER_ADDRESS]: owner,
   }
+
+  contract = AddSmartContractFunctions(contract)
+  contract = AddDebugFunctions(contract)
+  contract = AddContractProxy(contract)
+
+  return contract
 }
 
 export const isContract = (e: any): boolean => e[ATTR_TYPE] === TYPE_CONTRACT

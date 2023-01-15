@@ -1,4 +1,3 @@
-import { eventArgs } from "@chainlink/test-helpers/dist/src/helpers"
 import Contract from "../solidity/contract"
 
 export type ContractEvent = {
@@ -28,16 +27,24 @@ export function ContractDeployed({ contract }: { contract: Contract }) {
   workerStatus.contracts.push(contract)
 }
 
-export function ContractFunctionCalled({ contract, funcName }: { contract: string; funcName }) {
+export function ContractFunctionCalled({ contract, funcName }: { contract: string; funcName: string }) {
   workerStatus.events.push({
     contract,
     funcName,
   })
 }
 
-export function ContractFunctionEnded({ contract, funcName }: { contract: string; funcName }) {
+export function ContractFunctionEnded({ contract, funcName }: { contract: string; funcName: string }) {
   const e = workerStatus.events.pop()
   if (!e || e.contract !== contract || e.funcName !== funcName) {
     throw new Error("Error occurred on ContractFunctionEnded.")
   }
+
+  if (workerStatus.events.length === 0 && workerStatus.sender) {
+    workerStatus.sender = undefined
+  }
+}
+
+export function ContractSenderChanged({ contract, sender }: { contract: string; sender: string }) {
+  workerStatus.sender = sender
 }

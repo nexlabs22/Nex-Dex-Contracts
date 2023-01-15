@@ -8,12 +8,11 @@ export default function ({ address, usdc, account }: { address: string; usdc: st
     {
       name: CONTRACT_DEX,
       address,
-      owner: account
+      owner: account,
+      AddSmartContractFunctions,
+      AddDebugFunctions,
     }
   ) as any
-
-  contract = AddSmartContractFunctions(contract)
-  contract = AddDebugFunctions(contract)
 
   // initialize the contract
   contract.constructor(
