@@ -2,10 +2,10 @@ import {
   GetCurrentSender,
   GetCurrentContract 
 } from "../core";
-import { getContractOwner } from "./contract";
+import { GetContractOwner } from "./contract";
 
 export function Owner() {
-  return getContractOwner(GetCurrentContract());
+  return GetContractOwner(GetCurrentContract());
 }
 
 export const msg = {

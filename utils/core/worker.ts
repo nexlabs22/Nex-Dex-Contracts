@@ -1,4 +1,4 @@
-import Contract, { getContractAddress } from "../solidity/contract"
+import Contract, { GetContractAddress } from "../solidity/contract"
 
 export type ContractEvent = {
   address: string
@@ -54,7 +54,7 @@ export function GetCurrentSender() {
 }
 
 export function GetContractByAddress({address}: {address: string}) {
-  return workerStatus.contracts.find(contract => getContractAddress(contract) === address)
+  return workerStatus.contracts.find(contract => GetContractAddress(contract) === address)
 }
 
 export function GetCurrentContract() {

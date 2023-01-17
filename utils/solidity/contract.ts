@@ -44,11 +44,11 @@ export function Contract({
   return contract
 }
 
-export const isContract = (e: any): boolean => e[ATTR_TYPE] === TYPE_CONTRACT
+export const IsContract = (e: any): boolean => e[ATTR_TYPE] === TYPE_CONTRACT
 
-export const getContractAddress = (e: any): string =>
-  isContract(e) ? e[ATTR_CONTRACT_ADDRESS] : address(0)
+export const GetContractAddress = (e: any): string =>
+  IsContract(e) ? e[ATTR_CONTRACT_ADDRESS] : address(0)
 
-export const getContractName = (e: any): string => (isContract(e) ? e[ATTR_NAME] : "")
+export const GetContractName = (e: any): string => (IsContract(e) ? e[ATTR_NAME] : "")
 
-export const getContractOwner = (e: any): string => (isContract(e) ? e[ATTR_OWNER_ADDRESS] : "")
+export const GetContractOwner = (e: any): string => (IsContract(e) ? e[ATTR_OWNER_ADDRESS] : "")
