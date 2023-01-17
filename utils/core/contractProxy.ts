@@ -1,4 +1,4 @@
-import { isContract, getContractName } from "../solidity/contract"
+import { isContract, getContractAddress, getContractName } from "../solidity/contract"
 import { ContractFunctionCalled, ContractFunctionEnded, ContractSenderChanged } from "./worker"
 
 export default function (object: any) {
@@ -11,7 +11,7 @@ export default function (object: any) {
           return function () {
             const [account] = arguments
             ContractSenderChanged({
-              contract: getContractName(target),
+              address: getContractAddress(target),
               sender: account?.address,
             })
             return objectProxy
@@ -23,12 +23,12 @@ export default function (object: any) {
 
         return function () {
           ContractFunctionCalled({
-            contract: getContractName(target),
+            address: getContractName(target),
             funcName: prop,
           })
           const result = target[prop].call(objectProxy, ...arguments)
           ContractFunctionEnded({
-            contract: getContractName(target),
+            address: getContractName(target),
             funcName: prop,
           })
           return result

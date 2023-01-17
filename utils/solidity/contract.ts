@@ -6,7 +6,7 @@ import {
   TYPE_CONTRACT,
 } from "../constant"
 import address from "./address"
-import AddContractProxy from "../core/contractProxy"
+import { AddContractProxy } from "../core"
 
 export default Contract
 
@@ -50,3 +50,5 @@ export const getContractAddress = (e: any): string =>
   isContract(e) ? e[ATTR_CONTRACT_ADDRESS] : address(0)
 
 export const getContractName = (e: any): string => (isContract(e) ? e[ATTR_NAME] : "")
+
+export const getContractOwner = (e: any): string => (isContract(e) ? e[ATTR_OWNER_ADDRESS] : "")

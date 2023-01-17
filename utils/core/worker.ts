@@ -1,7 +1,7 @@
-import Contract from "../solidity/contract"
+import Contract, { getContractAddress } from "../solidity/contract"
 
 export type ContractEvent = {
-  contract: string
+  address: string
   funcName: string
 }
 
@@ -27,16 +27,16 @@ export function ContractDeployed({ contract }: { contract: Contract }) {
   workerStatus.contracts.push(contract)
 }
 
-export function ContractFunctionCalled({ contract, funcName }: { contract: string; funcName: string }) {
+export function ContractFunctionCalled({ address, funcName }: { address: string; funcName: string }) {
   workerStatus.events.push({
-    contract,
+    address,
     funcName,
   })
 }
 
-export function ContractFunctionEnded({ contract, funcName }: { contract: string; funcName: string }) {
+export function ContractFunctionEnded({ address, funcName }: { address: string; funcName: string }) {
   const e = workerStatus.events.pop()
-  if (!e || e.contract !== contract || e.funcName !== funcName) {
+  if (!e || e.address !== address || e.funcName !== funcName) {
     throw new Error("Error occurred on ContractFunctionEnded.")
   }
 
@@ -45,6 +45,23 @@ export function ContractFunctionEnded({ contract, funcName }: { contract: string
   }
 }
 
-export function ContractSenderChanged({ contract, sender }: { contract: string; sender: string }) {
+export function ContractSenderChanged({ address, sender }: { address: string; sender: string }) {
   workerStatus.sender = sender
+}
+
+export function GetCurrentSender() {
+  return workerStatus.sender || workerStatus.mainAccount
+}
+
+export function GetContractByAddress({address}: {address: string}) {
+  return workerStatus.contracts.find(contract => getContractAddress(contract) === address)
+}
+
+export function GetCurrentContract() {
+  if (workerStatus.events.length === 0) return undefined
+
+  const e = workerStatus.events[workerStatus.events.length - 1]
+  return GetContractByAddress({
+    address: e.address
+  });
 }

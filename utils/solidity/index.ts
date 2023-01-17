@@ -4,6 +4,7 @@ import address from "./address"
 import Contract, { isContract } from "./contract"
 import SafeERC20 from "./safeErc20"
 import IERC20 from "./ierc20"
+import { Owner, msg } from "./basics"
 
 export {
   int256,  
@@ -13,4 +14,6 @@ export {
   isContract,
   SafeERC20,
   IERC20,
+  Owner,
+  msg
 }

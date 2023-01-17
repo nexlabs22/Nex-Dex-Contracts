@@ -1,5 +1,5 @@
 import { 
-  address, int256, uint256, SafeERC20, IERC20
+  address, int256, uint256, SafeERC20, IERC20, Owner, msg
 } from "../../solidity";
 import  { Require } from '../../basics';
 
@@ -30,14 +30,6 @@ interface AddressToVirtualBalance {
 /////////////////////////////////////////////////////////////////////////////////
 //// Should be fixed later...
 /////////////////////////////////////////////////////////////////////////////////
-const msg = {
-  sender: ''
-}
-
-function Owner() {
-  return '123';
-}
-
 function AggregatorV3Interface(type: boolean) {
   // now we are testing contract with temp price - $2000
   if (type === true) // nftFloorPriceFeed
@@ -485,7 +477,7 @@ export default function(contract: any) {
     //trade fee
     const fee: uint256 = (usdBaycValue.multipliedBy(this.swapFee)).dividedBy(10000);
     this.collateral[this.usdc][_user] = this.collateral[this.usdc][_user].minus(fee);
-    const owner: address = Owner();
+    const owner: string = Owner();
     SafeERC20.safeTransfer(IERC20(this.usdc), owner, fee);
 
     //update the pool
