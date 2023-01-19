@@ -1,7 +1,11 @@
 import { toNumber } from "../../basics"
+import {
+  ATTR_CONTRACT_PRINTSTATUS
+} from "../../constant"
+
 
 export default function (contract: any): any {
-  contract.__printCurrentStatus = function () {
+  contract[ATTR_CONTRACT_PRINTSTATUS] = function () {
     // const result = [];
     // for (let i = 0; i < this.userAccounts.length; i++) {
     //   // if (this.activeUsers[i] === address(0)) break;

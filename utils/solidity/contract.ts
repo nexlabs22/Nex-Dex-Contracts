@@ -4,6 +4,7 @@ import {
   ATTR_NAME,
   ATTR_OWNER_ADDRESS,
   TYPE_CONTRACT,
+  ATTR_CONTRACT_PRINTSTATUS,
 } from "../constant"
 import address from "./address"
 import { AddContractProxy } from "../core"
@@ -15,6 +16,7 @@ export declare interface Contract {
   [ATTR_NAME]: string
   [ATTR_CONTRACT_ADDRESS]: string
   [ATTR_OWNER_ADDRESS]: string
+  [ATTR_CONTRACT_PRINTSTATUS]: () => void
 }
 
 export function Contract({
@@ -35,6 +37,7 @@ export function Contract({
     [ATTR_NAME]: name,
     [ATTR_CONTRACT_ADDRESS]: address,
     [ATTR_OWNER_ADDRESS]: owner,
+    [ATTR_CONTRACT_PRINTSTATUS]: (() => {})
   }
 
   contract = AddSmartContractFunctions(contract)
@@ -44,7 +47,7 @@ export function Contract({
   return contract
 }
 
-export const IsContract = (e: any): boolean => e[ATTR_TYPE] === TYPE_CONTRACT
+export const IsContract = (e: any): boolean => e && e[ATTR_TYPE] === TYPE_CONTRACT
 
 export const GetContractAddress = (e: any): string =>
   IsContract(e) ? e[ATTR_CONTRACT_ADDRESS] : address(0)

@@ -105,6 +105,8 @@ export default function(contract: any) {
     this.nftFloorPriceFeed = AggregatorV3Interface(true);
     this.priceFeed = AggregatorV3Interface(false);
     this.usdc = _usdc;
+
+    this.collateral[this.usdc] = {} as AddressToUint256; // ** only in testing
   }
 
   //return bayc virtual pool size of the market
@@ -224,7 +226,8 @@ export default function(contract: any) {
   //deposit collateral
   contract.depositCollateral = function(_amount: uint256) {
     SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(0), _amount);
-    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].add(_amount);
+    if (!this.collateral[this.usdc][msg.sender]) this.collateral[this.usdc][msg.sender] = uint256(0); // ** only in testing
+    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].plus(_amount);
     // emit Deposit(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }
 
