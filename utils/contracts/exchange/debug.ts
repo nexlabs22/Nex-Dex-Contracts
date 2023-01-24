@@ -2,12 +2,36 @@ import { toNumber } from "../../basics"
 import {
   ATTR_CONTRACT_PRINTSTATUS
 } from "../../constant"
+import { GetUserName } from "../../core/worker"
 
 
 export default function (contract: any): any {
   contract[ATTR_CONTRACT_PRINTSTATUS] = function () {
-    // const result = [];
-    // for (let i = 0; i < this.userAccounts.length; i++) {
+    const users = Object.keys(this.collateral[this.usdc])
+    
+    const result = []
+    for (let i = 0; i < users.length; i++) {
+      const address = users[i]
+      const name          = GetUserName(address)
+      const collateral    = this.collateral[this.usdc][address]
+      const accountValue  = this.getAccountValue(address)
+      const notionValue   = this.getPositionNotional(address)
+      const pnl           = this.getPNL(address)
+      const margin        = this.userMargin(address)
+      const vUsdBalance   = this.uservUsdBalance(address)
+      const vBaycBalance  = this.uservBaycBalance(address)
+
+      result.push({
+        Name: name,
+        Collateral: collateral,
+        AccountValue: accountValue,
+        NotionalValue: notionValue,
+        PNL: pnl,
+        Margin: margin,
+        VirtualUsdBalance: vUsdBalance,
+        VirtuaBaycBalance: vBaycBalance
+      })
+    }
     //   // if (this.activeUsers[i] === address(0)) break;
     //   const status = this.getUserStatus(this.userAccounts[i].address, this.poolState);
     //   result.push({
@@ -22,7 +46,7 @@ export default function (contract: any): any {
     //   });
     // }
 
-    // result.push({});
+    result.push({});
 
     // result.push({
     //   Collateral: 'Virtual Collateral',
@@ -41,10 +65,10 @@ export default function (contract: any): any {
     //   Margin: toNumber(this.price),
     // })
 
-    // console.table(result);
+    console.table(result);
 
-    console.log(toNumber(contract?.pool?.vBaycPoolSize), toNumber(contract?.pool?.vUsdPoolSize));
-    console.log(toNumber(contract?.showPriceUSD()));
+    // console.log(toNumber(contract?.pool?.vBaycPoolSize), toNumber(contract?.pool?.vUsdPoolSize));
+    // console.log(toNumber(contract?.showPriceUSD()));
   }
 
   return contract;

@@ -6,11 +6,17 @@ export type ContractEvent = {
   funcName: string
 }
 
+export type TestUser = {
+  name: string
+  address: string
+}
+
 export type WokerStatus = {
   contracts: Array<Contract>
   events: Array<ContractEvent>
   mainAccount: string
   sender: string | undefined
+  users: Array<TestUser>
 
   debug: any
 }
@@ -20,12 +26,13 @@ export let workerStatus: WokerStatus
 
 
 // Init Worker Status Object
-export function InitWorker({ account }: { account: string }) {
+export function InitWorker(account: string) {
   workerStatus = {
     contracts: [],
     events: [],
     mainAccount: account,
     sender: undefined,
+    users: [],
     
     debug: {
       trackFunction: true
@@ -116,7 +123,7 @@ export function GetCurrentContract() {
 }
 
 // Print the contract status
-export function PrintContractStatus({ contract }: { contract: Contract | string }) {
+export function PrintContractStatus( contract : Contract | string ) {
   let obj
   if (typeof contract === "string") {
     obj = GetContractByAddress({
@@ -129,4 +136,18 @@ export function PrintContractStatus({ contract }: { contract: Contract | string 
 // Enable/Disable debug mode
 export function SetTrackDebugFlag(flag: boolean) {
   workerStatus.debug.trackFunction = flag
+}
+
+export function AddUsers(users: Array<TestUser>) {
+  users.forEach((user: TestUser) => {
+    if (workerStatus.users.findIndex(uuser => uuser.address === user.address || uuser.name === user.name) !== -1) {
+      throw new Error("Already user is exisitng with same information. (AddUsers)")
+    }
+  })
+
+  workerStatus.users = [...workerStatus.users, ...users]
+}
+
+export function GetUserName(address: string) {
+  return workerStatus.users.find(user => user.address === address)?.name || "NoName"
 }
