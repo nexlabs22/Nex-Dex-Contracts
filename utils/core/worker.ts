@@ -35,7 +35,7 @@ export function InitWorker(account: string) {
     users: [],
     
     debug: {
-      trackFunction: true
+      trackFunction: false
     }
   }
 }
@@ -74,9 +74,11 @@ export function ContractFunctionEnded({ address, funcName }: { address: string; 
     throw new Error("Error occurred on ContractFunctionEnded.")
   }
 
+  let senderInitialized = false;
   // initialize sender if events is empty
   if (workerStatus.events.length === 0 && workerStatus.sender) {
     workerStatus.sender = undefined
+    senderInitialized = true
   }
 
   // log function and contract information if debug is enabled
@@ -84,8 +86,12 @@ export function ContractFunctionEnded({ address, funcName }: { address: string; 
     const prefix = "→ ".repeat(workerStatus.events.length + 1)
     console.log(`${prefix}${funcName} Ended (${GetContractName(GetContractByAddress({address}))})`)
     
-    if (workerStatus.events.length === 0 && workerStatus.sender) {
+    if (senderInitialized) {
       console.log("Msg Sender Initialized")
+    }
+
+    if (workerStatus.events.length === 0) {
+      console.log("")
     }
   }
 }

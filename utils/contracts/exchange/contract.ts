@@ -28,7 +28,7 @@ interface AddressToVirtualBalance {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-//// Should be fixed later...
+//// TODO: Should be fixed later...
 /////////////////////////////////////////////////////////////////////////////////
 function AggregatorV3Interface(type: boolean) {
   // now we are testing contract with temp price - $2000
@@ -225,8 +225,16 @@ export default function(contract: any) {
 
   //deposit collateral
   contract.depositCollateral = function(_amount: uint256) {
+    if (!this.collateral[this.usdc][msg.sender])        // ** only in testing
+    {
+      this.collateral[this.usdc][msg.sender] = uint256(0); 
+      this.virtualBalances[msg.sender] = {};
+      this.virtualBalances[msg.sender].virtualCollateral = int256(0);
+      this.virtualBalances[msg.sender].uservUsdBalance = int256(0);
+      this.virtualBalances[msg.sender].uservBaycBalance = int256(0);
+    }
+
     SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(0), _amount);
-    if (!this.collateral[this.usdc][msg.sender]) this.collateral[this.usdc][msg.sender] = uint256(0); // ** only in testing
     this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].plus(_amount);
     // emit Deposit(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }
