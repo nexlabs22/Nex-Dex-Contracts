@@ -23,13 +23,13 @@ export default function (contract: any): any {
 
       result.push({
         Name: name,
-        Collateral: collateral,
-        AccountValue: accountValue,
-        NotionalValue: notionValue,
-        PNL: pnl,
-        Margin: margin,
-        VirtualUsdBalance: vUsdBalance,
-        VirtuaBaycBalance: vBaycBalance
+        Collateral: toNumber(collateral),
+        AccountValue: toNumber(accountValue),
+        NotionalValue: toNumber(notionValue),
+        PNL: toNumber(pnl),
+        Margin: toNumber(margin),
+        VirtualUsdBalance: toNumber(vUsdBalance),
+        VirtualBaycBalance: toNumber(vBaycBalance)
       })
     }
     //   // if (this.activeUsers[i] === address(0)) break;

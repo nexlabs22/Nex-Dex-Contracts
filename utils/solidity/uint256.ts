@@ -61,7 +61,11 @@ export const UnsignedBigNumber = (
   }
 
   obj._helper = function (funcPrototype: any, args: Array<any>): UnsignedBigNumberType {
-    return UnsignedBigNumber(helper(funcPrototype, [this.value, ...args]))
+    const result = helper(funcPrototype, [this.value, ...args]);
+    if (result instanceof BigNumber) {
+      return UnsignedBigNumber(result)
+    }
+    return result
   }
 
   obj.plus = function (

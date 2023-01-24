@@ -1,7 +1,8 @@
 import { 
   address, int256, uint256, SafeERC20, IERC20, Owner, msg
 } from "../../solidity";
-import  { Require } from '../../basics';
+import  { Require, toNumber } from '../../basics';
+import { PrintContractStatus } from "../../core/worker";
 
 
 interface Pool {
@@ -195,7 +196,7 @@ export default function(contract: any) {
   }
 
   //return all active users in one array
-  contract.activeUsers = function(): Array<string> {
+  contract.getAllActiveUsers = function(): Array<string> {
     return this.activeUsers;
   }
 
@@ -214,7 +215,7 @@ export default function(contract: any) {
   }
 
   //Notice: newFee should be between 1 to 500 (0.01% - 5%)
-  contract.swapFee = function(_newFee: uint256) {
+  contract.setSwapFee = function(_newFee: uint256) {
     // TODO: block.timestamp
     // const distance: uint256 = block.timestamp - this.latestFeeUpdate;
     // Require(distance / 60 / 60 > 12, "You should wait at least 12 hours after the latest update");
@@ -356,6 +357,10 @@ export default function(contract: any) {
       newvBaycPoolSize,
       newvUsdPoolSize
     );
+
+    console.log("test1");
+    PrintContractStatus(this);
+
     Require(
       isNewMarginHardLiquidatable == false,
       "Insufficient margin to open position with requested size."
@@ -365,6 +370,8 @@ export default function(contract: any) {
     [newvBaycPoolSize, newvUsdPoolSize] = this._hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     [newvBaycPoolSize, newvUsdPoolSize] = this._partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
 
+    console.log("test2");
+    PrintContractStatus(this);
     k = this.pool.vBaycPoolSize.multipliedBy(this.pool.vUsdPoolSize);
     newvUsdPoolSize = this.pool.vUsdPoolSize.plus(_usdAmount);
     newvBaycPoolSize = k.dividedBy(newvUsdPoolSize);
@@ -374,15 +381,19 @@ export default function(contract: any) {
     this.virtualBalances[msg.sender].uservBaycBalance = this.virtualBalances[msg.sender].uservBaycBalance.plus(int256(userBayc));
     this.virtualBalances[msg.sender].uservUsdBalance = this.virtualBalances[msg.sender].uservUsdBalance.minus(int256(_usdAmount));
 
+    console.log("test3");
+    PrintContractStatus(this);
     //add user to the active user list
     this._addActiveUser(msg.sender);
 
     //trade fee
     const fee: uint256 = (_usdAmount.multipliedBy(this.swapFee)).dividedBy(10000);
+    console.log(toNumber(fee));
     this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].minus(fee);
     const owner: address = Owner();
     SafeERC20.safeTransfer(IERC20(this.usdc), owner, fee);
-
+    console.log("test4");
+    PrintContractStatus(this);
     //update pool
     this.pool.vBaycPoolSize = newvBaycPoolSize;
     this.pool.vUsdPoolSize = newvUsdPoolSize;
