@@ -13,7 +13,7 @@ import {
   toBigNumber,
   toWeiBigNumber,
   toEtherBigNumber,
-  toNumber
+  WeitoNumber
 } from '../../../utils/basics';
 
 import {

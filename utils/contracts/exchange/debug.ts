@@ -1,4 +1,4 @@
-import { toNumber } from "../../basics"
+import { WeitoNumber } from "../../basics"
 import {
   ATTR_CONTRACT_PRINTSTATUS
 } from "../../constant"
@@ -24,52 +24,36 @@ export default function (contract: any): any {
 
       result.push({
         Name: name,
-        Collateral: toNumber(collateral),
-        AccountValue: toNumber(accountValue),
-        NotionalValue: toNumber(notionValue),
-        PNL: toNumber(pnl),
-        Margin: toNumber(margin),
-        VirtualUsdBalance: toNumber(vUsdBalance),
-        VirtualBaycBalance: toNumber(vBaycBalance)
+        Collateral: WeitoNumber(collateral),
+        AccountValue: WeitoNumber(accountValue),
+        NotionalValue: WeitoNumber(notionValue),
+        PNL: WeitoNumber(pnl),
+        Margin: +margin.toFixed(2),
+        VirtualUsdBalance: WeitoNumber(vUsdBalance),
+        VirtualBaycBalance: WeitoNumber(vBaycBalance)
       })
     }
-    //   // if (this.activeUsers[i] === address(0)) break;
-    //   const status = this.getUserStatus(this.userAccounts[i].address, this.poolState);
-    //   result.push({
-    //     Id: "User" + i,
-    //     Collateral: toNumber(status.collateral),
-    //     AccountValue: toNumber(status.accountValue),
-    //     NotionalValue: toNumber(status.notionalValue),
-    //     PNL: toNumber(status.pnl),
-    //     Margin: toNumber(status.margin),
-    //     VirtuaUsdBalance: toNumber(status.vUsdBalance),
-    //     VirtuaBaycBalance: toNumber(status.vBaycBalance),
-    //   });
-    // }
 
     result.push({});
 
-    // result.push({
-    //   Collateral: 'Virtual Collateral',
-    //   AccountValue: 'Insurance Fund',
-    //   NotionalValue: 'Contract Collateral',
-    //   PNL: 'Total Fee',
-    //   Margin: 'Price',
-    // })
+    result.push({
+      Collateral: 'Virtual Collateral',
+      AccountValue: 'Insurance Fund',
+      NotionalValue: 'Contract Collateral',
+      PNL: 'Total Fee',
+      Margin: 'Price',
+    })
 
-    // result.push({
-    //   Id: 'Contract',
-    //   Collateral: toNumber(this.virtualCollateral),
-    //   AccountValue: toNumber(this.insuranceFunds),
-    //   NotionalValue: toNumber(this.realCollateral),
-    //   PNL: toNumber(this.feeCollector),
-    //   Margin: toNumber(this.price),
-    // })
+    result.push({
+      Name: 'Contract',
+      Collateral: '',
+      AccountValue: WeitoNumber(this.insuranceFunds),
+      NotionalValue: '',
+      PNL: '',
+      Margin: WeitoNumber(this.getCurrentExchangePrice()),
+    })
 
     console.table(result);
-
-    // console.log(toNumber(contract?.pool?.vBaycPoolSize), toNumber(contract?.pool?.vUsdPoolSize));
-    // console.log(toNumber(contract?.showPriceUSD()));
   }
 
   // returns an array of all users who have deposited money into the contract

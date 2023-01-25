@@ -27,8 +27,8 @@ export const Require = (condition: boolean, desc = ""): void => {
   if (!condition) throw new Error(desc)
 }
 
-export const toNumber = (v: int256 | uint256, places = 2): number => {
+export const WeitoNumber = (v: int256 | uint256, places = 2): number => {
   return +BigNumber(isUint256(v) ? v.value : v)
     .dividedBy(1e18)
-    .toFixed(places, 1)
+    .toFixed(places)
 }

@@ -1,7 +1,7 @@
 import { 
   address, int256, uint256, SafeERC20, IERC20, Owner, msg
 } from "../../solidity";
-import  { Require, toNumber } from '../../basics';
+import  { Require, WeitoNumber } from '../../basics';
 import { PrintContractStatus } from "../../core/worker";
 
 
@@ -235,7 +235,7 @@ export default function(contract: any) {
       this.virtualBalances[msg.sender].uservBaycBalance = int256(0);
     }
 
-    SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(0), _amount);
+    SafeERC20.safeTransferFrom(IERC20(this.usdc), msg.sender, address(this), _amount);
     this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].plus(_amount);
     // emit Deposit(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }

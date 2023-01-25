@@ -128,6 +128,14 @@ export function GetCurrentContract() {
   })
 }
 
+// Return the current contract address
+export function GetCurrentContractAddress() {
+  if (workerStatus.events.length === 0) return undefined
+
+  const e = workerStatus.events[workerStatus.events.length - 1]
+  return e.address
+}
+
 // Print the contract status
 export function PrintContractStatus( contract : Contract | string ) {
   let obj

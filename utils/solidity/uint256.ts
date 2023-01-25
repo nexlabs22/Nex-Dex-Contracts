@@ -31,7 +31,7 @@ export interface UnsignedBigNumberType {
 }
 
 export function instanceOfUnSignedBigNumber(data: any): data is UnsignedBigNumberType {
-  return data[ATTR_TYPE] === SOLIDITY_UINT256
+  return data && data[ATTR_TYPE] === SOLIDITY_UINT256
 }
 
 export const UnsignedBigNumber = (

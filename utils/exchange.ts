@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { compareResult, Require, toNumber } from "./basics";
+import { compareResult, Require, WeitoNumber } from "./basics";
 import { 
   TYPE_CONTRACT,
   ATTR_TYPE, 
@@ -1074,13 +1074,13 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
       const status = this.getUserStatus(this.userAccounts[i].address, this.poolState);
       result.push({
         Id: "User" + i,
-        Collateral: toNumber(status.collateral),
-        AccountValue: toNumber(status.accountValue),
-        NotionalValue: toNumber(status.notionalValue),
-        PNL: toNumber(status.pnl),
-        Margin: toNumber(status.margin),
-        VirtuaUsdBalance: toNumber(status.vUsdBalance),
-        VirtuaBaycBalance: toNumber(status.vBaycBalance),
+        Collateral: WeitoNumber(status.collateral),
+        AccountValue: WeitoNumber(status.accountValue),
+        NotionalValue: WeitoNumber(status.notionalValue),
+        PNL: WeitoNumber(status.pnl),
+        Margin: WeitoNumber(status.margin),
+        VirtuaUsdBalance: WeitoNumber(status.vUsdBalance),
+        VirtuaBaycBalance: WeitoNumber(status.vBaycBalance),
       });
     }
     
@@ -1096,11 +1096,11 @@ export function organizeTestPool(price: int256, poolsize: int256, exchangeContra
 
     result.push({
       Id: 'Contract',
-      Collateral: toNumber(this.virtualCollateral),
-      AccountValue: toNumber(this.insuranceFunds),
-      NotionalValue: toNumber(this.realCollateral),
-      PNL: toNumber(this.feeCollector),
-      Margin: toNumber(this.price),
+      Collateral: WeitoNumber(this.virtualCollateral),
+      AccountValue: WeitoNumber(this.insuranceFunds),
+      NotionalValue: WeitoNumber(this.realCollateral),
+      PNL: WeitoNumber(this.feeCollector),
+      Margin: WeitoNumber(this.price),
     })
     
 
