@@ -17,6 +17,7 @@ export default Contract
 interface AddressToUint256 {
   [index: string]: uint256
 }
+
 export declare interface Contract {
   [ATTR_TYPE]: string
   [ATTR_NAME]: string

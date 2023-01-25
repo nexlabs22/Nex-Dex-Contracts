@@ -1,8 +1,10 @@
+import { ATTR_CONTRACT_TOKEN } from './../../constant';
 import { WeitoNumber } from "../../basics"
 import {
   ATTR_CONTRACT_PRINTSTATUS
 } from "../../constant"
-import { GetUserName } from "../../core/worker"
+import { GetContractByAddress, GetUserName } from "../../core/worker"
+import { GetContractOwner } from '../../solidity/contract';
 
 
 export default function (contract: any): any {
@@ -37,20 +39,20 @@ export default function (contract: any): any {
     result.push({});
 
     result.push({
-      Collateral: 'Virtual Collateral',
+      Collateral: 'Price',
       AccountValue: 'Insurance Fund',
       NotionalValue: 'Contract Collateral',
-      PNL: 'Total Fee',
-      Margin: 'Price',
+      PNL: 'Owner Collateral',
     })
+
+    const owner = GetContractByAddress(GetContractOwner(this))
 
     result.push({
       Name: 'Contract',
-      Collateral: '',
+      Collateral: WeitoNumber(this.getCurrentExchangePrice()),
       AccountValue: WeitoNumber(this.insuranceFunds),
-      NotionalValue: '',
-      PNL: '',
-      Margin: WeitoNumber(this.getCurrentExchangePrice()),
+      NotionalValue: WeitoNumber(this[ATTR_CONTRACT_TOKEN][this.usdc]),
+      PNL: owner && WeitoNumber(owner[ATTR_CONTRACT_TOKEN][this.usdc] || 0),
     })
 
     console.table(result);
