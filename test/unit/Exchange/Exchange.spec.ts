@@ -142,6 +142,7 @@ async function compareResultExchange(contract: any, testContract: any) {
 
       PrintContractStatus(contract)
 
+
       // user0 open long position($490) in contract's pool
       let minimumBayc1 = await exchange.getMinimumLongBaycOut(toWeiN(longPositionUSD1.toNumber()));
       let minimumBayc2 = contract.getMinimumLongBaycOut(uint256(toWeiBigNumber(longPositionUSD1)));
@@ -151,6 +152,61 @@ async function compareResultExchange(contract: any, testContract: any) {
       contract.connect(account0).openLongPosition(uint256(toWeiBigNumber(longPositionUSD1)), minimumBayc2);
 
       console.log('First Step Result - User0 opened Long Position $490');
+      PrintContractStatus(contract)
+      await compareResultExchange(exchange, contract)
+
+
+      // user1 open short position($4500) in contract's pool
+      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
+      minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
+      expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
+
+      await exchange.connect(account1).openShortPosition(toWeiN(shortPositionUSD2.toNumber()), minimumBayc1);
+      contract.connect(account1).openShortPosition(uint256(toWeiBigNumber(shortPositionUSD2)), minimumBayc2);
+
+      console.log('Second Step Result - User1 opened Short Position $4500');
+      PrintContractStatus(contract)
+      await compareResultExchange(exchange, contract)
+
+
+      // user2 open short position($7500) in contract's pool
+      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
+      minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD3)));
+      expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
+
+      await exchange.connect(account2).openShortPosition(toWeiN(shortPositionUSD3.toNumber()), minimumBayc1);
+      contract.connect(account2).openShortPosition(uint256(toWeiBigNumber(shortPositionUSD3)), minimumBayc2);
+
+      console.log('Third Step Result - User2 opened Short Position $7500');
+      PrintContractStatus(contract)
+      await compareResultExchange(exchange, contract)
+
+      
+      // user1 close position($4500)
+      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
+      minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
+      expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
+
+      await exchange.connect(account1).closePositionComplete(minimumBayc1);
+      contract.connect(account1).closePositionComplete(minimumBayc2);
+
+      console.log('Last Step Result - User1 closed position $4500');
+      PrintContractStatus(contract)
+      await compareResultExchange(exchange, contract)
+
+
+      // withdraw all collateral
+      let withdraw0 = await exchange.collateral(usdc.address, account0.address);
+      let withdraw1 = await exchange.collateral(usdc.address, account1.address);
+      let withdraw2 = await exchange.collateral(usdc.address, account2.address);
+      await exchange.connect(account0).withdrawCollateral(withdraw0);
+      await exchange.connect(account1).withdrawCollateral(withdraw1);
+      await exchange.connect(account2).withdrawCollateral(withdraw2);
+
+      contract.connect(account0).withdrawCollateral(toBigNumber(withdraw0));
+      contract.connect(account1).withdrawCollateral(toBigNumber(withdraw1));
+      contract.connect(account2).withdrawCollateral(toBigNumber(withdraw2));
+
       PrintContractStatus(contract)
       await compareResultExchange(exchange, contract)
     })

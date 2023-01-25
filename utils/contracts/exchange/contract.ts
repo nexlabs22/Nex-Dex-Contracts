@@ -262,7 +262,7 @@ export default function(contract: any) {
     // transfer tokens to the user
 
     SafeERC20.safeTransfer(IERC20(this.usdc), msg.sender, _amount);
-    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].sub(_amount);
+    this.collateral[this.usdc][msg.sender] = this.collateral[this.usdc][msg.sender].minus(_amount);
     // emit Withdraw(usdc, msg.sender, _amount, this.collateral[this.usdc][msg.sender]);
   }
 
@@ -812,8 +812,8 @@ export default function(contract: any) {
         this._realizevirtualCollateral(_user, this.absoluteInt(realizeVirtualCollAmount));
       }
       //update user balance
-      this.virtualBalances[_user].uservBaycBalance = 0;
-      this.virtualBalances[_user].uservUsdBalance = 0;
+      this.virtualBalances[_user].uservBaycBalance = int256(0);
+      this.virtualBalances[_user].uservUsdBalance = int256(0);
       // if user has not vbalance so he is not active
       this._removeActiveUser(_user);
       //update the pool
@@ -1523,7 +1523,7 @@ export default function(contract: any) {
 
   //return positive int
   contract.absoluteInt = function(_value: int256): int256 {
-    if (_value.gt(0)) {
+    if (_value.lt(0)) {
       return _value.negated();
     } else {
       return _value;
