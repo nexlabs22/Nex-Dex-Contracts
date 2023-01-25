@@ -6,6 +6,7 @@ import { GetUserName } from "../../core/worker"
 
 
 export default function (contract: any): any {
+  // print current contract status
   contract[ATTR_CONTRACT_PRINTSTATUS] = function () {
     const users = Object.keys(this.collateral[this.usdc])
     
@@ -69,6 +70,11 @@ export default function (contract: any): any {
 
     // console.log(toNumber(contract?.pool?.vBaycPoolSize), toNumber(contract?.pool?.vUsdPoolSize));
     // console.log(toNumber(contract?.showPriceUSD()));
+  }
+
+  // returns an array of all users who have deposited money into the contract
+  contract.__getAllUsers = function() {
+    return Object.keys(this.collateral[this.usdc])
   }
 
   return contract;
