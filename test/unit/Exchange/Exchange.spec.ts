@@ -24,35 +24,51 @@ import {
 import ExchangeContract from "../../../utils/contracts/exchange";
 import { AddUsers, InitWorker, PrintContractStatus } from "../../../utils/core/worker";
 
-async function compareResultExchange(pool: any, users?: Array<number>) {
-  // in this function, compare the actual value of the smart contract with the expected value of the test pool
-  
-  const exchange = pool.exchangeContract;
-  const usdc = pool.usdcContract;
-  // compare the price of contract and test pool
-  expect(compareResult(toBigNumber(await exchange.getCurrentExchangePrice()), pool.price)).to.equal(true);
+async function compareResultExchange(contract: any, testContract: any) {
+  // compare the price of two contracts
+  expect(compareResult(
+    toBigNumber(await contract.getCurrentExchangePrice()), 
+    testContract.getCurrentExchangePrice()
+  )).to.equal(true);
 
-  if (!users) return;
-  for (let userId of users) {
-    const account = pool.account(userId);
-    const userStatus = pool.getUserStatus(account.address, pool.poolState);
-    if (!userStatus) break;
-    expect(compareResult(toBigNumber(await exchange.uservBaycBalance(account.address)), userStatus.vBaycBalance)).to.equal(true);
-    expect(compareResult(toBigNumber(await exchange.uservUsdBalance(account.address)), userStatus.vUsdBalance)).to.equal(true);
-    expect(compareResult(toBigNumber(await exchange.collateral(usdc.address, account.address)), userStatus.collateral)).to.equal(true);
-    expect(compareResult(toBigNumber(await exchange.getPositionNotional(account.address)), userStatus.notionalValue)).to.equal(true);
-    expect(compareResult(toBigNumber(await exchange.getPNL(account.address)), userStatus.pnl)).to.equal(true);
-    expect(compareResult(toBigNumber(await exchange.getAccountValue(account.address)), userStatus.accountValue)).to.equal(true);
-    expect(compareResult(Number(await exchange.userMargin(account.address)), userStatus.margin, 1)).to.equal(true);
+  // compare bayc virtual pool size
+  expect(compareResult(
+    toBigNumber(await contract.vBaycPoolSize()), 
+    testContract.vBaycPoolSize()
+  )).to.equal(true);
 
-    // comparing these values for each user
-    // - user virtual bayc balance
-    // - user virtual usd balance
-    // - user collateral value
-    // - user position notional value
-    // - user pnl
-    // - user account value
-    // - user margin
+  // compare usd virtual pool size
+  expect(compareResult(
+    toBigNumber(await contract.vUsdPoolSize()), 
+    testContract.vUsdPoolSize()
+  )).to.equal(true);
+
+  const users = testContract.__getAllUsers();
+  for (const user of users) {
+
+    // compare virtual collateral of each user
+    expect(compareResult(
+      toBigNumber(await contract.virtualCollateral(user)), 
+      testContract.virtualCollateral(user)
+    )).to.equal(true);
+
+    // compare virtual usd balance of each user
+    expect(compareResult(
+      toBigNumber(await contract.uservUsdBalance(user)), 
+      testContract.uservUsdBalance(user)
+    )).to.equal(true);
+
+    // compare virtual bayc balance of each user
+    expect(compareResult(
+      toBigNumber(await contract.uservBaycBalance(user)), 
+      testContract.uservBaycBalance(user)
+    )).to.equal(true);
+
+    // compare real collateral of each user
+    expect(compareResult(
+      toBigNumber(await contract.collateral(testContract.usdc,  user)), 
+      testContract.collateral[testContract.usdc][user]
+    )).to.equal(true);
   }
 }
 
@@ -136,6 +152,6 @@ async function compareResultExchange(pool: any, users?: Array<number>) {
 
       console.log('First Step Result - User0 opened Long Position $490');
       PrintContractStatus(contract)
-
+      await compareResultExchange(exchange, contract)
     })
   })
