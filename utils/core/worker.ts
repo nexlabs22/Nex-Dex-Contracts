@@ -1,3 +1,4 @@
+import { ATTR_CONTRACT_ADDRESS, ATTR_CONTRACT_TOKEN, ATTR_TYPE, TYPE_CONTRACT } from './../constant';
 import { ATTR_CONTRACT_PRINTSTATUS } from "../constant"
 import Contract, { GetContractAddress, GetContractName } from "../solidity/contract"
 
@@ -42,7 +43,7 @@ export function InitWorker(account: string) {
 
 // Called when contract is deployed
 // Save the contract information to wokerStatus
-export function ContractDeployed({ contract }: { contract: Contract }) {
+export function ContractDeployed(contract: Contract) {
   workerStatus.contracts.push(contract)
 }
 
@@ -58,7 +59,7 @@ export function ContractFunctionCalled({ address, funcName }: { address: string;
 
   if (workerStatus.debug.trackFunction) {
     const prefix = "→ ".repeat(workerStatus.events.length)
-    console.log(`${prefix}${funcName} Started (${GetContractName(GetContractByAddress({address}))})`)
+    console.log(`${prefix}${funcName} Started (${GetContractName(GetContractByAddress(address))})`)
   }
 }
 
@@ -84,7 +85,7 @@ export function ContractFunctionEnded({ address, funcName }: { address: string; 
   // log function and contract information if debug is enabled
   if (workerStatus.debug.trackFunction) {
     const prefix = "→ ".repeat(workerStatus.events.length + 1)
-    console.log(`${prefix}${funcName} Ended (${GetContractName(GetContractByAddress({address}))})`)
+    console.log(`${prefix}${funcName} Ended (${GetContractName(GetContractByAddress(address))})`)
     
     if (senderInitialized) {
       console.log("Msg Sender Initialized")
@@ -114,7 +115,7 @@ export function GetCurrentSender() {
 }
 
 // Search contract address by address
-export function GetContractByAddress({address}: {address: string}) {
+export function GetContractByAddress(address: string) {
   return workerStatus.contracts.find(contract => GetContractAddress(contract) === address)
 }
 
@@ -123,9 +124,7 @@ export function GetCurrentContract() {
   if (workerStatus.events.length === 0) return undefined
 
   const e = workerStatus.events[workerStatus.events.length - 1]
-  return GetContractByAddress({
-    address: e.address
-  })
+  return GetContractByAddress(e.address)
 }
 
 // Return the current contract address
@@ -140,9 +139,7 @@ export function GetCurrentContractAddress() {
 export function PrintContractStatus( contract : Contract | string ) {
   let obj
   if (typeof contract === "string") {
-    obj = GetContractByAddress({
-      address: contract,
-    })
+    obj = GetContractByAddress(contract)
   } else obj = contract
   if (obj) obj[ATTR_CONTRACT_PRINTSTATUS]()
 }
@@ -157,6 +154,12 @@ export function AddUsers(users: Array<TestUser>) {
     if (workerStatus.users.findIndex(uuser => uuser.address === user.address || uuser.name === user.name) !== -1) {
       throw new Error("Already user is exisitng with same information. (AddUsers)")
     }
+
+    workerStatus.contracts.push({
+      [ATTR_TYPE]: TYPE_CONTRACT,
+      [ATTR_CONTRACT_ADDRESS]: user.address,
+      [ATTR_CONTRACT_TOKEN]: {}
+    } as Contract)
   })
 
   workerStatus.users = [...workerStatus.users, ...users]

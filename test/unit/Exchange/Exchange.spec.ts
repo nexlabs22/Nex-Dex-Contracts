@@ -22,7 +22,8 @@ import {
 } from "../../../utils/solidity";
 
 import ExchangeContract from "../../../utils/contracts/exchange";
-import { AddUsers, InitWorker, PrintContractStatus } from "../../../utils/core/worker";
+import { AddUsers, GetContractByAddress, InitWorker, PrintContractStatus } from "../../../utils/core/worker";
+import { AirdropToken } from "../../../utils/solidity/contract";
 
 async function compareResultExchange(contract: any, testContract: any) {
   // compare the price of two contracts
@@ -128,16 +129,31 @@ async function compareResultExchange(contract: any, testContract: any) {
       await usdc.transfer(account0.address, toWei('300'))
       await usdc.connect(account0).approve(exchange.address, toWei('300'));
       await exchange.connect(account0).depositCollateral(toWei('300'));
+      AirdropToken(
+        GetContractByAddress(account0.address),
+        usdc.address,
+        uint256(toWeiBigNumber(300))
+      )
       contract.connect(account0).depositCollateral(uint256(toWeiBigNumber(300)))
 
       await usdc.transfer(account1.address, toWei('5000'))
       await usdc.connect(account1).approve(exchange.address, toWei('5000'));
       await exchange.connect(account1).depositCollateral(toWei('5000'));
+      AirdropToken(
+        GetContractByAddress(account1.address),
+        usdc.address,
+        uint256(toWeiBigNumber(5000))
+      )
       contract.connect(account1).depositCollateral(uint256(toWeiBigNumber(5000)))
 
       await usdc.transfer(account2.address, toWei('5000'))
       await usdc.connect(account2).approve(exchange.address, toWei('5000'));
       await exchange.connect(account2).depositCollateral(toWei('5000'));
+      AirdropToken(
+        GetContractByAddress(account2.address),
+        usdc.address,
+        uint256(toWeiBigNumber(5000))
+      )
       contract.connect(account2).depositCollateral(uint256(toWeiBigNumber(5000)))
 
       PrintContractStatus(contract)

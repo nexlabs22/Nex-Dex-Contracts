@@ -11,18 +11,12 @@ const SafeERC20 = {
     to: address | undefined,
     value: uint256
   ) {
-    const sender = GetContractByAddress({
-      address: from as string,
-    })
+    const sender = GetContractByAddress(from as string)
 
-    const receiver = GetContractByAddress({
-      address: to as string,
-    })
+    const receiver = GetContractByAddress(to as string)
 
     const tokenAddress = token[ATTR_CONTRACT_ADDRESS]
 
-    console.log(from);
-    console.log(to);
     if (!sender || !receiver) {
       throw new Error("Sender or Receiver contract can not be null.")
     }
