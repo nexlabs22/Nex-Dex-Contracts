@@ -4,9 +4,6 @@ import { BigNumber as EtherBigNumber } from "ethers";
 import { developmentChains } from "../../../helper-hardhat-config";
 import { LinkToken, Exchange, MockV3Aggregator } from "../../../typechain";
 import {
-  organizeTestPool,
-} from '../../../utils/exchange';
-import {
   compareResult,
   toWei,
   toWeiN,
