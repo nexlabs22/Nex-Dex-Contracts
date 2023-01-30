@@ -40,9 +40,9 @@ export default function (contract: any): any {
 
     result.push({
       Collateral: 'Price',
-      AccountValue: 'Insurance Fund',
+      AccountValue: 'Liquidator',
       NotionalValue: 'Contract Collateral',
-      PNL: 'Owner Collateral',
+      PNL: 'Trading Fee',
     })
 
     const owner = GetContractByAddress(GetContractOwner(this))
