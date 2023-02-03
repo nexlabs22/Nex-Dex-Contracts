@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../contracts/Exchange.sol";
@@ -29,12 +30,29 @@ contract Positions is Test {
             address(ethPriceOracle),
             address(usdc)
         );
-
+        exchange.initialVirtualPool(1e18);
         usdc.transfer(add1, 1000e18);
         usdc.transfer(add2, 1000e18);
         usdc.transfer(add3, 1000e18);
         usdc.transfer(add4, 1000e18);
         usdc.transfer(add5, 1000e18);
+    }
+
+    function getShortUsdOut(uint _vBaycAmount) public returns(uint) {
+        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
+        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() + _vBaycAmount;
+        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+        uint256 uservUsd = exchange.vUsdPoolSize() - newvUsdPoolSize;
+    return uservUsd;
+    }
+
+
+    function getLongUsdOut(uint _vBaycAmount) public returns(uint) {
+        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
+        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() - _vBaycAmount;
+        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+        uint256 uservUsd = newvUsdPoolSize - exchange.vUsdPoolSize();
+        return uservUsd;
     }
 
     function testAddAndWithdrawCollateral() public {
@@ -49,7 +67,7 @@ contract Positions is Test {
     }
 
     function testOpenAndClosePosition() public {
-        vm.startPrank(add1);
+       vm.startPrank(add1);
        usdc.approve(address(exchange), 1000e18);
        exchange.depositCollateral(1000e18);
        assertEq(usdc.balanceOf(address(add1)), 0);
@@ -57,5 +75,30 @@ contract Positions is Test {
        exchange.openLongPosition(1000e18, 0);
        exchange.closePositionComplete(0);
     }
+
+    function testMoveThePrice() public {
+        //user 1 open 1000 usd long postion
+       vm.startPrank(add1);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add1)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add1)), 1000e18);
+       exchange.openLongPosition(1000e18, 0);
+       
+       uint price1 = exchange.marketPrice();
+        vm.stopPrank();
+       //user 2 open 500 usd long postion
+       vm.startPrank(add2);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add2)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add2)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+       uint newUsdValue = getShortUsdOut(uint(exchange.uservBaycBalance(add1)));
+       int pnl =  int(newUsdValue) - (-exchange.uservUsdBalance(add1));
+       assertEq(exchange.getPNL(add1), pnl);
+       console.log("add1 position notional", exchange.getPositionNotional(add1)/1e15);
+    }
+    
     
 }

@@ -9,6 +9,7 @@ export type { LinkTokenInterface } from "./LinkTokenInterface";
 export type { LinkTokenReceiver } from "./LinkTokenReceiver";
 export type { MockV3Aggregator } from "./MockV3Aggregator";
 export type { ChainlinkClient } from "./ChainlinkClient";
+export type { AutomationCompatibleInterface } from "./AutomationCompatibleInterface";
 export type { ENSInterface } from "./ENSInterface";
 export type { KeeperCompatibleInterface } from "./KeeperCompatibleInterface";
 export type { OperatorInterface } from "./OperatorInterface";
@@ -51,6 +52,7 @@ export { LinkTokenInterface__factory } from "./factories/LinkTokenInterface__fac
 export { LinkTokenReceiver__factory } from "./factories/LinkTokenReceiver__factory";
 export { MockV3Aggregator__factory } from "./factories/MockV3Aggregator__factory";
 export { ChainlinkClient__factory } from "./factories/ChainlinkClient__factory";
+export { AutomationCompatibleInterface__factory } from "./factories/AutomationCompatibleInterface__factory";
 export { ENSInterface__factory } from "./factories/ENSInterface__factory";
 export { KeeperCompatibleInterface__factory } from "./factories/KeeperCompatibleInterface__factory";
 export { OperatorInterface__factory } from "./factories/OperatorInterface__factory";
