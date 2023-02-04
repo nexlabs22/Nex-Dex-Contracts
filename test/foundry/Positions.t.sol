@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import "../../contracts/Exchange.sol";
 import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3AggregatorV8.sol";
+import "./helper.sol";
 
 contract Positions is Test {
     Exchange public exchange;
@@ -13,6 +14,8 @@ contract Positions is Test {
     Token public usdc;
     MockV3Aggregator public nftOracle;
     MockV3Aggregator public ethPriceOracle;
+
+    Helper public helper;
 
     address add1 = vm.addr(1);
     address add2 = vm.addr(2);
@@ -30,6 +33,12 @@ contract Positions is Test {
             address(ethPriceOracle),
             address(usdc)
         );
+        helper = new Helper(
+            address(exchange),
+            address(nftOracle),
+            address(ethPriceOracle),
+            address(usdc)
+        );
         exchange.initialVirtualPool(1e18);
         usdc.transfer(add1, 1000e18);
         usdc.transfer(add2, 1000e18);
@@ -38,22 +47,6 @@ contract Positions is Test {
         usdc.transfer(add5, 1000e18);
     }
 
-    function getShortUsdOut(uint _vBaycAmount) public returns(uint) {
-        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
-        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() + _vBaycAmount;
-        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
-        uint256 uservUsd = exchange.vUsdPoolSize() - newvUsdPoolSize;
-    return uservUsd;
-    }
-
-
-    function getLongUsdOut(uint _vBaycAmount) public returns(uint) {
-        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
-        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() - _vBaycAmount;
-        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
-        uint256 uservUsd = newvUsdPoolSize - exchange.vUsdPoolSize();
-        return uservUsd;
-    }
 
     function testAddAndWithdrawCollateral() public {
        vm.startPrank(add1);
@@ -94,7 +87,7 @@ contract Positions is Test {
        assertEq(usdc.balanceOf(address(add2)), 0);
        assertEq(exchange.collateral(address(usdc), address(add2)), 1000e18);
        exchange.openLongPosition(1600e18, 0);
-       uint newUsdValue = getShortUsdOut(uint(exchange.uservBaycBalance(add1)));
+       uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
        int pnl =  int(newUsdValue) - (-exchange.uservUsdBalance(add1));
        assertEq(exchange.getPNL(add1), pnl);
        console.log("add1 position notional", exchange.getPositionNotional(add1)/1e15);
