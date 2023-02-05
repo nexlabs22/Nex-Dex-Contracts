@@ -1541,9 +1541,84 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1675442324291,
-      "contentHash": "bf03dc27d802ee09f0e963a8e35370bc",
+      "lastModificationDate": 1675609308047,
+      "contentHash": "07dd494582e4b989e6f4a8aae557dedd",
       "sourceName": "test/foundry/Positions.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Exchange.sol",
+        "contracts/Token.sol",
+        "contracts/test/MockV3AggregatorV8.sol",
+        "lib/forge-std/lib/ds-test/src\\test.sol",
+        "lib/forge-std/src/Common.sol",
+        "lib/forge-std/src/Components.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src\\Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
+        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/ERC20.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\helper.sol"
+      ],
+      "versionRequirement": "^0.8.17",
+      "artifacts": {
+        "Positions": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "Positions.t.sol\\Positions.json"
+        }
+      }
+    },
+    "test/foundry/helper.sol": {
+      "lastModificationDate": 1675528715635,
+      "contentHash": "e15f0a7fbacd00107933664bd4022ff5",
+      "sourceName": "test/foundry/helper.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1609,8 +1684,8 @@
       ],
       "versionRequirement": "^0.8.17",
       "artifacts": {
-        "Positions": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "Positions.t.sol\\Positions.json"
+        "Helper": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "helper.sol\\Helper.json"
         }
       }
     }

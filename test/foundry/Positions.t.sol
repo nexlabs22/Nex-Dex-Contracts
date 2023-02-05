@@ -69,7 +69,7 @@ contract Positions is Test {
        exchange.closePositionComplete(0);
     }
 
-    function testMoveThePrice() public {
+    function testPNL() public {
         //user 1 open 1000 usd long postion
        vm.startPrank(add1);
        usdc.approve(address(exchange), 1000e18);
@@ -87,9 +87,16 @@ contract Positions is Test {
        assertEq(usdc.balanceOf(address(add2)), 0);
        assertEq(exchange.collateral(address(usdc), address(add2)), 1000e18);
        exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+
+       vm.startPrank(add1);
        uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
        int pnl =  int(newUsdValue) - (-exchange.uservUsdBalance(add1));
        assertEq(exchange.getPNL(add1), pnl);
+       uint lastCollateral = exchange.collateral(address(usdc), add1);
+       uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
+       exchange.closePositionComplete(0);
+       assertEq(exchange.collateral(address(usdc), add1), lastCollateral + uint(pnl) - lastPositionValue/1000);
        console.log("add1 position notional", exchange.getPositionNotional(add1)/1e15);
     }
     
