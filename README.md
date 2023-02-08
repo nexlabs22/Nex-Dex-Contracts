@@ -8,9 +8,8 @@
 
 
 ```
-nftOracle = https://goerli.etherscan.io/address/0x5630D8903B9702E26e08879A8D5886815e1Ea07E#code
 
-exchange= https://goerli.etherscan.io/address/0xC66D561D0E5BE0767e6b53620D3989721385d906
+exchange= https://goerli.etherscan.io/address/0xFAA250E2906b8A5548254Fc335eB54F1a5C17C7F
 ````
 
 # Getting Started 
