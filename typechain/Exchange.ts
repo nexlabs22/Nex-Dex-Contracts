@@ -571,21 +571,63 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "CloseLongPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
+    "CloseShortPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
     "Deposit(address,address,uint256,uint256)": EventFragment;
+    "HardLiquidate(address,uint256,uint256,uint256,uint256)": EventFragment;
     "NewOracle(address)": EventFragment;
+    "OpenLongPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
+    "OpenShortPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "PartialLiquidate(address,uint256,uint256,uint256,uint256)": EventFragment;
     "Paused(address)": EventFragment;
+    "Price(uint256,uint256,uint256,uint256,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
     "Withdraw(address,address,uint256,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "CloseLongPosition"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CloseShortPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "HardLiquidate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewOracle"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OpenLongPosition"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OpenShortPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PartialLiquidate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Price"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
+
+export type CloseLongPositionEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type CloseLongPositionEventFilter =
+  TypedEventFilter<CloseLongPositionEvent>;
+
+export type CloseShortPositionEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type CloseShortPositionEventFilter =
+  TypedEventFilter<CloseShortPositionEvent>;
 
 export type DepositEvent = TypedEvent<
   [string, string, BigNumber, BigNumber],
@@ -594,9 +636,50 @@ export type DepositEvent = TypedEvent<
 
 export type DepositEventFilter = TypedEventFilter<DepositEvent>;
 
+export type HardLiquidateEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type HardLiquidateEventFilter = TypedEventFilter<HardLiquidateEvent>;
+
 export type NewOracleEvent = TypedEvent<[string], { oracle: string }>;
 
 export type NewOracleEventFilter = TypedEventFilter<NewOracleEvent>;
+
+export type OpenLongPositionEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type OpenLongPositionEventFilter =
+  TypedEventFilter<OpenLongPositionEvent>;
+
+export type OpenShortPositionEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type OpenShortPositionEventFilter =
+  TypedEventFilter<OpenShortPositionEvent>;
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
@@ -606,9 +689,36 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
+export type PartialLiquidateEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    user: string;
+    price: BigNumber;
+    timestamp: BigNumber;
+    vBaycAmount: BigNumber;
+    vUsdAmount: BigNumber;
+  }
+>;
+
+export type PartialLiquidateEventFilter =
+  TypedEventFilter<PartialLiquidateEvent>;
+
 export type PausedEvent = TypedEvent<[string], { account: string }>;
 
 export type PausedEventFilter = TypedEventFilter<PausedEvent>;
+
+export type PriceEvent = TypedEvent<
+  [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    price: BigNumber;
+    volume: BigNumber;
+    timestamp: BigNumber;
+    vBaycPoolSize: BigNumber;
+    vUsdPoolSize: BigNumber;
+  }
+>;
+
+export type PriceEventFilter = TypedEventFilter<PriceEvent>;
 
 export type UnpausedEvent = TypedEvent<[string], { account: string }>;
 
@@ -1458,6 +1568,36 @@ export interface Exchange extends BaseContract {
   };
 
   filters: {
+    "CloseLongPosition(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): CloseLongPositionEventFilter;
+    CloseLongPosition(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): CloseLongPositionEventFilter;
+
+    "CloseShortPosition(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): CloseShortPositionEventFilter;
+    CloseShortPosition(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): CloseShortPositionEventFilter;
+
     "Deposit(address,address,uint256,uint256)"(
       token?: null,
       user?: null,
@@ -1471,8 +1611,53 @@ export interface Exchange extends BaseContract {
       balance?: null
     ): DepositEventFilter;
 
+    "HardLiquidate(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): HardLiquidateEventFilter;
+    HardLiquidate(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): HardLiquidateEventFilter;
+
     "NewOracle(address)"(oracle?: null): NewOracleEventFilter;
     NewOracle(oracle?: null): NewOracleEventFilter;
+
+    "OpenLongPosition(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): OpenLongPositionEventFilter;
+    OpenLongPosition(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): OpenLongPositionEventFilter;
+
+    "OpenShortPosition(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): OpenShortPositionEventFilter;
+    OpenShortPosition(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): OpenShortPositionEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
@@ -1483,8 +1668,38 @@ export interface Exchange extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
+    "PartialLiquidate(address,uint256,uint256,uint256,uint256)"(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): PartialLiquidateEventFilter;
+    PartialLiquidate(
+      user?: null,
+      price?: null,
+      timestamp?: null,
+      vBaycAmount?: null,
+      vUsdAmount?: null
+    ): PartialLiquidateEventFilter;
+
     "Paused(address)"(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
+
+    "Price(uint256,uint256,uint256,uint256,uint256)"(
+      price?: null,
+      volume?: null,
+      timestamp?: null,
+      vBaycPoolSize?: null,
+      vUsdPoolSize?: null
+    ): PriceEventFilter;
+    Price(
+      price?: null,
+      volume?: null,
+      timestamp?: null,
+      vBaycPoolSize?: null,
+      vUsdPoolSize?: null
+    ): PriceEventFilter;
 
     "Unpaused(address)"(account?: null): UnpausedEventFilter;
     Unpaused(account?: null): UnpausedEventFilter;

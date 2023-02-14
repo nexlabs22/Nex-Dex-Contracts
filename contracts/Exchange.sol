@@ -58,6 +58,16 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   event Deposit(address token, address user, uint256 amount, uint256 balance);
   event Withdraw(address token, address user, uint256 amount, uint256 balance);
 
+  event OpenLongPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
+  event OpenShortPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
+  event CloseLongPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
+  event CloseShortPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
+
+  event HardLiquidate(address user, uint price, uint timestamp, uint vBaycAmount, uint vUsdAmount);
+  event PartialLiquidate(address user, uint price, uint timestamp, uint vBaycAmount, uint vUsdAmount);
+
+  event Price(uint price, uint volume, uint timestamp, uint vBaycPoolSize, uint vUsdPoolSize);
+
   constructor(
     address _nftOracleAddress,
     address _priceFeed,
@@ -346,6 +356,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
     pool.vUsdPoolSize = newvUsdPoolSize;
+
+    //set the event
+    emit OpenLongPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
+    emit Price(marketPrice(), userBayc, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
   function openShortPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut) public {
@@ -396,6 +410,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
     pool.vUsdPoolSize = newvUsdPoolSize;
+
+    //set the event
+    emit OpenShortPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
+    emit Price(marketPrice(), userBayc, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
   function _closeLongPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut) internal {
@@ -455,6 +473,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     pool.vBaycPoolSize += _assetSize;
     pool.vUsdPoolSize = k / pool.vBaycPoolSize;
+
+    //set event
+    emit CloseLongPosition(msg.sender, marketPrice(), block.timestamp, _assetSize, positive(userPartialvUsdBalance));
+    emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
   function _closeShortPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut) internal {
@@ -511,6 +533,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     pool.vBaycPoolSize -= _assetSize;
     pool.vUsdPoolSize = k / pool.vBaycPoolSize;
+
+    //set event
+    emit CloseShortPosition(msg.sender, marketPrice(), block.timestamp, _assetSize, positive(userPartialvUsdBalance));
+    emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
   function closePositionComplete(uint256 _minimumUsdOut) public {
@@ -778,6 +804,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       k = vBaycNewPoolSize*vUsdNewPoolSize;
       vBaycNewPoolSize += _assetSize;
       vUsdNewPoolSize = k / vBaycNewPoolSize;
+      //set events
+      emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, usdBaycValue);
+      emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
     } else if (virtualBalances[_user].uservBaycBalance < 0) {
       uint256 _assetSize = positive(virtualBalances[_user].uservBaycBalance);
       uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
@@ -807,6 +836,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       k = vBaycNewPoolSize*vUsdNewPoolSize;
       vBaycNewPoolSize -= _assetSize;
       vUsdNewPoolSize = k / vBaycNewPoolSize;
+      //set events
+      emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, usdBaycValue);
+      emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
+
     }
     uint256 collateralValue = collateral[usdc][_user];
     uint256 discountAmount = (discountRate * collateralValue) / 100;
@@ -844,6 +877,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //update the new pool size
       vBaycNewPoolSize += _assetSize;
       vUsdNewPoolSize = k / vBaycNewPoolSize;
+      //set events
+      emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
+      emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
       // reduce short users virtual collateral
       int256 allShortBaycBalance = getAllShortvBaycBalance();
       for (uint256 i = 0; i < activeUsers.length; i++) {
@@ -873,6 +909,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //update the new pool size
       vBaycNewPoolSize -= _assetSize;
       vUsdNewPoolSize = k / vBaycNewPoolSize;
+      //set events
+      emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
+      emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize); 
       // reduce long users virtual collateral
       int256 allLongvBaycBalance = getAllLongvBaycBalance();
       for (uint256 i = 0; i < activeUsers.length; i++) {
@@ -1270,6 +1309,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //update the newPoolSize
       vBaycNewPoolSize += baycLiquidateAmount;
       vUsdNewPoolSize = k / vBaycNewPoolSize;
+      //set events
+      emit PartialLiquidate(msg.sender, marketPrice(), block.timestamp, baycLiquidateAmount, positive(userPartialvUsdBalance));
+      emit Price(marketPrice(), baycLiquidateAmount, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
     } else if (virtualBalances[_user].uservBaycBalance < 0) {
       //get the output usd of closing position
       uint256 usdBaycValue = liquidateAmount;
@@ -1306,6 +1348,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       //update the newPoolSize
       vBaycNewPoolSize -= baycLiquidateAmount;
       vUsdNewPoolSize = k2 / vBaycNewPoolSize;
+      //set events
+      emit PartialLiquidate(msg.sender, marketPrice(), block.timestamp, baycLiquidateAmount, positive(userPartialvUsdBalance));
+      emit Price(marketPrice(), baycLiquidateAmount, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
     }
     uint256 discountAmount = (liquidateAmount * discountRate) / 100;
     collateral[usdc][_user] -= discountAmount;
