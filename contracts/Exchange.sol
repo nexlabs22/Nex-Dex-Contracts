@@ -348,10 +348,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     _addActiveUser(msg.sender);
 
     //trade fee
-    // uint256 fee = (_usdAmount * swapFee) / 10000;
-    // collateral[usdc][msg.sender] -= fee;
-    // address owner = owner();
-    // SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    uint256 fee = (_usdAmount * swapFee) / 10000;
+    collateral[usdc][msg.sender] -= fee;
+    address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
@@ -402,10 +402,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     _addActiveUser(msg.sender);
 
     //trade fee
-    // uint256 fee = (_usdAmount * swapFee) / 10000;
-    // collateral[usdc][msg.sender] -= fee;
-    // address owner = owner();
-    // SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    uint256 fee = (_usdAmount * swapFee) / 10000;
+    collateral[usdc][msg.sender] -= fee;
+    address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
@@ -435,13 +435,12 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     //get the output usd of closing position
     //f.e 1Bayc -> 2000$
     uint256 usdBaycValue = getShortVusdAmountOut(_assetSize);
-    // uint256 usdBaycValue = pool.vUsdPoolSize - vUsdNewPoolSize;
     require(usdBaycValue >= _minimumUsdOut, "INSUFFICIENT_OUTPUT_AMOUNT");
     int256 userPartialvUsdBalance = (virtualBalances[_user].uservUsdBalance * int256(_assetSize)) /
       virtualBalances[_user].uservBaycBalance;
-    // int256 userPartialvUsdBalance = virtualBalances[_user].uservUsdBalance;
+
     //increase or decrease the user pnl for this function
-    if (usdBaycValue > (positive(userPartialvUsdBalance))) {
+    if (usdBaycValue > uint256(positive(userPartialvUsdBalance))) {
       uint256 pnl = usdBaycValue - uint256(positive(userPartialvUsdBalance));
       // collateral[usdc][_user] += pnl;
       collateral[usdc][_user] += pnl;
@@ -465,10 +464,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
 
     //trade fee
-    // uint256 fee = (usdBaycValue * swapFee) / 10000;
-    // collateral[usdc][_user] -= fee;
-    // address owner = owner();
-    // SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    uint256 fee = (usdBaycValue * swapFee) / 10000;
+    collateral[usdc][_user] -= fee;
+    address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update the pool
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
@@ -526,10 +525,10 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
       _removeActiveUser(_user);
     }
     //trade fee
-    // uint256 fee = (usdBaycValue * swapFee) / 10000;
-    // collateral[usdc][_user] -= fee;
-    // address owner = owner();
-    // SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    uint256 fee = (usdBaycValue * swapFee) / 10000;
+    collateral[usdc][_user] -= fee;
+    address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
     //update pool
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     pool.vBaycPoolSize -= _assetSize;

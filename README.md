@@ -9,7 +9,7 @@
 
 ```
 
-exchange= https://goerli.etherscan.io/address/0xFAA250E2906b8A5548254Fc335eB54F1a5C17C7F
+exchange= https://goerli.etherscan.io/address/0x183380A669B1742e975B179Db14ca488fa3C8e8a
 ````
 
 # Getting Started 
