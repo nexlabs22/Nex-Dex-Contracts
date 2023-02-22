@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
     // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
   contractSizer: {
-    runOnCompile: true,
+    runOnCompile: false,
     only: ["Exchange"],
   },
   namedAccounts: {
