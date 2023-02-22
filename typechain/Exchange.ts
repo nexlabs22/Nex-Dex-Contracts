@@ -30,6 +30,7 @@ export interface ExchangeInterface extends utils.Interface {
     "closePosition(uint256,uint256)": FunctionFragment;
     "closePositionComplete(uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
+    "decimals()": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
     "doesUserExist(address)": FunctionFragment;
@@ -127,6 +128,7 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "collateral",
     values: [string, string]
   ): string;
+  encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "depositCollateral",
     values: [BigNumberish]
@@ -364,6 +366,7 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "collateral", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositCollateral",
     data: BytesLike
@@ -795,6 +798,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    decimals(overrides?: CallOverrides): Promise<[number]>;
+
     depositCollateral(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1064,6 +1069,8 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  decimals(overrides?: CallOverrides): Promise<number>;
+
   depositCollateral(
     _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1328,6 +1335,8 @@ export interface Exchange extends BaseContract {
       arg1: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    decimals(overrides?: CallOverrides): Promise<number>;
 
     depositCollateral(
       _amount: BigNumberish,
@@ -1738,6 +1747,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    decimals(overrides?: CallOverrides): Promise<BigNumber>;
+
     depositCollateral(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1994,6 +2005,8 @@ export interface Exchange extends BaseContract {
       arg1: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     depositCollateral(
       _amount: BigNumberish,

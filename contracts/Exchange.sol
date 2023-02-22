@@ -4,10 +4,8 @@ pragma solidity ^0.8.17;
 pragma abicoder v2;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -34,6 +32,8 @@ contract Exchange is Ownable, ReentrancyGuard {
 
   uint8 public swapFee = 10; //=> 10/10000 = 0.1%
   uint256 public latestFeeUpdate;
+
+  uint8 public decimals;
 
   address[] liquidateList;
 
@@ -72,11 +72,13 @@ contract Exchange is Ownable, ReentrancyGuard {
   constructor(
     address _nftOracleAddress,
     address _priceFeed,
-    address _usdc
+    address _usdc,
+    uint8 _tokenDecimals
   ) {
     nftFloorPriceFeed = AggregatorV3Interface(_nftOracleAddress);
     priceFeed = AggregatorV3Interface(_priceFeed);
     usdc = _usdc;
+    decimals = _tokenDecimals;
   }
 
   //return bayc virtual pool size of the market
@@ -206,7 +208,6 @@ contract Exchange is Ownable, ReentrancyGuard {
 
   //deposit collateral
   function depositCollateral(uint256 _amount) public {
-    uint decimals = ERC20(usdc).decimals();
     uint amount = _amount * 10**18/10**decimals;
     SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
     collateral[usdc][msg.sender] = collateral[usdc][msg.sender].add(amount);
@@ -216,7 +217,6 @@ contract Exchange is Ownable, ReentrancyGuard {
   //withdraw collateral
   //befor that the function check user margin
   function withdrawCollateral(uint256 _amount) public {
-    uint decimals = ERC20(usdc).decimals();
     uint amount = _amount * 10**18/10**decimals;
     //check new margin
     uint256 totalPositionNotional = getPositionNotional(msg.sender);
@@ -356,7 +356,6 @@ contract Exchange is Ownable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
-    uint decimals = ERC20(usdc).decimals();
     fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
@@ -412,7 +411,6 @@ contract Exchange is Ownable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
-    uint decimals = ERC20(usdc).decimals();
     fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
@@ -476,7 +474,6 @@ contract Exchange is Ownable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
-    uint decimals = ERC20(usdc).decimals();
     fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
@@ -539,7 +536,6 @@ contract Exchange is Ownable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
-    uint decimals = ERC20(usdc).decimals();
     fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
     //update pool
@@ -1557,7 +1553,6 @@ contract Exchange is Ownable, ReentrancyGuard {
 
   // remove insurance funds from contract to owner account
   function removeInsuranceFunds(uint256 _amount) public onlyOwner {
-    uint decimals = ERC20(usdc).decimals();
     uint amount = _amount * 10**18/10**decimals;
     require(
       amount <= insuranceFunds,
