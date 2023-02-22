@@ -7,13 +7,14 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // @title Nex Exchange smart contract
 
-contract Exchange is Ownable, Pausable, ReentrancyGuard {
+contract Exchange is Ownable, ReentrancyGuard {
   using SafeMath for uint256;
 
   AggregatorV3Interface internal nftFloorPriceFeed;
@@ -54,9 +55,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
   mapping(address => VirtualBalance) public virtualBalances;
 
-  event NewOracle(address oracle);
-  event Deposit(address token, address user, uint256 amount, uint256 balance);
-  event Withdraw(address token, address user, uint256 amount, uint256 balance);
+
+  event Deposit(address token, address user, uint timestamp, uint256 amount, uint256 balance);
+  event Withdraw(address token, address user, uint timestamp, uint256 amount, uint256 balance);
 
   event OpenLongPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
   event OpenShortPosition(address user, uint256 price, uint256 timestamp, uint256 vBaycAmount, uint256 vUsdAmount);
@@ -205,19 +206,23 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   //deposit collateral
   function depositCollateral(uint256 _amount) public {
+    uint decimals = ERC20(usdc).decimals();
+    uint amount = _amount * 10**18/10**decimals;
     SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
-    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].add(_amount);
-    emit Deposit(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
+    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].add(amount);
+    emit Deposit(usdc, msg.sender, block.timestamp,  amount, collateral[usdc][msg.sender]);
   }
 
   //withdraw collateral
   //befor that the function check user margin
   function withdrawCollateral(uint256 _amount) public {
+    uint decimals = ERC20(usdc).decimals();
+    uint amount = _amount * 10**18/10**decimals;
     //check new margin
     uint256 totalPositionNotional = getPositionNotional(msg.sender);
     int256 totalAccountValue = getAccountValue(msg.sender);
     if (totalPositionNotional > 0) {
-      int256 newAccountValue = totalAccountValue - int256(_amount);
+      int256 newAccountValue = totalAccountValue - int256(amount);
       int256 newMargin = (100 * newAccountValue) / int256(totalPositionNotional);
       require(
         newMargin > int8(saveLevelMargin),
@@ -226,13 +231,13 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     }
     //check user has enough collateral
     require(
-      collateral[usdc][msg.sender] >= _amount,
+      collateral[usdc][msg.sender] >= amount,
       "Requested withdrawal amount is larger than the collateral balance."
     );
     //transfer tokens to the user
     SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
-    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].sub(_amount);
-    emit Withdraw(usdc, msg.sender, _amount, collateral[usdc][msg.sender]);
+    collateral[usdc][msg.sender] = collateral[usdc][msg.sender].sub(amount);
+    emit Withdraw(usdc, msg.sender, block.timestamp, amount, collateral[usdc][msg.sender]);
   }
 
   //give the user funding reward when position will be closed
@@ -304,9 +309,9 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     return oraclePrice;
   }
 
-  function getCurrentExchangePrice() public view returns (uint256) {
-    return (1e18 * pool.vUsdPoolSize) / pool.vBaycPoolSize;
-  }
+  // function getCurrentExchangePrice() public view returns (uint256) {
+  //   return (1e18 * pool.vUsdPoolSize) / pool.vBaycPoolSize;
+  // }
 
   function openLongPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut) public {
     //calculate the new pool size and user bayc amount
@@ -351,6 +356,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
+    uint decimals = ERC20(usdc).decimals();
+    fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
@@ -405,6 +412,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
     address owner = owner();
+    uint decimals = ERC20(usdc).decimals();
+    fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update pool
@@ -467,6 +476,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
+    uint decimals = ERC20(usdc).decimals();
+    fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
 
     //update the pool
@@ -528,6 +539,8 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
     address owner = owner();
+    uint decimals = ERC20(usdc).decimals();
+    fee = fee * 10**decimals/10**18;
     SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
     //update pool
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
@@ -1544,12 +1557,14 @@ contract Exchange is Ownable, Pausable, ReentrancyGuard {
 
   // remove insurance funds from contract to owner account
   function removeInsuranceFunds(uint256 _amount) public onlyOwner {
+    uint decimals = ERC20(usdc).decimals();
+    uint amount = _amount * 10**18/10**decimals;
     require(
-      _amount <= insuranceFunds,
+      amount <= insuranceFunds,
       "Requested collect amount is larger than the ContractFee balance."
     );
     SafeERC20.safeTransfer(IERC20(usdc), msg.sender, _amount);
-    insuranceFunds -= _amount;
+    insuranceFunds -= amount;
   }
 
   function isLongInRightRange(uint256 _usdAmount) public view returns (bool) {

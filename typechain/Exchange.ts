@@ -37,7 +37,6 @@ export interface ExchangeInterface extends utils.Interface {
     "getAllActiveUsers()": FunctionFragment;
     "getAllLongvBaycBalance()": FunctionFragment;
     "getAllShortvBaycBalance()": FunctionFragment;
-    "getCurrentExchangePrice()": FunctionFragment;
     "getEthUsdPrice()": FunctionFragment;
     "getLatestNftPrice()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
@@ -64,7 +63,6 @@ export interface ExchangeInterface extends utils.Interface {
     "openShortPosition(uint256,uint256)": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
-    "paused()": FunctionFragment;
     "pool()": FunctionFragment;
     "poolInitialized()": FunctionFragment;
     "positive(int256)": FunctionFragment;
@@ -155,10 +153,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getAllShortvBaycBalance",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getCurrentExchangePrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -259,7 +253,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(functionFragment: "pool", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "poolInitialized",
@@ -400,10 +393,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getCurrentExchangePrice",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getEthUsdPrice",
     data: BytesLike
   ): Result;
@@ -501,7 +490,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pool", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "poolInitialized",
@@ -573,31 +561,25 @@ export interface ExchangeInterface extends utils.Interface {
   events: {
     "CloseLongPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
     "CloseShortPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
-    "Deposit(address,address,uint256,uint256)": EventFragment;
+    "Deposit(address,address,uint256,uint256,uint256)": EventFragment;
     "HardLiquidate(address,uint256,uint256,uint256,uint256)": EventFragment;
-    "NewOracle(address)": EventFragment;
     "OpenLongPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
     "OpenShortPosition(address,uint256,uint256,uint256,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "PartialLiquidate(address,uint256,uint256,uint256,uint256)": EventFragment;
-    "Paused(address)": EventFragment;
     "Price(uint256,uint256,uint256,uint256,uint256)": EventFragment;
-    "Unpaused(address)": EventFragment;
-    "Withdraw(address,address,uint256,uint256)": EventFragment;
+    "Withdraw(address,address,uint256,uint256,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "CloseLongPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CloseShortPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Deposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "HardLiquidate"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewOracle"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OpenLongPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OpenShortPosition"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PartialLiquidate"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Price"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -630,8 +612,14 @@ export type CloseShortPositionEventFilter =
   TypedEventFilter<CloseShortPositionEvent>;
 
 export type DepositEvent = TypedEvent<
-  [string, string, BigNumber, BigNumber],
-  { token: string; user: string; amount: BigNumber; balance: BigNumber }
+  [string, string, BigNumber, BigNumber, BigNumber],
+  {
+    token: string;
+    user: string;
+    timestamp: BigNumber;
+    amount: BigNumber;
+    balance: BigNumber;
+  }
 >;
 
 export type DepositEventFilter = TypedEventFilter<DepositEvent>;
@@ -648,10 +636,6 @@ export type HardLiquidateEvent = TypedEvent<
 >;
 
 export type HardLiquidateEventFilter = TypedEventFilter<HardLiquidateEvent>;
-
-export type NewOracleEvent = TypedEvent<[string], { oracle: string }>;
-
-export type NewOracleEventFilter = TypedEventFilter<NewOracleEvent>;
 
 export type OpenLongPositionEvent = TypedEvent<
   [string, BigNumber, BigNumber, BigNumber, BigNumber],
@@ -703,10 +687,6 @@ export type PartialLiquidateEvent = TypedEvent<
 export type PartialLiquidateEventFilter =
   TypedEventFilter<PartialLiquidateEvent>;
 
-export type PausedEvent = TypedEvent<[string], { account: string }>;
-
-export type PausedEventFilter = TypedEventFilter<PausedEvent>;
-
 export type PriceEvent = TypedEvent<
   [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber],
   {
@@ -720,13 +700,15 @@ export type PriceEvent = TypedEvent<
 
 export type PriceEventFilter = TypedEventFilter<PriceEvent>;
 
-export type UnpausedEvent = TypedEvent<[string], { account: string }>;
-
-export type UnpausedEventFilter = TypedEventFilter<UnpausedEvent>;
-
 export type WithdrawEvent = TypedEvent<
-  [string, string, BigNumber, BigNumber],
-  { token: string; user: string; amount: BigNumber; balance: BigNumber }
+  [string, string, BigNumber, BigNumber, BigNumber],
+  {
+    token: string;
+    user: string;
+    timestamp: BigNumber;
+    amount: BigNumber;
+    balance: BigNumber;
+  }
 >;
 
 export type WithdrawEventFilter = TypedEventFilter<WithdrawEvent>;
@@ -832,8 +814,6 @@ export interface Exchange extends BaseContract {
     getAllLongvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -943,8 +923,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    paused(overrides?: CallOverrides): Promise<[boolean]>;
 
     pool(
       overrides?: CallOverrides
@@ -1103,8 +1081,6 @@ export interface Exchange extends BaseContract {
 
   getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
   getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getLatestNftPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1210,8 +1186,6 @@ export interface Exchange extends BaseContract {
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
-
-  paused(overrides?: CallOverrides): Promise<boolean>;
 
   pool(
     overrides?: CallOverrides
@@ -1375,8 +1349,6 @@ export interface Exchange extends BaseContract {
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLatestNftPrice(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1482,8 +1454,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    paused(overrides?: CallOverrides): Promise<boolean>;
 
     pool(
       overrides?: CallOverrides
@@ -1598,15 +1568,17 @@ export interface Exchange extends BaseContract {
       vUsdAmount?: null
     ): CloseShortPositionEventFilter;
 
-    "Deposit(address,address,uint256,uint256)"(
+    "Deposit(address,address,uint256,uint256,uint256)"(
       token?: null,
       user?: null,
+      timestamp?: null,
       amount?: null,
       balance?: null
     ): DepositEventFilter;
     Deposit(
       token?: null,
       user?: null,
+      timestamp?: null,
       amount?: null,
       balance?: null
     ): DepositEventFilter;
@@ -1625,9 +1597,6 @@ export interface Exchange extends BaseContract {
       vBaycAmount?: null,
       vUsdAmount?: null
     ): HardLiquidateEventFilter;
-
-    "NewOracle(address)"(oracle?: null): NewOracleEventFilter;
-    NewOracle(oracle?: null): NewOracleEventFilter;
 
     "OpenLongPosition(address,uint256,uint256,uint256,uint256)"(
       user?: null,
@@ -1683,9 +1652,6 @@ export interface Exchange extends BaseContract {
       vUsdAmount?: null
     ): PartialLiquidateEventFilter;
 
-    "Paused(address)"(account?: null): PausedEventFilter;
-    Paused(account?: null): PausedEventFilter;
-
     "Price(uint256,uint256,uint256,uint256,uint256)"(
       price?: null,
       volume?: null,
@@ -1701,18 +1667,17 @@ export interface Exchange extends BaseContract {
       vUsdPoolSize?: null
     ): PriceEventFilter;
 
-    "Unpaused(address)"(account?: null): UnpausedEventFilter;
-    Unpaused(account?: null): UnpausedEventFilter;
-
-    "Withdraw(address,address,uint256,uint256)"(
+    "Withdraw(address,address,uint256,uint256,uint256)"(
       token?: null,
       user?: null,
+      timestamp?: null,
       amount?: null,
       balance?: null
     ): WithdrawEventFilter;
     Withdraw(
       token?: null,
       user?: null,
+      timestamp?: null,
       amount?: null,
       balance?: null
     ): WithdrawEventFilter;
@@ -1792,8 +1757,6 @@ export interface Exchange extends BaseContract {
     getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1900,8 +1863,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    paused(overrides?: CallOverrides): Promise<BigNumber>;
 
     pool(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2061,10 +2022,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getCurrentExchangePrice(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getEthUsdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getLatestNftPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2173,8 +2130,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     pool(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
