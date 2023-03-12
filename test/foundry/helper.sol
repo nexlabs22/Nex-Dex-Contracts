@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../../contracts/Exchange.sol";
 import "../../contracts/Token.sol";
-import "../../contracts/test/MockV3AggregatorV8.sol";
+import "../../contracts/test/MockV3Aggregator.sol";
 
 contract Helper {
     Exchange public exchange;
