@@ -1616,8 +1616,8 @@
       }
     },
     "test/foundry/InsuranceFunds.sol": {
-      "lastModificationDate": 1678839114547,
-      "contentHash": "55d12805f84c23c73927083c488dd34e",
+      "lastModificationDate": 1678839236975,
+      "contentHash": "890e0ad6b825b3066701d669a4764985",
       "sourceName": "test/foundry/InsuranceFunds.sol",
       "solcConfig": {
         "settings": {

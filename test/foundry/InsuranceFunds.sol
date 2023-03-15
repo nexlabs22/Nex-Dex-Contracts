@@ -97,6 +97,9 @@ contract InsuranceFunds is Test {
        exchange.openShortPosition(1600e18, 0);
        assertEq(exchange.userMargin(add1), 0);
        vm.stopPrank();
+
+       uint insuranceFunds = exchange.insuranceFunds();
+       exchange.removeInsuranceFunds(insuranceFunds);
     }
 
 
