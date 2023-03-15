@@ -19,13 +19,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       let mockOracle: MockOracle
       let usdc:any
       let accounts:any
+      let exchangeInfo:any
 
       beforeEach(async () => {
-        await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
+        await deployments.fixture(["mocks", "nftOracle", "exchange","exchangeInfo", "token"]);
         linkToken = await ethers.getContract("LinkToken")
         nftOracle = await ethers.getContract("MockV3AggregatorNft")
         exchange = await ethers.getContract("Exchange")
         usdc = await ethers.getContract("Token")
+        exchangeInfo = await ethers.getContract("ExchangeInfo");
         accounts = await ethers.provider.getSigner()
       })
 
@@ -61,7 +63,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        let minimumBayc = await exchange.getMinimumLongBaycOut(toWei('1000'))
+        let minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('1000'))
         await exchange.openLongPosition(toWei('1000'), minimumBayc)
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
@@ -72,10 +74,10 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner margin 1 :', Number(await exchange.userMargin(owner.address)))
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1);
-        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('900'))
+        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('900'))
         await exchange.connect(account1).openShortPosition(toWei('900'), minimumBayc)
 
-        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('900'))
+        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('900'))
         await exchange.connect(account2).openShortPosition(toWei('900'), minimumBayc)
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('p2:', toEther(await exchange.getCurrentExchangePrice()))
@@ -83,7 +85,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner account value 2 :',toEther(await exchange.getAccountValue(owner.address)));
         console.log('owner collateral 2 :',toEther(await exchange.collateral(usdc.address, owner.address)));
         // return
-        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('580'))
+        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('580'))
         await exchange.connect(account3).openShortPosition(toWei('580'), minimumBayc)
         
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))
@@ -126,7 +128,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         // await setOraclePrice(1.2);
-        let minimumBayc = await exchange.getMinimumShortBaycOut(toWei('800'))
+        let minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('800'))
         await exchange.openShortPosition(toWei('800'), minimumBayc)
         console.log(toEther(await exchange.getAccountValue(owner.address)));
         console.log(toEther(await exchange.uservBaycBalance(owner.address)));
@@ -138,10 +140,10 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('p1:', toEther(await exchange.getCurrentExchangePrice()))
         await setOraclePrice(1.8);
         // return
-        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('800'))
+        minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('800'))
         await exchange.connect(account1).openLongPosition(toWei('800'), minimumBayc)
 
-        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('500'))
+        minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('500'))
         await exchange.connect(account2).openLongPosition(toWei('500'), minimumBayc)
         console.log('owner margin 2 :', Number(await exchange.userMargin(owner.address)))
         console.log('p2:', toEther(await exchange.getCurrentExchangePrice()))
@@ -150,7 +152,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner collateral 2 :',toEther(await exchange.collateral(usdc.address, owner.address)));
         // return
         await setOraclePrice(2.2);
-        minimumBayc = await exchange.getMinimumLongBaycOut(toWei('80'))
+        minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('80'))
         await exchange.connect(account3).openLongPosition(toWei('80'), minimumBayc)
         
         console.log('owner margin 3 :', Number(await exchange.userMargin(owner.address)))

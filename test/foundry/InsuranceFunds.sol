@@ -8,7 +8,7 @@ import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
-contract Liquidation is Test {
+contract InsuranceFunds is Test {
     Exchange public exchange;
     
     Token public usdc;
@@ -100,7 +100,7 @@ contract Liquidation is Test {
     }
 
 
-    function testPartialLiquidation() public {
+    function testInsuranceFunds() public {
        
        uint startvBaycPoolSize = exchange.vBaycPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
@@ -149,6 +149,9 @@ contract Liquidation is Test {
        exchange.openShortPosition(1600e18, 0);
        assertEq(exchange.userMargin(add1) > 60, true);
        vm.stopPrank();
+
+       uint insuranceFunds = exchange.insuranceFunds();
+       exchange.removeInsuranceFunds(insuranceFunds);
     }
 
     

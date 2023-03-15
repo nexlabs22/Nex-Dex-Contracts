@@ -1,3 +1,4 @@
+import { oracle } from "@chainlink/test-helpers"
 import { numToBytes32, stringToBytes } from "@chainlink/test-helpers/dist/src/helpers"
 import { assert, expect } from "chai"
 import { BigNumber, ContractReceipt, ContractTransaction } from "ethers"
@@ -20,20 +21,22 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
       let usdc: any
       let accounts: any
       let priceFeed: any
+      let exchangeInfo:any
 
       beforeEach(async () => {
-        await deployments.fixture(["mocks", "nftOracle", "exchange", "token"])
+        await deployments.fixture(["mocks", "nftOracle", "exchange", "token", "exchangeInfo"])
         // linkToken = await ethers.getContract("LinkToken")
         nftOracle = await ethers.getContract("MockV3AggregatorNft")
         priceFeed = await ethers.getContract("MockV3Aggregator")
-        exchange = await ethers.getContract("Exchange")
+        exchange = await ethers.getContract("Exchange");
+        exchangeInfo = await ethers.getContract("ExchangeInfo");
         usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
       })
 
       async function setOraclePrice(newPrice: any) {
         await nftOracle.updateAnswer((1 * 10 ** 18).toString())
-        await priceFeed.updateAnswer((newPrice * 10 ** 8).toString())
+        await priceFeed.updateAnswer((newPrice * 10 ** 18).toLocaleString('fullwide', {useGrouping:false}))
       }
 
       //call functions
@@ -75,6 +78,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
       }
 
       it("Test open and close long position", async () => {
+        console.log("nft decimals", await nftOracle.decimals());
+        console.log("feed decimals", await priceFeed.decimals());
+        // return;
         const [owner, account1, account2] = await ethers.getSigners()
         await setOraclePrice(2000)
         // console.log(toEther(await exchange.showPriceETH()))
@@ -105,7 +111,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
         await printCurrentStatus()
 
         console.log("First, user0 will open Long Position with $490.")
-        const minimumBayc = await exchange.getMinimumLongBaycOut(toWei("490"))
+        const minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei("490"))
         console.log("minimumBayc :", toEther(minimumBayc))
         await exchange.openLongPosition(toWei("490"), minimumBayc)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
@@ -114,7 +120,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
         console.log(
           "Second, user1 will open Short Position with $4500. At that time, user0 will be liquidated partially because his margin is 50% for new pool state."
         )
-        const minimumBayc1 = await exchange.getMinimumShortBaycOut(toWei("4500"))
+        const minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWei("4500"))
         console.log("minimumBayc :", toEther(minimumBayc1))
         await exchange.connect(account1).openShortPosition(toWei("4500"), minimumBayc1)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
@@ -123,7 +129,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
         console.log(
           "Third, user2 will open Short Position with $7000 and user0 will be liquidated hardly."
         )
-        const minimumBayc2 = await exchange.getMinimumShortBaycOut(toWei("7500"))
+        const minimumBayc2 = await exchangeInfo.getMinimumShortBaycOut(toWei("7500"))
         console.log("minimumBayc :", toEther(minimumBayc2))
         await exchange.connect(account2).openShortPosition(toWei("7500"), minimumBayc2)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
@@ -134,7 +140,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
         )
         const account1BaycBalance = await exchange.uservBaycBalance(account1.address)
         console.log(account1BaycBalance.abs())
-        const minimumUsdOut = await exchange.getMinimumLongUsdOut(account1BaycBalance.abs())
+        const minimumUsdOut = await exchangeInfo.getMinimumLongUsdOut(account1BaycBalance.abs())
         console.log("by liq:", toEther(minimumUsdOut))
         console.log(
           "without liq:",

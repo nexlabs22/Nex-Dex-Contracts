@@ -12,7 +12,7 @@ import "hardhat-contract-sizer"
 import "@appliedblockchain/chainlink-plugins-fund-link"
 import "./tasks"
 import "hardhat-gas-reporter"
-
+import "hardhat-interface-generator";
 dotenv.config()
 
 const MAINNET_RPC_URL = 

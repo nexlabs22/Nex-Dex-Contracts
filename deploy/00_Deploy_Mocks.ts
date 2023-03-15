@@ -9,10 +9,11 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
 const deployFunction: DeployFunction = async () => {
   
   const DECIMALS: string = `18`
-  let INITIAL_PRICE: any = `200000000000000000000`
+  let INITIAL_ETH_PRICE: any = `2000000000000000000000`
+  let INITIAL_NFT_PRICE: any = `1000000000000000000`
   let response:any = await fetchJson(url);
   // INITIAL_PRICE = toWei(response.ethereum.usd.toString());
-  INITIAL_PRICE = (response.ethereum.usd.toFixed(0)*10**8).toString();
+  // INITIAL_PRICE = (response.ethereum.usd.toFixed(0)*10**18).toString();
   /**
    * @dev Read more at https://docs.chain.link/docs/chainlink-vrf/
    */
@@ -33,7 +34,7 @@ const deployFunction: DeployFunction = async () => {
       contract: `MockV3Aggregator`,
       from: deployer,
       log: true,
-      args: [DECIMALS, INITIAL_PRICE],
+      args: [DECIMALS, INITIAL_ETH_PRICE],
     })
 
     await deploy("VRFCoordinatorV2Mock", {
@@ -46,7 +47,7 @@ const deployFunction: DeployFunction = async () => {
       contract: `MockV3Aggregator`,
       from: deployer,
       log: true,
-      args: [DECIMALS, INITIAL_PRICE],
+      args: [DECIMALS, INITIAL_NFT_PRICE],
     })
 
     

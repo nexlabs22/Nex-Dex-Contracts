@@ -19,13 +19,15 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       let mockOracle: MockOracle
       let usdc:any
       let accounts:any
+      let exchangeInfo:any
 
       beforeEach(async () => {
-        await deployments.fixture(["mocks", "nftOracle", "exchange", "token"]);
+        await deployments.fixture(["mocks", "nftOracle", "exchange", "exchangeInfo", "token"]);
         linkToken = await ethers.getContract("LinkToken")
         nftOracle = await ethers.getContract("MockV3AggregatorNft")
         exchange = await ethers.getContract("Exchange")
         usdc = await ethers.getContract("Token")
+        exchangeInfo = await ethers.getContract("ExchangeInfo");
         accounts = await ethers.provider.getSigner()
       })
 
@@ -62,9 +64,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
         // await exchange.openShortPosition(toWei('250'))
-        let minimumBayc = await exchange.getMinimumLongBaycOut(toWei('250'))
+        let minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('250'))
         await expect(exchange.openLongPosition(toWei('250'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
-        minimumBayc = await exchange.getMinimumShortBaycOut(toWei('250'))
+        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('250'))
         await expect(exchange.openShortPosition(toWei('250'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
         console.log('owner margin:', Number(await exchange.userMargin(owner.address)))
         

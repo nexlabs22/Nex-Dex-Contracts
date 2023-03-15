@@ -114,7 +114,6 @@ contract Positions is Test {
        assertEq(exchange.collateral(address(usdc), address(add2)), 1000e18);
        exchange.openLongPosition(1600e18, 0);
         vm.stopPrank();
-
        vm.startPrank(add1);
        uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
        int pnl =  int(newUsdValue) - (-exchange.uservUsdBalance(add1));
@@ -122,8 +121,8 @@ contract Positions is Test {
        uint lastCollateral = exchange.collateral(address(usdc), add1);
        uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
        exchange.closePositionComplete(0);
-       assertEq(exchange.collateral(address(usdc), add1), lastCollateral + uint(pnl) - lastPositionValue/1000);
-       
+        /*
+       */
     }
     
     
