@@ -3,10 +3,10 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../../contracts/Exchange.sol";
-import "../../contracts/Token.sol";
-import "../../contracts/test/MockV3Aggregator.sol";
-import "./helper.sol";
+import "../../../contracts/Exchange.sol";
+import "../../../contracts/Token.sol";
+import "../../../contracts/test/MockV3Aggregator.sol";
+import "./../helper.sol";
 
 contract Users2 is Test {
     
@@ -63,7 +63,7 @@ contract Users2 is Test {
        exchange.closePositionComplete(0);
        vm.stopPrank();
        //user 1 close poition
-       vm.startPrank(add1);
+       vm.startPrank(add2);
        exchange.closePositionComplete(0);
        vm.stopPrank();
     }
