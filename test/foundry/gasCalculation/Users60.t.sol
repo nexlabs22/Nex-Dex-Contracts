@@ -9,7 +9,7 @@ import "./../helper.sol";
 
 // 2, 20, 40, 60, 100, 1000
 
-contract Users40 is Test {
+contract Users60 is Test {
     
     MockV3Aggregator public nftOracle;
     MockV3Aggregator public ethPriceOracle;
@@ -58,6 +58,27 @@ contract Users40 is Test {
     address add38 = vm.addr(38);
     address add39 = vm.addr(39);
     address add40 = vm.addr(40);
+    address add41 = vm.addr(41);
+    address add42 = vm.addr(42);
+    address add43 = vm.addr(43);
+    address add44 = vm.addr(44);
+    address add45 = vm.addr(45);
+    address add46 = vm.addr(46);
+    address add47 = vm.addr(47);
+    address add48 = vm.addr(48);
+    address add49 = vm.addr(49);
+    address add50 = vm.addr(50);
+    address add51 = vm.addr(51);
+    address add52 = vm.addr(52);
+    address add53 = vm.addr(53);
+    address add54 = vm.addr(54);
+    address add55 = vm.addr(55);
+    address add56 = vm.addr(56);
+    address add57 = vm.addr(57);
+    address add58 = vm.addr(58);
+    address add59 = vm.addr(59);
+    address add60 = vm.addr(60);
+    
 
     function setUp() public {
         usdc = new Token(1000000e18);
@@ -74,7 +95,7 @@ contract Users40 is Test {
             address(ethPriceOracle),
             address(usdc)
         );
-        exchange.initialVirtualPool(100e18);
+        exchange.initialVirtualPool(1000e18);
         usdc.transfer(add1, 1000e18);
         usdc.transfer(add2, 1000e18);
         usdc.transfer(add3, 1000e18);
@@ -115,6 +136,26 @@ contract Users40 is Test {
         usdc.transfer(add38, 1000e18);
         usdc.transfer(add39, 1000e18);
         usdc.transfer(add40, 1000e18);
+        usdc.transfer(add41, 1000e18);
+        usdc.transfer(add42, 1000e18);
+        usdc.transfer(add43, 1000e18);
+        usdc.transfer(add44, 1000e18);
+        usdc.transfer(add45, 1000e18);
+        usdc.transfer(add46, 1000e18);
+        usdc.transfer(add47, 1000e18);
+        usdc.transfer(add48, 1000e18);
+        usdc.transfer(add49, 1000e18);
+        usdc.transfer(add50, 1000e18);
+        usdc.transfer(add51, 1000e18);
+        usdc.transfer(add52, 1000e18);
+        usdc.transfer(add53, 1000e18);
+        usdc.transfer(add54, 1000e18);
+        usdc.transfer(add55, 1000e18);
+        usdc.transfer(add56, 1000e18);
+        usdc.transfer(add57, 1000e18);
+        usdc.transfer(add58, 1000e18);
+        usdc.transfer(add59, 1000e18);
+        usdc.transfer(add60, 1000e18);
     }
 
 
@@ -439,6 +480,166 @@ contract Users40 is Test {
        assertEq(exchange.collateral(address(usdc), address(add40)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+       //user 41 open short postion
+       vm.startPrank(add41);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add41)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add41)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 42 open long postion
+       vm.startPrank(add42);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add42)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add42)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 43 open short postion
+       vm.startPrank(add43);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add43)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add43)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 44 open long postion
+       vm.startPrank(add44);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add44)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add44)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 45 open long postion
+       vm.startPrank(add45);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add45)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add45)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 46 open short postion
+       vm.startPrank(add46);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add46)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add46)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 47 open long postion
+       vm.startPrank(add47);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add47)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add47)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 48 open short postion
+       vm.startPrank(add48);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add48)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add48)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 49 open long postion
+       vm.startPrank(add49);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add49)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add49)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 50 open short postion
+       vm.startPrank(add50);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add50)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add50)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 51 open short postion
+       vm.startPrank(add51);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add51)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add51)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 52 open long postion
+       vm.startPrank(add52);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add52)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add52)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 53 open short postion
+       vm.startPrank(add53);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add53)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add53)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 54 open long postion
+       vm.startPrank(add54);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add54)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add54)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 55 open long postion
+       vm.startPrank(add55);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add55)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add55)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 56 open short postion
+       vm.startPrank(add56);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add56)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add56)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 57 open short postion
+       vm.startPrank(add57);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add57)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add57)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 58 open long postion
+       vm.startPrank(add58);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add58)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add58)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 59 open long postion
+       vm.startPrank(add59);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add59)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add59)), 1000e18);
+       exchange.openLongPosition(1600e18, 0);
+        vm.stopPrank();
+       //user 60 open short postion
+       vm.startPrank(add60);
+       usdc.approve(address(exchange), 1000e18);
+       exchange.depositCollateral(1000e18);
+       assertEq(usdc.balanceOf(address(add60)), 0);
+       assertEq(exchange.collateral(address(usdc), address(add60)), 1000e18);
+       exchange.openShortPosition(1600e18, 0);
+        vm.stopPrank();
     
 
 
@@ -634,6 +835,106 @@ contract Users40 is Test {
 
        //user 40 close poition
        vm.startPrank(add40);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 41 close poition
+       vm.startPrank(add41);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 42 close poition
+       vm.startPrank(add42);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 43 close poition
+       vm.startPrank(add43);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 44 close poition
+       vm.startPrank(add44);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 45 close poition
+       vm.startPrank(add45);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 46 close poition
+       vm.startPrank(add46);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 47 close poition
+       vm.startPrank(add47);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 48 close poition
+       vm.startPrank(add48);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 49 close poition
+       vm.startPrank(add49);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 50 close poition
+       vm.startPrank(add50);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 51 close poition
+       vm.startPrank(add51);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 52 close poition
+       vm.startPrank(add52);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 53 close poition
+       vm.startPrank(add53);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 54 close poition
+       vm.startPrank(add54);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 55 close poition
+       vm.startPrank(add55);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 56 close poition
+       vm.startPrank(add56);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 57 close poition
+       vm.startPrank(add57);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 58 close poition
+       vm.startPrank(add58);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 59 close poition
+       vm.startPrank(add59);
+       exchange.closePositionComplete(0);
+       vm.stopPrank();
+
+       //user 60 close poition
+       vm.startPrank(add60);
        exchange.closePositionComplete(0);
        vm.stopPrank();
 
