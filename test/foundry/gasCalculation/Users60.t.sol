@@ -320,6 +320,10 @@ contract Users60 is Test {
        assertEq(exchange.collateral(address(usdc), address(add20)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 21 open short postion
        vm.startPrank(add21);
        usdc.approve(address(exchange), 1000e18);
@@ -480,6 +484,10 @@ contract Users60 is Test {
        assertEq(exchange.collateral(address(usdc), address(add40)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 41 open short postion
        vm.startPrank(add41);
        usdc.approve(address(exchange), 1000e18);
@@ -641,6 +649,8 @@ contract Users60 is Test {
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
     
+        //funding fee
+       exchange.setFundingRate();
 
 
        //user 1 close poition

@@ -9,7 +9,7 @@ import "./../helper.sol";
 
 // 2, 20, 40, 60, 100, 1000
 
-contract Users1000 is Test {
+contract Users5000 is Test {
     
     MockV3Aggregator public nftOracle;
     MockV3Aggregator public ethPriceOracle;
@@ -41,17 +41,17 @@ contract Users1000 is Test {
             address(usdc)
         );
 
-        exchange.initialVirtualPool(1000e18);
+        exchange.initialVirtualPool(10000e18);
 
         // createUsers()
-        for(uint i=1; i <= 1000; i++){
-            address add = vm.addr(i);
-            users.push(add);
-        }
+        // for(uint i=1; i <= 10000; i++){
+        //     address add = vm.addr(i);
+        //     users.push(add);
+        // }
 
-        for(uint i; i < 1000; i++){
-            usdc.transfer(users[i], 1000e18);
-        }
+        // for(uint i; i < 10000; i++){
+        //     usdc.transfer(users[i], 1000e18);
+        // }
 
     }
 
@@ -61,7 +61,13 @@ contract Users1000 is Test {
         bool shouldBeLong = true;
         bool shouldBeShort = false;
         uint startPrice = exchange.marketPrice();
-        for(uint i; i < 1000; i++) {
+        for(uint i; i < 5000; i++) {
+            console.log("Time :", i);
+            //create and charge user
+            address add = vm.addr(i+1);
+            users.push(add);
+            usdc.transfer(users[i], 1000e18);
+            //start trading with the user
             vm.startPrank(users[i]);
             usdc.approve(address(exchange), 1000e18);
             exchange.depositCollateral(1000e18);
@@ -83,17 +89,21 @@ contract Users1000 is Test {
                 }
             }
             vm.stopPrank();
-            //funding fee
-            exchange.setFundingRate();
-        }
-    
-
-       
-        for(uint i; i < 1000; i++) {
-            vm.startPrank(users[i]);
+            
+            //close poistions
+            if( 4000 < i ) {
+            vm.startPrank(users[i -1]);
             exchange.closePositionComplete(0);
             vm.stopPrank();
+            }
+
         }
+    
+        // for(uint i; i < 10000; i++) {
+        //     vm.startPrank(users[i]);
+        //     exchange.closePositionComplete(0);
+        //     vm.stopPrank();
+        // }
         
     }
 

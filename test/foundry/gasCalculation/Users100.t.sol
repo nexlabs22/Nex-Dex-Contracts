@@ -400,6 +400,10 @@ contract Users100 is Test {
        assertEq(exchange.collateral(address(usdc), address(add20)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 21 open short postion
        vm.startPrank(add21);
        usdc.approve(address(exchange), 1000e18);
@@ -560,6 +564,10 @@ contract Users100 is Test {
        assertEq(exchange.collateral(address(usdc), address(add40)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 41 open short postion
        vm.startPrank(add41);
        usdc.approve(address(exchange), 1000e18);
@@ -720,6 +728,10 @@ contract Users100 is Test {
        assertEq(exchange.collateral(address(usdc), address(add60)), 1000e18);
        exchange.openShortPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 61 open short postion
        vm.startPrank(add61);
        usdc.approve(address(exchange), 1000e18);
@@ -880,6 +892,10 @@ contract Users100 is Test {
        assertEq(exchange.collateral(address(usdc), address(add80)), 1000e18);
        exchange.openLongPosition(1600e18, 0);
         vm.stopPrank();
+
+        //funding fee
+       exchange.setFundingRate();
+
        //user 81 open short postion
        vm.startPrank(add81);
        usdc.approve(address(exchange), 1000e18);
@@ -1041,7 +1057,8 @@ contract Users100 is Test {
        exchange.openLongPosition(1600e18, 0);
         vm.stopPrank();
     
-
+        //funding fee
+       exchange.setFundingRate();
 
        //user 1 close poition
        vm.startPrank(add1);
