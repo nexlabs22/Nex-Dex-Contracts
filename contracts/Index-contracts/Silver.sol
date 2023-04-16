@@ -14,7 +14,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 
 // @title Nex Exchange smart contract
 
-contract Gold is Ownable, ReentrancyGuard, Pausable {
+contract Silver is Ownable, ReentrancyGuard, Pausable {
   using SafeMath for uint256;
 
   AggregatorV3Interface internal nftFloorPriceFeed;
