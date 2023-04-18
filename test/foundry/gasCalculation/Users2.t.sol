@@ -8,6 +8,8 @@ import "../../../contracts/Token.sol";
 import "../../../contracts/test/MockV3Aggregator.sol";
 import "./../helper.sol";
 
+// command: forge test --match-path test/foundry/gasCalculation/Users2.t.sol --contracts exchange
+
 contract Users2 is Test {
     
     MockV3Aggregator public nftOracle;
