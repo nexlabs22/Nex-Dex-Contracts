@@ -28,7 +28,7 @@ contract Users1000 is Test {
     function setUp() public {
         usdc = new Token(2000000000e18);
         nftOracle = new MockV3Aggregator(18, 1e18);
-        ethPriceOracle = new MockV3Aggregator(18, 2500e18);
+        ethPriceOracle = new MockV3Aggregator(18, 1300e18);
         exchange = new Exchange(
             address(nftOracle),
             address(ethPriceOracle),
@@ -43,21 +43,17 @@ contract Users1000 is Test {
 
         exchange.initialVirtualPool(1000e18);
 
-        // createUsers()
+        
         for(uint i=1; i <= 1000; i++){
             address add = vm.addr(i);
+            usdc.transfer(add, 1000e18);
             users.push(add);
-        }
-
-        for(uint i; i < 1000; i++){
-            usdc.transfer(users[i], 1000e18);
         }
 
     }
 
 
     function testActions() public {
-       console.log("start price 1", exchange.marketPrice());
         bool shouldBeLong = true;
         bool shouldBeShort = false;
         uint startPrice = exchange.marketPrice();
@@ -69,31 +65,42 @@ contract Users1000 is Test {
             assertEq(exchange.collateral(address(usdc), address(users[i])), 1000e18);
             if(shouldBeShort == true){
                 exchange.openShortPosition(1500e18, 0);
-                if((startPrice - exchange.marketPrice())*100/startPrice >= 100){
+                if(startPrice > exchange.marketPrice() && (startPrice - exchange.marketPrice())*100/startPrice >= 50){
                     shouldBeLong = true;
                     shouldBeShort = false;
-                    startPrice = exchange.marketPrice();
+                    // startPrice = exchange.marketPrice();
                 }
             }else if(shouldBeLong == true){
                 exchange.openLongPosition(1500e18, 0);
-                if((exchange.marketPrice() - startPrice)*100/startPrice >= 30){
+                if(startPrice < exchange.marketPrice() &&(exchange.marketPrice() - startPrice)*100/startPrice >= 50){
                     shouldBeLong = false;
                     shouldBeShort = true;
-                    startPrice = exchange.marketPrice();
+                    // startPrice = exchange.marketPrice();
                 }
             }
+            console.log("exchange market price", exchange.marketPrice()/1e18);
             vm.stopPrank();
             //funding fee
             exchange.setFundingRate();
         }
-    
 
-       
+        
+
+        
         for(uint i; i < 1000; i++) {
+            console.log("***");
+            console.log("index", i);
+            console.log("user margin", exchange.positive(exchange.userMargin(users[i])));
+            console.log("bayc balance", exchange.positive(exchange.uservBaycBalance(users[i]))/1e16);
+            console.log("usd balance", exchange.positive(exchange.uservUsdBalance(users[i]))/1e16);
+            // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
+            console.log("***");
             vm.startPrank(users[i]);
             exchange.closePositionComplete(0);
             vm.stopPrank();
         }
+
+        
         
     }
 

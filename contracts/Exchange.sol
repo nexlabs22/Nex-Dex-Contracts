@@ -332,7 +332,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
     //first we run liquidation functions
     (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    // (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    
 
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     newvUsdPoolSize = pool.vUsdPoolSize + _usdAmount;
@@ -388,6 +389,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //first we run liquidation functions
     (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
     (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    
 
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     newvUsdPoolSize = pool.vUsdPoolSize - _usdAmount;
@@ -495,6 +497,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //liquidate users
     (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
     (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    
     //get the output usd of closing position
     uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
     require(usdBaycValue >= _minimumUsdOut, "INSUFFICIENT_OUTPUT_AMOUNT");
