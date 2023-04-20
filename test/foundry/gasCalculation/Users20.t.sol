@@ -98,6 +98,8 @@ contract Users20 is Test {
             vm.startPrank(users[i]);
             exchange.closePositionComplete(0);
             vm.stopPrank();
+            //funding fee
+            exchange.setFundingRate();
         }
 
         
