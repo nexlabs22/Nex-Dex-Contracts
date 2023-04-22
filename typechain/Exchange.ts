@@ -33,8 +33,8 @@ export interface ExchangeInterface extends utils.Interface {
     "activeUsers(uint256)": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "changeNftOracleAddress(address)": FunctionFragment;
-    "closePosition(uint256,uint256)": FunctionFragment;
-    "closePositionComplete(uint256)": FunctionFragment;
+    "closePosition(uint256,uint256,address[],address[])": FunctionFragment;
+    "closePositionComplete(uint256,address[],address[])": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
@@ -58,11 +58,12 @@ export interface ExchangeInterface extends utils.Interface {
     "isPartialLiquidatable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
+    "isUserActive(address)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "marketPrice()": FunctionFragment;
-    "openLongPosition(uint256,uint256)": FunctionFragment;
-    "openShortPosition(uint256,uint256)": FunctionFragment;
+    "openLongPosition(uint256,uint256,address[],address[])": FunctionFragment;
+    "openShortPosition(uint256,uint256,address[],address[])": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "paused()": FunctionFragment;
@@ -143,11 +144,11 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "closePosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "closePositionComplete",
-    values: [BigNumberish]
+    values: [BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "collateral",
@@ -239,6 +240,10 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "isUserActive",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "latestFeeUpdate",
     values?: undefined
   ): string;
@@ -252,11 +257,11 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "openLongPosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "openShortPosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "oraclePrice",
@@ -478,6 +483,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isShortInRightRange",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isUserActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -844,11 +853,15 @@ export interface Exchange extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -945,6 +958,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
@@ -954,12 +969,16 @@ export interface Exchange extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -1135,11 +1154,15 @@ export interface Exchange extends BaseContract {
   closePosition(
     _assetSize: BigNumberish,
     _minimumUsdOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   closePositionComplete(
     _minimumUsdOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1230,6 +1253,8 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1239,12 +1264,16 @@ export interface Exchange extends BaseContract {
   openLongPosition(
     _usdAmount: BigNumberish,
     _minimumBaycAmountOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortPosition(
     _usdAmount: BigNumberish,
     _minimumBaycAmountOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1417,11 +1446,15 @@ export interface Exchange extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1515,6 +1548,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1524,12 +1559,16 @@ export interface Exchange extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1853,11 +1892,15 @@ export interface Exchange extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1951,6 +1994,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1960,12 +2005,16 @@ export interface Exchange extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -2132,11 +2181,15 @@ export interface Exchange extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -2242,6 +2295,11 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    isUserActive(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2251,12 +2309,16 @@ export interface Exchange extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

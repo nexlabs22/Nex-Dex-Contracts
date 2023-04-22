@@ -3,6 +3,7 @@
 pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../../../contracts/Exchange.sol";
+import "../../../contracts/ExchangeInfo.sol";
 import "../../../contracts/Token.sol";
 import "../../../contracts/test/MockV3Aggregator.sol";
 import "./../helper.sol";
@@ -16,6 +17,7 @@ contract Users20 is Test {
     Token public usdc;
 
     Exchange public exchange;
+    ExchangeInfo public exchangeInfo;
     Helper public helper;
 
     address add1 = vm.addr(1);
@@ -33,6 +35,9 @@ contract Users20 is Test {
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
+        );
+        exchangeInfo = new ExchangeInfo(
+            address(exchange)
         );
         helper = new Helper(
             address(exchange),
@@ -64,14 +69,19 @@ contract Users20 is Test {
             assertEq(usdc.balanceOf(address(users[i])), 0);
             assertEq(exchange.collateral(address(usdc), address(users[i])), 1000e18);
             if(shouldBeShort == true){
-                exchange.openShortPosition(1500e18, 0);
+                (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1500e18);
+                consoleLiquidateList(hardLiquidateUsers, partialLiquidateUsers);
+                exchange.openShortPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
                 if(startPrice > exchange.marketPrice() && (startPrice - exchange.marketPrice())*100/startPrice >= 50){
                     shouldBeLong = true;
                     shouldBeShort = false;
                     // startPrice = exchange.marketPrice();
                 }
             }else if(shouldBeLong == true){
-                exchange.openLongPosition(1500e18, 0);
+                (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1500e18);
+                exchange.openLongPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+                consoleLiquidateList(hardLiquidateUsers, partialLiquidateUsers);
+
                 if(startPrice < exchange.marketPrice() &&(exchange.marketPrice() - startPrice)*100/startPrice >= 50){
                     shouldBeLong = false;
                     shouldBeShort = true;
@@ -90,20 +100,52 @@ contract Users20 is Test {
         for(uint i; i < 20; i++) {
             console.log("***");
             console.log("index", i);
+            console.log("index address", users[i]);
             console.log("user margin", exchange.positive(exchange.userMargin(users[i])));
             console.log("bayc balance", exchange.positive(exchange.uservBaycBalance(users[i]))/1e16);
             console.log("usd balance", exchange.positive(exchange.uservUsdBalance(users[i]))/1e16);
             // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
             console.log("***");
             vm.startPrank(users[i]);
-            exchange.closePositionComplete(0);
-            vm.stopPrank();
-            //funding fee
-            exchange.setFundingRate();
-        }
+            if(exchange.uservBaycBalance(users[i]) > 0) {
+            (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.closeLongLiquidateList(exchange.positive(exchange.uservBaycBalance(users[i])));
+            consoleLiquidateList(hardLiquidateUsers, partialLiquidateUsers);
+            exchange.closePositionComplete(0,hardLiquidateUsers, partialLiquidateUsers);
+            consoleLiquidatedUsers();
+            } else{
+            (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.closeShortLiquidateList(exchange.positive(exchange.uservBaycBalance(users[i])));
+            consoleLiquidateList(hardLiquidateUsers, partialLiquidateUsers);
+            exchange.closePositionComplete(0, hardLiquidateUsers, partialLiquidateUsers);
+            }
 
+            vm.stopPrank();
+            
+        }        
+
+        consoleLiquidatedUsers();
         
-        
+    }
+
+    function consoleLiquidateList(address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) public {
+          for(uint i; i < hardLiquidateUsers.length; i++){
+            console.log("hard liquidate user ", i,  ":",  hardLiquidateUsers[i]);
+          }
+          for(uint i; i < partialLiquidateUsers.length; i++){
+            console.log("partial liquidate user ", i,  ":",  partialLiquidateUsers[i]);
+          } 
+    }
+
+
+    function consoleLiquidatedUsers() public {
+          address[] memory hardLiquidatedUsers = exchange.getHardLiquidatedUsers();
+          address[] memory partialLiquidatedUsers = exchange.getPartialLiquidatedUsers();
+
+          for(uint i; i < hardLiquidatedUsers.length; i++){
+            console.log("** hard liquidated users ", i,  ":",  hardLiquidatedUsers[i]);
+          }
+          for(uint i; i < partialLiquidatedUsers.length; i++){
+            console.log("**partial liquidated user ", i,  ":",  partialLiquidatedUsers[i]);
+          } 
     }
 
     

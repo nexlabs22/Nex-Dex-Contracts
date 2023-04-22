@@ -21,11 +21,16 @@ export interface ExchangeInfoInterface extends utils.Interface {
   contractName: "ExchangeInfo";
   functions: {
     "changeExchangeAddress(address)": FunctionFragment;
+    "closeLongLiquidateList(uint256)": FunctionFragment;
+    "closeShortLiquidateList(uint256)": FunctionFragment;
     "exchange()": FunctionFragment;
+    "getLiquidateList(int256,int256)": FunctionFragment;
     "getMinimumLongBaycOut(uint256)": FunctionFragment;
     "getMinimumLongUsdOut(uint256)": FunctionFragment;
     "getMinimumShortBaycOut(uint256)": FunctionFragment;
     "getMinimumShortUsdOut(uint256)": FunctionFragment;
+    "openLongLiquidateList(uint256)": FunctionFragment;
+    "openShortLiquidateList(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -35,7 +40,19 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "changeExchangeAddress",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "closeLongLiquidateList",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "closeShortLiquidateList",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "exchange", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getLiquidateList",
+    values: [BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "getMinimumLongBaycOut",
     values: [BigNumberish]
@@ -50,6 +67,14 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getMinimumShortUsdOut",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "openLongLiquidateList",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "openShortLiquidateList",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -66,7 +91,19 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "changeExchangeAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "closeLongLiquidateList",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "closeShortLiquidateList",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "exchange", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getLiquidateList",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getMinimumLongBaycOut",
     data: BytesLike
@@ -81,6 +118,14 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getMinimumShortUsdOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "openLongLiquidateList",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "openShortLiquidateList",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -141,7 +186,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    closeLongLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
+    closeShortLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
     exchange(overrides?: CallOverrides): Promise<[string]>;
+
+    getLiquidateList(
+      newvBaycPoolSize: BigNumberish,
+      newvUsdPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -163,6 +224,16 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    openLongLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
+    openShortLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
@@ -180,7 +251,23 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  closeLongLiquidateList(
+    _BaycAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string[], string[]]>;
+
+  closeShortLiquidateList(
+    _BaycAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string[], string[]]>;
+
   exchange(overrides?: CallOverrides): Promise<string>;
+
+  getLiquidateList(
+    newvBaycPoolSize: BigNumberish,
+    newvUsdPoolSize: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string[], string[]]>;
 
   getMinimumLongBaycOut(
     _usdAmount: BigNumberish,
@@ -202,6 +289,16 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  openLongLiquidateList(
+    _usdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string[], string[]]>;
+
+  openShortLiquidateList(
+    _usdAmount: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[string[], string[]]>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
@@ -219,7 +316,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    closeLongLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
+    closeShortLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
     exchange(overrides?: CallOverrides): Promise<string>;
+
+    getLiquidateList(
+      newvBaycPoolSize: BigNumberish,
+      newvUsdPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -240,6 +353,16 @@ export interface ExchangeInfo extends BaseContract {
       _BaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    openLongLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
+
+    openShortLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[], string[]]>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -268,7 +391,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    closeLongLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    closeShortLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     exchange(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getLiquidateList(
+      newvBaycPoolSize: BigNumberish,
+      newvUsdPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -287,6 +426,16 @@ export interface ExchangeInfo extends BaseContract {
 
     getMinimumShortUsdOut(
       _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    openLongLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    openShortLiquidateList(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -308,7 +457,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    closeLongLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    closeShortLiquidateList(
+      _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     exchange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getLiquidateList(
+      newvBaycPoolSize: BigNumberish,
+      newvUsdPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -327,6 +492,16 @@ export interface ExchangeInfo extends BaseContract {
 
     getMinimumShortUsdOut(
       _BaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    openLongLiquidateList(
+      _usdAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    openShortLiquidateList(
+      _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

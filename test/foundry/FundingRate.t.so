@@ -82,7 +82,7 @@ contract FundingRate is Test {
        vm.stopPrank();
        //add1 opens a long position
        vm.startPrank(add1);
-       exchange.openLongPosition(1000e18, 0);
+       exchange.openLongPosition(1000e18, 0, [add1], [add1]);
        vm.stopPrank();
        //add2 opens a short position
        vm.startPrank(add2);

@@ -17,6 +17,17 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 contract Exchange is Ownable, ReentrancyGuard, Pausable {
   using SafeMath for uint256;
 
+  //test
+  address[] public hardLiquidatedUsers;
+  function getHardLiquidatedUsers() public view returns(address[] memory){
+    return hardLiquidatedUsers;
+  }
+  address[] public partialLiquidatedUsers;
+  function getPartialLiquidatedUsers() public view returns(address[] memory){
+    return partialLiquidatedUsers;
+  }
+
+
   AggregatorV3Interface internal nftFloorPriceFeed;
 
   AggregatorV3Interface internal priceFeed;
@@ -54,6 +65,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   mapping(address => mapping(address => uint256)) public collateral; //collateral[tokenaddress][useraddress]
   mapping(address => VirtualBalance) public virtualBalances;
+  mapping(address => bool) public isUserActive;
 
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -146,18 +158,14 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   //check is user exist in activeUsers array
   function doesUserExist(address _user) public view returns (bool) {
-    for (uint256 i; i < activeUsers.length; i++) {
-      if (activeUsers[i] == _user) {
-        return true;
-      }
-    }
-    return false;
+    return isUserActive[_user];
   }
 
   //add user to the active user list (first check if its not)
   function _addActiveUser(address _user) internal {
     bool isExist = doesUserExist(_user);
     if (isExist == false) {
+      isUserActive[_user] = true;
       activeUsers.push(_user);
     }
   }
@@ -168,6 +176,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     if (isExist == true) {
       for (uint256 i; i < activeUsers.length; i++) {
         if (activeUsers[i] == _user) {
+          isUserActive[_user] = false;
           delete activeUsers[i];
         }
       }
@@ -307,7 +316,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
   
   
-  function openLongPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut) public {
+  function openLongPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut, address[] calldata hardLiquidateUsers, address[] calldata partialLiquidateUsers) public {
     //calculate the new pool size and user bayc amount
     uint256 k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     uint256 newvUsdPoolSize = pool.vUsdPoolSize + _usdAmount;
@@ -331,8 +340,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     );
 
     //first we run liquidation functions
-    (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize, hardLiquidateUsers);
+    (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize, partialLiquidateUsers);
     
 
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
@@ -350,20 +359,20 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //trade fee
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
-    address owner = owner();
-    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    // address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner(), fee);
 
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
     pool.vUsdPoolSize = newvUsdPoolSize;
 
     //set the event
-    emit OpenLongPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
+    // emit OpenLongPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
     emit Price(marketPrice(), userBayc, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
   
 
-  function openShortPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut) public {
+  function openShortPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut, address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) public {
     //calculate the new pool size and user bayc amount
     uint256 k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     uint256 newvUsdPoolSize = pool.vUsdPoolSize - _usdAmount;
@@ -387,8 +396,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     );
 
     //first we run liquidation functions
-    (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
-    (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize);
+    (newvBaycPoolSize, newvUsdPoolSize) = _hardLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize, hardLiquidateUsers);
+    (newvBaycPoolSize, newvUsdPoolSize) = _partialLiquidateUsers(newvBaycPoolSize, newvUsdPoolSize, partialLiquidateUsers);
     
 
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
@@ -406,19 +415,19 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //trade fee
     uint256 fee = (_usdAmount * swapFee) / 10000;
     collateral[usdc][msg.sender] -= fee;
-    address owner = owner();
-    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    // address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner(), fee);
 
     //update pool
     pool.vBaycPoolSize = newvBaycPoolSize;
     pool.vUsdPoolSize = newvUsdPoolSize;
 
     //set the event
-    emit OpenShortPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
+    // emit OpenShortPosition(msg.sender, marketPrice(), block.timestamp, userBayc, _usdAmount);
     emit Price(marketPrice(), userBayc, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
-  function _closeLongPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut) internal {
+  function _closeLongPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut, address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) internal {
     require(
       _assetSize <= positive(virtualBalances[_user].uservBaycBalance),
       "Reduce only order can only close long size equal or less than the outstanding asset size."
@@ -431,8 +440,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 vUsdNewPoolSize = k / vBaycNewPoolSize;
 
     //liquidate users
-    (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
-    (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize, hardLiquidateUsers);
+    (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize, partialLiquidateUsers);
 
     //get the output usd of closing position
     //f.e 1Bayc -> 2000$
@@ -468,8 +477,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //trade fee
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
-    address owner = owner();
-    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    // address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner(), fee);
 
     //update the pool
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
@@ -481,7 +490,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
-  function _closeShortPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut) internal {
+  function _closeShortPosition(address _user, uint256 _assetSize, uint256 _minimumUsdOut, address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) internal {
     require(
       _assetSize <= positive(virtualBalances[_user].uservBaycBalance),
       "Reduce only order can only close short size equal or less than the outstanding asset size."
@@ -495,8 +504,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
 
     //liquidate users
-    (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
-    (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize);
+    (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize, hardLiquidateUsers);
+    (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidateUsers(vBaycNewPoolSize, vUsdNewPoolSize, partialLiquidateUsers);
     
     //get the output usd of closing position
     uint256 usdBaycValue = getLongVusdAmountOut(_assetSize);
@@ -530,8 +539,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //trade fee
     uint256 fee = (usdBaycValue * swapFee) / 10000;
     collateral[usdc][_user] -= fee;
-    address owner = owner();
-    SafeERC20.safeTransfer(IERC20(usdc), owner, fee);
+    // address owner = owner();
+    SafeERC20.safeTransfer(IERC20(usdc), owner(), fee);
     //update pool
     k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     pool.vBaycPoolSize -= _assetSize;
@@ -542,12 +551,12 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     emit Price(marketPrice(), _assetSize, block.timestamp, pool.vBaycPoolSize, pool.vUsdPoolSize);
   }
 
-  function closePositionComplete(uint256 _minimumUsdOut) public {
+  function closePositionComplete(uint256 _minimumUsdOut, address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) public {
     uint256 assetSize = positive(virtualBalances[msg.sender].uservBaycBalance);
-    closePosition(assetSize, _minimumUsdOut);
+    closePosition(assetSize, _minimumUsdOut, hardLiquidateUsers, partialLiquidateUsers);
   }
 
-  function closePosition(uint256 _assetSize, uint256 _minimumUsdOut) public {
+  function closePosition(uint256 _assetSize, uint256 _minimumUsdOut, address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) public {
     require(
       _assetSize <= positive(virtualBalances[msg.sender].uservBaycBalance),
       "Reduce only order can only close size equal or less than the outstanding asset size."
@@ -555,9 +564,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     //if user has positive vBayc balance so he/she has longPosition
     //if user has negative vBayc balance so he/she has shortPosition
     if (virtualBalances[msg.sender].uservBaycBalance > 0) {
-      _closeLongPosition(msg.sender, _assetSize, _minimumUsdOut);
+      _closeLongPosition(msg.sender, _assetSize, _minimumUsdOut, hardLiquidateUsers, partialLiquidateUsers);
     } else if (virtualBalances[msg.sender].uservBaycBalance < 0) {
-      _closeShortPosition(msg.sender, _assetSize, _minimumUsdOut);
+      _closeShortPosition(msg.sender, _assetSize, _minimumUsdOut, hardLiquidateUsers, partialLiquidateUsers);
     }
   }
 
@@ -775,6 +784,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       _isHardLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
       "User is not hard liquidatable."
     );
+    //test
+    hardLiquidatedUsers.push(_user);
+
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
     if (virtualBalances[_user].uservBaycBalance > 0) {
@@ -971,6 +983,10 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       _isPartialLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
       "user can not be partially liquidated"
     );
+    //test
+    partialLiquidatedUsers.push(_user);
+
+
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
 
@@ -1069,30 +1085,30 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
 
   //liquidate users according to the new price (is used only in trade trade functions)
-  function _hardLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize)
+  function _hardLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize, address[] memory hardLiquidateUsers)
     internal
     returns (uint256 vBaycNewPoolSize, uint256 vUsdNewPoolSize)
   {
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
-    for (uint256 i = 0; i < activeUsers.length; i++) {
-      if (activeUsers[i] != address(0)) {
+    for (uint256 i = 0; i < hardLiquidateUsers.length; i++) {
+      if (hardLiquidateUsers[i] != address(0)) {
         bool isLiquidatable = _isHardLiquidatable(
-          activeUsers[i],
+          hardLiquidateUsers[i],
           vBaycNewPoolSize,
           vUsdNewPoolSize
         );
         if (isLiquidatable == true) {
-          int256 userMargin = _userNewMargin(activeUsers[i], vBaycNewPoolSize, vUsdNewPoolSize);
+          int256 userMargin = _userNewMargin(hardLiquidateUsers[i], vBaycNewPoolSize, vUsdNewPoolSize);
           if (userMargin > 0) {
             (vBaycNewPoolSize, vUsdNewPoolSize) = _hardLiquidate(
-              activeUsers[i],
+              hardLiquidateUsers[i],
               vBaycNewPoolSize,
               vUsdNewPoolSize
             );
           } else if (userMargin < 0) {
             (vBaycNewPoolSize, vUsdNewPoolSize) = _hardNegativeLiquidate(
-              activeUsers[i],
+              hardLiquidateUsers[i],
               vBaycNewPoolSize,
               vUsdNewPoolSize
             );
@@ -1103,22 +1119,22 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
 
   //liquidate users partialy according to the new price (is used only in trade trade functions)
-  function _partialLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize)
+  function _partialLiquidateUsers(uint256 _vBaycNewPoolSize, uint256 _vUsdNewPoolSize, address[] memory partialLiquidateUsers)
     internal
     returns (uint256 vBaycNewPoolSize, uint256 vUsdNewPoolSize)
   {
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
-    for (uint256 i = 0; i < activeUsers.length; i++) {
-      if (activeUsers[i] != address(0)) {
+    for (uint256 i = 0; i < partialLiquidateUsers.length; i++) {
+      if (partialLiquidateUsers[i] != address(0)) {
         bool isPartialLiquidatable = _isPartialLiquidatable(
-          activeUsers[i],
+          partialLiquidateUsers[i],
           vBaycNewPoolSize,
           vUsdNewPoolSize
         );
         if (isPartialLiquidatable == true) {
           (vBaycNewPoolSize, vUsdNewPoolSize) = _partialLiquidate(
-            activeUsers[i],
+            partialLiquidateUsers[i],
             vBaycNewPoolSize,
             vUsdNewPoolSize
           );
