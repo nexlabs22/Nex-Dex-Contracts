@@ -364,7 +364,70 @@ contract ExchangeInfo is Ownable {
         }
       }
     }
+    //first hardliquidateUsers
+    for (uint256 i; i < activeUsers.length; i++) {
+      if (activeUsers[i] != address(0)) {
+        bool isHardLiquidatable = exchange._isHardLiquidatable(
+          activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isHardLiquidatable == true) {
+          //store in hardLiquidate list
+          hardLiquidateUsers[hardLiquidateUsersCount] = activeUsers[i];
+          hardLiquidateUsersCount ++;
+          //update new pool
+          k = newvBaycPoolSize * newvUsdPoolSize;
+          newvBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
+          newvUsdPoolSize = k / newvBaycPoolSize;
+          //update pool
+          k = vBaycPoolSize * vUsdPoolSize;
+          vBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
+          vUsdPoolSize = k / vBaycPoolSize;
+        }
+      }
+    }
 
+    //Second partially liquidate users
+    for (uint256 i = 0; i < activeUsers.length; i++) {
+      if (activeUsers[i] != address(0)) {
+        bool isPartialLiquidatable = exchange._isPartialLiquidatable(
+          activeUsers[i],
+          uint256(newvBaycPoolSize),
+          uint256(newvUsdPoolSize)
+        );
+        if (isPartialLiquidatable == true) {
+          //store in hardLiquidate list
+          partialLiquidateUsers[partialLiquidateUsersCount] = activeUsers[i];
+          partialLiquidateUsersCount ++;
+          //calculate partial liquidate amount
+          uint256 vUsdPartialLiquidateAmount = exchange._calculatePartialLiquidateValue(
+            activeUsers[i],
+            uint256(newvBaycPoolSize),
+            uint256(newvUsdPoolSize)
+          );
+          if (exchange.uservBaycBalance(activeUsers[i]) > 0) {
+            //update new pool
+            k = newvBaycPoolSize * newvUsdPoolSize;
+            newvUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
+            newvBaycPoolSize = k / newvUsdPoolSize;
+            //update pool
+            k = vBaycPoolSize * vUsdPoolSize;
+            vUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
+            vBaycPoolSize = k / vUsdPoolSize;
+          } else if (exchange.uservBaycBalance(activeUsers[i]) < 0) {
+            //update new pool
+            k = newvBaycPoolSize * newvUsdPoolSize;
+            newvUsdPoolSize += int256(vUsdPartialLiquidateAmount);
+            newvBaycPoolSize = k / newvUsdPoolSize;
+            //update pool
+            k = vBaycPoolSize * vUsdPoolSize;
+            vUsdPoolSize += int256(vUsdPartialLiquidateAmount);
+            vBaycPoolSize = k / vUsdPoolSize;
+          }
+        }
+      }
+    }
     //Second partially liquidate users
     for (uint256 i = 0; i < activeUsers.length; i++) {
       if (activeUsers[i] != address(0)) {
