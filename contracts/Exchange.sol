@@ -202,7 +202,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     nftFloorPriceFeed = AggregatorV3Interface(_newAddress);
   }
 
-  //Notice: newFee should be between 1 to 100 (0.01% - 5%)
+  //Notice: newFee should be between 1 to 100 (0.01% - 1%)
   function setSwapFee(uint8 _newFee) public onlyOwner {
     uint256 distance = block.timestamp - latestFeeUpdate;
     require(distance / 60 / 60 > 12, "You should wait at least 12 hours after the latest update");
