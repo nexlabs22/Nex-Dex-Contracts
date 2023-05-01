@@ -4,12 +4,15 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../contracts/Exchange.sol";
+import "../../contracts/ExchangeInfo.sol";
 import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
 contract Liquidation is Test {
     Exchange public exchange;
+    ExchangeInfo public exchangeInfo;
+
     
     Token public usdc;
     MockV3Aggregator public nftOracle;
@@ -32,6 +35,9 @@ contract Liquidation is Test {
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
+        );
+        exchangeInfo = new ExchangeInfo(
+            address(exchange)
         );
         helper = new Helper(
             address(exchange),
@@ -82,19 +88,23 @@ contract Liquidation is Test {
        vm.stopPrank();
        //add1 opens a long position
        vm.startPrank(add1);
-       exchange.openLongPosition(1400e18, 0);
+       (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1400e18);
+       exchange.openLongPosition(1400e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add2 opens a short position
        vm.startPrank(add2);
-       exchange.openShortPosition(1500e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1500e18);
+       exchange.openShortPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add3);
-       exchange.openShortPosition(1000e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1000e18);
+       exchange.openShortPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add4);
-       exchange.openShortPosition(1600e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1600e18);
+       exchange.openShortPosition(1600e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        assertEq(exchange.userMargin(add1), 0);
        vm.stopPrank();
     }
@@ -134,19 +144,23 @@ contract Liquidation is Test {
        vm.stopPrank();
        //add1 opens a long position
        vm.startPrank(add1);
-       exchange.openLongPosition(1400e18, 0);
+       (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1400e18);
+       exchange.openLongPosition(1400e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add2 opens a short position
        vm.startPrank(add2);
-       exchange.openShortPosition(1500e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1500e18);
+       exchange.openShortPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add3);
-       exchange.openShortPosition(1400e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1400e18);
+       exchange.openShortPosition(1400e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add4);
-       exchange.openShortPosition(1600e18, 0);
+       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1600e18);
+       exchange.openShortPosition(1600e18, 0, hardLiquidateUsers, partialLiquidateUsers);
        assertEq(exchange.userMargin(add1) > 60, true);
        vm.stopPrank();
     }

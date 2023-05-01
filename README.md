@@ -11,9 +11,9 @@
 
 exchange= https://goerli.etherscan.io/address/0x183380A669B1742e975B179Db14ca488fa3C8e8a
 
-Gold = https://goerli.etherscan.io/address/0xf39b58878Dc18496c327c0ba6A0B71C6A3D96E24#code
+Gold = https://goerli.etherscan.io/address/0x90Edb005e95ffA0D8b0c8D26CDCd7fE499A1408c
 
-Silver = https://goerli.etherscan.io/address/0x00B398dDd75a7aF1Ce5846cA0a75d856F48574B6#code
+Silver = https://goerli.etherscan.io/address/0x022275b0a2bC89db6Bf2dD80d8cFC6f07d687B9D#code
 ````
 
 # Getting Started 

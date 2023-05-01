@@ -7,9 +7,10 @@ async function main() {
   //goerli nftOracle = 0x5630D8903B9702E26e08879A8D5886815e1Ea07E
   //goerli nftOracleFeed = 0xB677bfBc9B09a3469695f40477d05bc9BcB15F50
   //goerli eth/usd price feed = 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
-  // goerli gold contract = 0xf39b58878Dc18496c327c0ba6A0B71C6A3D96E24
-  // goerli silver contract = 0x00B398dDd75a7aF1Ce5846cA0a75d856F48574B6
-
+  // goerli gold contract = 0x90Edb005e95ffA0D8b0c8D26CDCd7fE499A1408c
+  // goerli silver contract = 0x022275b0a2bC89db6Bf2dD80d8cFC6f07d687B9D
+  //npx hardhat verify --contract contracts/Index-contracts/Silver.sol:Silver --network goerli 0x90Edb005e95ffA0D8b0c8D26CDCd7fE499A1408c 0xB677bfBc9B09a3469695f40477d05bc9BcB15F50 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e 0x636b346942ee09Ee6383C22290e89742b55797c5
+  
   const Exchange = await ethers.getContractFactory("Gold")
   const exchange = await Exchange.deploy(
     "0xB677bfBc9B09a3469695f40477d05bc9BcB15F50",//nftOracleFeed

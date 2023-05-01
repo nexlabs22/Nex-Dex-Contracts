@@ -46,7 +46,7 @@ contract Users100 is Test {
             address(usdc)
         );
         //80
-        exchange.initialVirtualPool(60e18);
+        exchange.initialVirtualPool(80e18);
 
         
         for(uint i=1; i <= 100; i++){

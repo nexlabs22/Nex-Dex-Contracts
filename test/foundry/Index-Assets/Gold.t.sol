@@ -3,13 +3,13 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../../contracts/Exchange.sol";
-import "../../contracts/Token.sol";
-import "../../contracts/test/MockV3Aggregator.sol";
-import "./helper.sol";
+import "../../../contracts/Index-contracts/Gold.sol";
+import "../../../contracts/Token.sol";
+import "../../../contracts/test/MockV3Aggregator.sol";
+import "../helper.sol";
 
-contract Positions is Test {
-    Exchange public exchange;
+contract GoldTest is Test {
+    Gold public exchange;
     
     Token public usdc;
     MockV3Aggregator public nftOracle;
@@ -28,7 +28,7 @@ contract Positions is Test {
         usdc = new Token(1000000e18);
         nftOracle = new MockV3Aggregator(18, 1e18);
         ethPriceOracle = new MockV3Aggregator(18, 1300e18);
-        exchange = new Exchange(
+        exchange = new Gold(
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
@@ -39,7 +39,7 @@ contract Positions is Test {
             address(ethPriceOracle),
             address(usdc)
         );
-        exchange.initialVirtualPool(1e18);
+        exchange.initialVirtualPool(5000e18, 5e17);
         usdc.transfer(add1, 1000e18);
         usdc.transfer(add2, 1000e18);
         usdc.transfer(add3, 1000e18);
@@ -51,6 +51,11 @@ contract Positions is Test {
     function testAddAndWithdrawCollateral() public {
        uint startvBaycPoolSize = exchange.vBaycPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
+       uint marketPrice = exchange.marketPrice();
+       assertEq(startvUsdPoolSize, 5000e18);
+       assertEq(startvBaycPoolSize, 10000e18);
+       assertEq(marketPrice, 5e17);
+       
        vm.startPrank(add1);
        usdc.approve(address(exchange), 1000e18);
        exchange.depositCollateral(1000e18);
@@ -77,6 +82,7 @@ contract Positions is Test {
        uint firstCollateral = exchange.collateral(address(usdc), address(add1));
        assertEq(usdc.balanceOf(address(add1)), 0);
        assertEq(exchange.collateral(address(usdc), address(add1)), 1000e18);
+       
        exchange.openLongPosition(1000e18, 0);
        uint baycValue = exchange.getShortVusdAmountOut(exchange.positive(exchange.uservBaycBalance(add1)));
        
