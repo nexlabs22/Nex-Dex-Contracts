@@ -33,8 +33,8 @@ export interface SilverInterface extends utils.Interface {
     "activeUsers(uint256)": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "changeNftOracleAddress(address)": FunctionFragment;
-    "closePosition(uint256,uint256)": FunctionFragment;
-    "closePositionComplete(uint256)": FunctionFragment;
+    "closePosition(uint256,uint256,address[],address[])": FunctionFragment;
+    "closePositionComplete(uint256,address[],address[])": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
@@ -45,12 +45,15 @@ export interface SilverInterface extends utils.Interface {
     "getAllShortvBaycBalance()": FunctionFragment;
     "getCurrentExchangePrice()": FunctionFragment;
     "getEthUsdPrice()": FunctionFragment;
+    "getHardLiquidatedUsers()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
+    "getPartialLiquidatedUsers()": FunctionFragment;
     "getPositionNotional(address)": FunctionFragment;
     "getShortBaycAmountOut(uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256)": FunctionFragment;
+    "hardLiquidatedUsers(uint256)": FunctionFragment;
     "initialVirtualPool(uint256,uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
@@ -58,13 +61,15 @@ export interface SilverInterface extends utils.Interface {
     "isPartialLiquidatable(address)": FunctionFragment;
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
+    "isUserActive(address)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "marketPrice()": FunctionFragment;
-    "openLongPosition(uint256,uint256)": FunctionFragment;
-    "openShortPosition(uint256,uint256)": FunctionFragment;
+    "openLongPosition(uint256,uint256,address[],address[])": FunctionFragment;
+    "openShortPosition(uint256,uint256,address[],address[])": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
+    "partialLiquidatedUsers(uint256)": FunctionFragment;
     "paused()": FunctionFragment;
     "pool()": FunctionFragment;
     "poolInitialized()": FunctionFragment;
@@ -143,11 +148,11 @@ export interface SilverInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "closePosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "closePositionComplete",
-    values: [BigNumberish]
+    values: [BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "collateral",
@@ -190,6 +195,10 @@ export interface SilverInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getHardLiquidatedUsers",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getLongBaycAmountOut",
     values: [BigNumberish]
   ): string;
@@ -198,6 +207,10 @@ export interface SilverInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "getPNL", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "getPartialLiquidatedUsers",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getPositionNotional",
     values: [string]
@@ -208,6 +221,10 @@ export interface SilverInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getShortVusdAmountOut",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hardLiquidatedUsers",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -239,6 +256,10 @@ export interface SilverInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "isUserActive",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "latestFeeUpdate",
     values?: undefined
   ): string;
@@ -252,17 +273,21 @@ export interface SilverInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "openLongPosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "openShortPosition",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "oraclePrice",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "partialLiquidatedUsers",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(functionFragment: "pool", values?: undefined): string;
   encodeFunctionData(
@@ -432,6 +457,10 @@ export interface SilverInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getHardLiquidatedUsers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getLongBaycAmountOut",
     data: BytesLike
   ): Result;
@@ -440,6 +469,10 @@ export interface SilverInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPNL", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getPartialLiquidatedUsers",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getPositionNotional",
     data: BytesLike
@@ -450,6 +483,10 @@ export interface SilverInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getShortVusdAmountOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "hardLiquidatedUsers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -481,6 +518,10 @@ export interface SilverInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "isUserActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "latestFeeUpdate",
     data: BytesLike
   ): Result;
@@ -505,6 +546,10 @@ export interface SilverInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "partialLiquidatedUsers",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pool", data: BytesLike): Result;
   decodeFunctionResult(
@@ -844,11 +889,15 @@ export interface Silver extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -882,6 +931,8 @@ export interface Silver extends BaseContract {
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<[string[]]>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -897,6 +948,8 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { pnl: BigNumber }>;
 
+    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<[string[]]>;
+
     getPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -911,6 +964,11 @@ export interface Silver extends BaseContract {
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    hardLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     initialVirtualPool(
       _vUsdSize: BigNumberish,
@@ -946,6 +1004,8 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
@@ -955,18 +1015,27 @@ export interface Silver extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    partialLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -1136,11 +1205,15 @@ export interface Silver extends BaseContract {
   closePosition(
     _assetSize: BigNumberish,
     _minimumUsdOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   closePositionComplete(
     _minimumUsdOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1171,6 +1244,8 @@ export interface Silver extends BaseContract {
 
   getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+  getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
+
   getLongBaycAmountOut(
     _vUsdAmount: BigNumberish,
     overrides?: CallOverrides
@@ -1182,6 +1257,8 @@ export interface Silver extends BaseContract {
   ): Promise<BigNumber>;
 
   getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
   getPositionNotional(
     _user: string,
@@ -1197,6 +1274,11 @@ export interface Silver extends BaseContract {
     _vBaycAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  hardLiquidatedUsers(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   initialVirtualPool(
     _vUsdSize: BigNumberish,
@@ -1232,6 +1314,8 @@ export interface Silver extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1241,18 +1325,27 @@ export interface Silver extends BaseContract {
   openLongPosition(
     _usdAmount: BigNumberish,
     _minimumBaycAmountOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortPosition(
     _usdAmount: BigNumberish,
     _minimumBaycAmountOut: BigNumberish,
+    hardLiquidateUsers: string[],
+    partialLiquidateUsers: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  partialLiquidatedUsers(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1419,11 +1512,15 @@ export interface Silver extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1457,6 +1554,8 @@ export interface Silver extends BaseContract {
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1468,6 +1567,8 @@ export interface Silver extends BaseContract {
     ): Promise<BigNumber>;
 
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
     getPositionNotional(
       _user: string,
@@ -1483,6 +1584,11 @@ export interface Silver extends BaseContract {
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    hardLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     initialVirtualPool(
       _vUsdSize: BigNumberish,
@@ -1518,6 +1624,8 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1527,18 +1635,27 @@ export interface Silver extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    partialLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1856,11 +1973,15 @@ export interface Silver extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1894,6 +2015,8 @@ export interface Silver extends BaseContract {
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<BigNumber>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1905,6 +2028,8 @@ export interface Silver extends BaseContract {
     ): Promise<BigNumber>;
 
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPositionNotional(
       _user: string,
@@ -1918,6 +2043,11 @@ export interface Silver extends BaseContract {
 
     getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    hardLiquidatedUsers(
+      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1955,6 +2085,8 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    isUserActive(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1964,18 +2096,27 @@ export interface Silver extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    partialLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2136,11 +2277,15 @@ export interface Silver extends BaseContract {
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     closePositionComplete(
       _minimumUsdOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -2183,6 +2328,10 @@ export interface Silver extends BaseContract {
 
     getEthUsdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    getHardLiquidatedUsers(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -2198,6 +2347,10 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getPartialLiquidatedUsers(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -2210,6 +2363,11 @@ export interface Silver extends BaseContract {
 
     getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    hardLiquidatedUsers(
+      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2247,6 +2405,11 @@ export interface Silver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    isUserActive(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2256,18 +2419,27 @@ export interface Silver extends BaseContract {
     openLongPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
       _minimumBaycAmountOut: BigNumberish,
+      hardLiquidateUsers: string[],
+      partialLiquidateUsers: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    partialLiquidatedUsers(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

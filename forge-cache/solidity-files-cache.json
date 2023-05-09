@@ -13,7 +13,7 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1682531961030,
+      "lastModificationDate": 1683667601017,
       "contentHash": "92b42dd9c3cd738eed9e6053901cefa9",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
@@ -64,7 +64,7 @@
       }
     },
     "contracts/ExchangeInfo.sol": {
-      "lastModificationDate": 1682197552225,
+      "lastModificationDate": 1682932542461,
       "contentHash": "1b08fd37acfb36b9dcdc55ee13326fae",
       "sourceName": "contracts/ExchangeInfo.sol",
       "solcConfig": {
@@ -116,8 +116,8 @@
       }
     },
     "contracts/Index-contracts/Gold.sol": {
-      "lastModificationDate": 1682531790066,
-      "contentHash": "3ae6a2f3c0c0b10b352e77b954519097",
+      "lastModificationDate": 1683668033710,
+      "contentHash": "4a16a641e137acacec34a545042e493d",
       "sourceName": "contracts/Index-contracts/Gold.sol",
       "solcConfig": {
         "settings": {
@@ -167,8 +167,8 @@
       }
     },
     "contracts/Index-contracts/Silver.sol": {
-      "lastModificationDate": 1681606533573,
-      "contentHash": "904d86fa8b5d69db55ce076bf97796c2",
+      "lastModificationDate": 1683668135300,
+      "contentHash": "81c022b7f9b3f81ba4313cde4e2a8d5c",
       "sourceName": "contracts/Index-contracts/Silver.sol",
       "solcConfig": {
         "settings": {
@@ -1695,7 +1695,7 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1682933341792,
+      "lastModificationDate": 1682933387372,
       "contentHash": "b94f14afbfeb8dacc5d95a0fab792169",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
@@ -1771,8 +1771,8 @@
       }
     },
     "test/foundry/Index-Assets/Gold.t.sol": {
-      "lastModificationDate": 1682930955528,
-      "contentHash": "5d4ba61c6347c004c78e000c69b544f9",
+      "lastModificationDate": 1683668740463,
+      "contentHash": "b7327a08ee17696313cd75b1cc1e4628",
       "sourceName": "test/foundry/Index-Assets/Gold.t.sol",
       "solcConfig": {
         "settings": {
@@ -1804,6 +1804,7 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Gold.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1847,8 +1848,8 @@
       }
     },
     "test/foundry/Index-Assets/Silver.t.sol": {
-      "lastModificationDate": 1682932755316,
-      "contentHash": "1d9e602771dda502096bb77c6f95351e",
+      "lastModificationDate": 1683669063209,
+      "contentHash": "5208e2e232a0848d0c537ad514c1a1e6",
       "sourceName": "test/foundry/Index-Assets/Silver.t.sol",
       "solcConfig": {
         "settings": {
@@ -1880,6 +1881,7 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Silver.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1923,7 +1925,7 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1682935483292,
+      "lastModificationDate": 1682935619634,
       "contentHash": "0a52226faf1c3cf1c468e37fbbde2b12",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
@@ -1999,7 +2001,7 @@
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1682936084221,
+      "lastModificationDate": 1682936135607,
       "contentHash": "b118e2bc5a2e7b26ee192abb99592d42",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
@@ -2075,8 +2077,8 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1682936949201,
-      "contentHash": "ed3bd70f45667b5f992f29d1f408e53c",
+      "lastModificationDate": 1683668856791,
+      "contentHash": "4d49d8d193aac8ae1b6c58a54cb943b2",
       "sourceName": "test/foundry/Positions.t.sol",
       "solcConfig": {
         "settings": {

@@ -132,8 +132,7 @@ contract Positions is Test {
        uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
        (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.closeLongLiquidateList(exchange.positive(exchange.uservBaycBalance(add1)));
        exchange.closePositionComplete(0, hardLiquidateUsers, partialLiquidateUsers);
-        /*
-       */
+    
     }
     
     
