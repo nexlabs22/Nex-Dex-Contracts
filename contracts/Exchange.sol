@@ -315,7 +315,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     return (1e18 * pool.vUsdPoolSize) / pool.vBaycPoolSize;
   }
   
-  
+  //open long position
   function openLongPosition(uint256 _usdAmount, uint256 _minimumBaycAmountOut, address[] calldata hardLiquidateUsers, address[] calldata partialLiquidateUsers) public {
     //calculate the new pool size and user bayc amount
     uint256 k = pool.vBaycPoolSize * pool.vUsdPoolSize;
