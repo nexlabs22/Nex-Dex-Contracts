@@ -4,15 +4,12 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../../contracts/Index-contracts/Gold.sol";
-import "../../../contracts/ExchangeInfo.sol";
 import "../../../contracts/Token.sol";
 import "../../../contracts/test/MockV3Aggregator.sol";
 import "../helper.sol";
 
 contract GoldTest is Test {
     Gold public exchange;
-    ExchangeInfo public exchangeInfo;
-
     
     Token public usdc;
     MockV3Aggregator public nftOracle;
@@ -35,9 +32,6 @@ contract GoldTest is Test {
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
-        );
-        exchangeInfo = new ExchangeInfo(
-            address(exchange)
         );
         helper = new Helper(
             address(exchange),
@@ -88,15 +82,13 @@ contract GoldTest is Test {
        uint firstCollateral = exchange.collateral(address(usdc), address(add1));
        assertEq(usdc.balanceOf(address(add1)), 0);
        assertEq(exchange.collateral(address(usdc), address(add1)), 1000e18);
-       (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1000e18);
-       exchange.openLongPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openLongPosition(1000e18, 0);
        uint baycValue = exchange.getShortVusdAmountOut(exchange.positive(exchange.uservBaycBalance(add1)));
        
        int baycBalance = exchange.uservUsdBalance(add1);
     
        uint middlevBaycPoolSize = exchange.vBaycPoolSize();
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.closeLongLiquidateList(exchange.positive(exchange.uservBaycBalance(add1)));
-       exchange.closePositionComplete(0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.closePositionComplete(0);
        uint endCollateral = exchange.collateral(address(usdc), address(add1));
        uint endvBaycPoolSize = exchange.vBaycPoolSize();
        uint endUsdPoolSize = exchange.vUsdPoolSize();
@@ -115,8 +107,7 @@ contract GoldTest is Test {
        exchange.depositCollateral(1000e18);
        assertEq(usdc.balanceOf(address(add1)), 0);
        assertEq(exchange.collateral(address(usdc), address(add1)), 1000e18);
-       (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1000e18);
-       exchange.openLongPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openLongPosition(1000e18, 0);
        
        uint price1 = exchange.marketPrice();
         vm.stopPrank();
@@ -126,8 +117,7 @@ contract GoldTest is Test {
        exchange.depositCollateral(1000e18);
        assertEq(usdc.balanceOf(address(add2)), 0);
        assertEq(exchange.collateral(address(usdc), address(add2)), 1000e18);
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1600e18);
-       exchange.openLongPosition(1600e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openLongPosition(1600e18, 0);
         vm.stopPrank();
        vm.startPrank(add1);
        uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
@@ -135,8 +125,7 @@ contract GoldTest is Test {
        assertEq(exchange.getPNL(add1), pnl);
        uint lastCollateral = exchange.collateral(address(usdc), add1);
        uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.closeLongLiquidateList(exchange.positive(exchange.uservBaycBalance(add1)));
-       exchange.closePositionComplete(0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.closePositionComplete(0);
         /*
        */
     }

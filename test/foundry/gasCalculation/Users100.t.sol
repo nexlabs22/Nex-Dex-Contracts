@@ -3,7 +3,6 @@
 pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../../../contracts/Exchange.sol";
-import "../../../contracts/ExchangeInfo.sol";
 import "../../../contracts/Token.sol";
 import "../../../contracts/test/MockV3Aggregator.sol";
 import "./../helper.sol";
@@ -17,7 +16,6 @@ contract Users100 is Test {
     Token public usdc;
 
     Exchange public exchange;
-    ExchangeInfo public exchangeInfo;
     Helper public helper;
 
     address add1 = vm.addr(1);
@@ -36,16 +34,13 @@ contract Users100 is Test {
             address(ethPriceOracle),
             address(usdc)
         );
-        exchangeInfo = new ExchangeInfo(
-            address(exchange)
-        );
         helper = new Helper(
             address(exchange),
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
         );
-        //80
+
         exchange.initialVirtualPool(80e18);
 
         
@@ -69,27 +64,27 @@ contract Users100 is Test {
             assertEq(usdc.balanceOf(address(users[i])), 0);
             assertEq(exchange.collateral(address(usdc), address(users[i])), 1000e18);
             if(shouldBeShort == true){
-                (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1500e18);
-                exchange.openShortPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+                exchange.openShortPosition(1500e18, 0);
                 if(startPrice > exchange.marketPrice() && (startPrice - exchange.marketPrice())*100/startPrice >= 50){
                     shouldBeLong = true;
                     shouldBeShort = false;
                     // startPrice = exchange.marketPrice();
                 }
             }else if(shouldBeLong == true){
-                (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1500e18);
-                exchange.openLongPosition(1500e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+                exchange.openLongPosition(1500e18, 0);
                 if(startPrice < exchange.marketPrice() &&(exchange.marketPrice() - startPrice)*100/startPrice >= 50){
                     shouldBeLong = false;
                     shouldBeShort = true;
                     // startPrice = exchange.marketPrice();
                 }
             }
-            console.log(i, "exchange market price", exchange.marketPrice()/1e18);
+            console.log("exchange market price", exchange.marketPrice()/1e18);
             vm.stopPrank();
             //funding fee
             exchange.setFundingRate();
         }
+
+        
 
         
         for(uint i; i < 100; i++) {
@@ -101,13 +96,7 @@ contract Users100 is Test {
             // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
             console.log("***");
             vm.startPrank(users[i]);
-            if(exchange.uservBaycBalance(users[i]) > 0) {
-            (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.closeLongLiquidateList(exchange.positive(exchange.uservBaycBalance(users[i])));
-            exchange.closePositionComplete(0,hardLiquidateUsers, partialLiquidateUsers);
-            } else{
-            (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.closeShortLiquidateList(exchange.positive(exchange.uservBaycBalance(users[i])));
-            exchange.closePositionComplete(0, hardLiquidateUsers, partialLiquidateUsers);
-            }
+            exchange.closePositionComplete(0);
             vm.stopPrank();
         }
 

@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1683667601017,
-      "contentHash": "92b42dd9c3cd738eed9e6053901cefa9",
+      "lastModificationDate": 1684652603088,
+      "contentHash": "f94e5abe3694a285287aac2b76d4e895",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -63,61 +63,9 @@
         }
       }
     },
-    "contracts/ExchangeInfo.sol": {
-      "lastModificationDate": 1682932542461,
-      "contentHash": "1b08fd37acfb36b9dcdc55ee13326fae",
-      "sourceName": "contracts/ExchangeInfo.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/Exchange.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
-        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
-        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
-        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
-        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
-        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
-        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
-        "node_modules/@openzeppelin/contracts/utils/Address.sol",
-        "node_modules/@openzeppelin/contracts/utils/Context.sol",
-        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol"
-      ],
-      "versionRequirement": "^0.8.17",
-      "artifacts": {
-        "ExchangeInfo": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "ExchangeInfo.sol\\ExchangeInfo.json"
-        }
-      }
-    },
     "contracts/Index-contracts/Gold.sol": {
-      "lastModificationDate": 1683668033710,
-      "contentHash": "4a16a641e137acacec34a545042e493d",
+      "lastModificationDate": 1684653929414,
+      "contentHash": "fbac805c934bf884d7350cf5423ff4bb",
       "sourceName": "contracts/Index-contracts/Gold.sol",
       "solcConfig": {
         "settings": {
@@ -167,8 +115,8 @@
       }
     },
     "contracts/Index-contracts/Silver.sol": {
-      "lastModificationDate": 1683668135300,
-      "contentHash": "81c022b7f9b3f81ba4313cde4e2a8d5c",
+      "lastModificationDate": 1684654038523,
+      "contentHash": "b94c28d908cf2506085490c512cd16cc",
       "sourceName": "contracts/Index-contracts/Silver.sol",
       "solcConfig": {
         "settings": {
@@ -1695,8 +1643,8 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1682933387372,
-      "contentHash": "b94f14afbfeb8dacc5d95a0fab792169",
+      "lastModificationDate": 1684654331409,
+      "contentHash": "1486e1a4291429bd13de9294403b15ae",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -1728,7 +1676,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -1771,8 +1718,8 @@
       }
     },
     "test/foundry/Index-Assets/Gold.t.sol": {
-      "lastModificationDate": 1683668740463,
-      "contentHash": "b7327a08ee17696313cd75b1cc1e4628",
+      "lastModificationDate": 1684654143963,
+      "contentHash": "24cdc9658be1fedfda987930572dc5b5",
       "sourceName": "test/foundry/Index-Assets/Gold.t.sol",
       "solcConfig": {
         "settings": {
@@ -1804,7 +1751,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Gold.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1848,8 +1794,8 @@
       }
     },
     "test/foundry/Index-Assets/Silver.t.sol": {
-      "lastModificationDate": 1683669063209,
-      "contentHash": "5208e2e232a0848d0c537ad514c1a1e6",
+      "lastModificationDate": 1684654161118,
+      "contentHash": "4d07b1bbdb1ff2bc50272acbf04157b2",
       "sourceName": "test/foundry/Index-Assets/Silver.t.sol",
       "solcConfig": {
         "settings": {
@@ -1881,7 +1827,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Silver.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1925,8 +1870,8 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1682935619634,
-      "contentHash": "0a52226faf1c3cf1c468e37fbbde2b12",
+      "lastModificationDate": 1684654422691,
+      "contentHash": "5ce0b99b6193d2045d1fe369a13f14a6",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
         "settings": {
@@ -1958,7 +1903,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2001,8 +1945,8 @@
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1682936135607,
-      "contentHash": "b118e2bc5a2e7b26ee192abb99592d42",
+      "lastModificationDate": 1684654470529,
+      "contentHash": "22e31e461596d77c46f18927582c6ed7",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
         "settings": {
@@ -2034,7 +1978,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2077,8 +2020,8 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1683668856791,
-      "contentHash": "4d49d8d193aac8ae1b6c58a54cb943b2",
+      "lastModificationDate": 1684654521639,
+      "contentHash": "412d1b2b67fb61203eca926daf5af9c1",
       "sourceName": "test/foundry/Positions.t.sol",
       "solcConfig": {
         "settings": {
@@ -2110,7 +2053,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2153,8 +2095,8 @@
       }
     },
     "test/foundry/gasCalculation/Users100.t.sol": {
-      "lastModificationDate": 1682932576275,
-      "contentHash": "f1fa215c997191033137c6dc50418503",
+      "lastModificationDate": 1684652875304,
+      "contentHash": "f1dc5c927765e1f2fd91dd83d284eec5",
       "sourceName": "test/foundry/gasCalculation/Users100.t.sol",
       "solcConfig": {
         "settings": {
@@ -2186,7 +2128,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2229,8 +2170,8 @@
       }
     },
     "test/foundry/gasCalculation/Users1000.t.sol": {
-      "lastModificationDate": 1682167891603,
-      "contentHash": "de506ed5f201b69b55337fe0be6d329f",
+      "lastModificationDate": 1684652941361,
+      "contentHash": "303dfbbaa4eabe4e7419546967edcc4b",
       "sourceName": "test/foundry/gasCalculation/Users1000.t.sol",
       "solcConfig": {
         "settings": {
@@ -2262,7 +2203,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2305,8 +2245,8 @@
       }
     },
     "test/foundry/gasCalculation/Users10000.t.sol": {
-      "lastModificationDate": 1682153762633,
-      "contentHash": "e884eb11367a6a28ae31324c96f91b58",
+      "lastModificationDate": 1684652958544,
+      "contentHash": "c2a285ead7e00b72be0d260f152b8763",
       "sourceName": "test/foundry/gasCalculation/Users10000.t.sol",
       "solcConfig": {
         "settings": {
@@ -2338,7 +2278,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2381,8 +2320,8 @@
       }
     },
     "test/foundry/gasCalculation/Users2.t.sol": {
-      "lastModificationDate": 1682166965824,
-      "contentHash": "4936c55dfc2f24f3592264fe13f94b41",
+      "lastModificationDate": 1684652745149,
+      "contentHash": "86b60f0b8b034054d2d9263f1254478a",
       "sourceName": "test/foundry/gasCalculation/Users2.t.sol",
       "solcConfig": {
         "settings": {
@@ -2414,7 +2353,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2457,8 +2395,8 @@
       }
     },
     "test/foundry/gasCalculation/Users20.t.sol": {
-      "lastModificationDate": 1682166062621,
-      "contentHash": "8a6eaaac462fab8abd8c2088460cebdd",
+      "lastModificationDate": 1684652773201,
+      "contentHash": "681f6caee2463098fb61d2b1502ee80e",
       "sourceName": "test/foundry/gasCalculation/Users20.t.sol",
       "solcConfig": {
         "settings": {
@@ -2490,7 +2428,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2533,8 +2470,8 @@
       }
     },
     "test/foundry/gasCalculation/Users40.t.sol": {
-      "lastModificationDate": 1682167455529,
-      "contentHash": "3d03bb5725551e2d6d2ff8fba92c85a8",
+      "lastModificationDate": 1684652813060,
+      "contentHash": "c12dde40ff375e4de8c0382a637e4abb",
       "sourceName": "test/foundry/gasCalculation/Users40.t.sol",
       "solcConfig": {
         "settings": {
@@ -2566,7 +2503,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2609,8 +2545,8 @@
       }
     },
     "test/foundry/gasCalculation/Users60.t.sol": {
-      "lastModificationDate": 1682167467939,
-      "contentHash": "c0224494a7a78e791ad36de2c80f9f73",
+      "lastModificationDate": 1684652853337,
+      "contentHash": "135cb6643af5af4ea55b1a89ee17c14f",
       "sourceName": "test/foundry/gasCalculation/Users60.t.sol",
       "solcConfig": {
         "settings": {
@@ -2642,7 +2578,6 @@
       },
       "imports": [
         "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",

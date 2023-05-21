@@ -4,15 +4,12 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../../contracts/Exchange.sol";
-import "../../contracts/ExchangeInfo.sol";
 import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
 contract FundingRate is Test {
     Exchange public exchange;
-    ExchangeInfo public exchangeInfo;
-
     
     Token public usdc;
     MockV3Aggregator public nftOracle;
@@ -35,9 +32,6 @@ contract FundingRate is Test {
             address(nftOracle),
             address(ethPriceOracle),
             address(usdc)
-        );
-        exchangeInfo = new ExchangeInfo(
-            address(exchange)
         );
         helper = new Helper(
             address(exchange),
@@ -88,23 +82,19 @@ contract FundingRate is Test {
        vm.stopPrank();
        //add1 opens a long position
        vm.startPrank(add1);
-       (address[] memory hardLiquidateUsers, address[] memory partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1000e18);
-       exchange.openLongPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openLongPosition(1000e18, 0);
        vm.stopPrank();
        //add2 opens a short position
        vm.startPrank(add2);
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openLongLiquidateList(1000e18);
-       exchange.openLongPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openLongPosition(1000e18, 0);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add3);
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1000e18);
-       exchange.openShortPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openShortPosition(1000e18, 0);
        vm.stopPrank();
        //add4 opens a short position
        vm.startPrank(add4);
-       (hardLiquidateUsers, partialLiquidateUsers) = exchangeInfo.openShortLiquidateList(1000e18);
-       exchange.openShortPosition(1000e18, 0, hardLiquidateUsers, partialLiquidateUsers);
+       exchange.openShortPosition(1000e18, 0);
        vm.stopPrank();
     
        // runs fundingRate function
@@ -116,7 +106,4 @@ contract FundingRate is Test {
        assertEq(add1FundingFee + add2FundingFee, -(add3FundingFee + add4FundingFee));
     }
 
-    
-    
-    
 }
