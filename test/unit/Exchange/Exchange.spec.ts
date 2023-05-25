@@ -74,6 +74,7 @@ async function compareResultExchange(contract: any, testContract: any) {
   ? describe.skip
   : describe("Exchange Unit Tests", async function () {
     let exchange: Exchange
+    let exchangeInfo:any
     let nftOracle: MockV3Aggregator
     let priceFeed: MockV3Aggregator
     let linkToken: LinkToken
@@ -89,6 +90,7 @@ async function compareResultExchange(contract: any, testContract: any) {
       nftOracle = await ethers.getContract("MockV3AggregatorNft");
       priceFeed = await ethers.getContract("MockV3Aggregator");
       exchange = await ethers.getContract("Exchange");
+      exchangeInfo = await ethers.getContract("ExchangeInfo");
       usdc = await ethers.getContract("Token");
 
     })
@@ -157,7 +159,7 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user0 open long position($490) in contract's pool
-      let minimumBayc1 = await exchange.getMinimumLongBaycOut(toWeiN(longPositionUSD1.toNumber()));
+      let minimumBayc1 = await exchangeInfo.getMinimumLongBaycOut(toWeiN(longPositionUSD1.toNumber()));
       let minimumBayc2 = contract.getMinimumLongBaycOut(uint256(toWeiBigNumber(longPositionUSD1)));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
 
@@ -170,7 +172,7 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user1 open short position($4500) in contract's pool
-      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
+      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
       minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
 
@@ -183,7 +185,7 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user2 open short position($7500) in contract's pool
-      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
+      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
       minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD3)));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
 
@@ -196,7 +198,7 @@ async function compareResultExchange(contract: any, testContract: any) {
 
       
       // user1 close position($4500)
-      minimumBayc1 = await exchange.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
+      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
       minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
       expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
 
