@@ -8,7 +8,7 @@
 
 ```
 
-exchange= https://goerli.etherscan.io/address/0xf4338c04b412434943e9301dD357C2Ed54e775Cf#writeContract
+exchange= https://goerli.etherscan.io/address/0xEAB749422E979f1D3A68be627925743d878598B9#code
 
 exchangeInfo=
 https://goerli.etherscan.io/address/0x5E07aC161537572054e0F1A76F73fefCDe6c4545#code
