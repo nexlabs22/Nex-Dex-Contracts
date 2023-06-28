@@ -51,5 +51,19 @@ contract ExchangeDeployer {
     function uintToBytes32(uint myUint) public pure returns (bytes32 myBytes32) {
         myBytes32 = bytes32(myUint);
     }
+
+    function intToBytes32(int x) public pure returns (bytes32) {
+        bytes memory b = abi.encodePacked(x);
+        bytes32 y = bytesToBytes32(b, 0);
+        return y;
+    }
+
+    function bytesToBytes32(bytes memory b, uint offset) private pure returns (bytes32) {
+        bytes32 out;
+        for (uint i = 0; i < 32; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+        return out;
+    }
     
 }

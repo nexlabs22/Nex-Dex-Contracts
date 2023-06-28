@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1687027746093,
-      "contentHash": "e222e2fb6094b95e35788ff052ab6bc7",
+      "lastModificationDate": 1687963205989,
+      "contentHash": "57c8ef04eba61eea6b13080ef390f1e3",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -2361,8 +2361,8 @@
       }
     },
     "test/foundry/ExchangeDeployer.sol": {
-      "lastModificationDate": 1687943159720,
-      "contentHash": "acb8bddb0fde3e6521633c186c5e1349",
+      "lastModificationDate": 1687961099134,
+      "contentHash": "1ec2196080747756f3014b249406c9b0",
       "sourceName": "test/foundry/ExchangeDeployer.sol",
       "solcConfig": {
         "settings": {
@@ -2451,8 +2451,8 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1687943308038,
-      "contentHash": "5bed4d022d6bc2bd41c30e0bf0132c63",
+      "lastModificationDate": 1687961611824,
+      "contentHash": "b2b893b11c330d270c188e3805227db9",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -2631,7 +2631,7 @@
       }
     },
     "test/foundry/Index-Assets/Silver.t.sol": {
-      "lastModificationDate": 1684654161118,
+      "lastModificationDate": 1687944534408,
       "contentHash": "4d07b1bbdb1ff2bc50272acbf04157b2",
       "sourceName": "test/foundry/Index-Assets/Silver.t.sol",
       "solcConfig": {
@@ -2719,7 +2719,7 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1687943381408,
+      "lastModificationDate": 1687943391261,
       "contentHash": "2d44e322031b7b359940283d0d09561e",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
@@ -2811,7 +2811,7 @@
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1687943482149,
+      "lastModificationDate": 1687943504090,
       "contentHash": "06907b20ea938bfd9e3f11e31975ae09",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
@@ -2903,7 +2903,7 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1687943557542,
+      "lastModificationDate": 1687943582899,
       "contentHash": "dec1967ae9542358c712d62c9f14057c",
       "sourceName": "test/foundry/Positions.t.sol",
       "solcConfig": {
@@ -2995,8 +2995,8 @@
       }
     },
     "test/foundry/gasCalculation/Users100.t.sol": {
-      "lastModificationDate": 1687944185844,
-      "contentHash": "97e0012e280ba8c857c7c94be6cde4db",
+      "lastModificationDate": 1687962342503,
+      "contentHash": "7e97ad3ba2f209e6cdbdaea70d52b950",
       "sourceName": "test/foundry/gasCalculation/Users100.t.sol",
       "solcConfig": {
         "settings": {
@@ -3087,8 +3087,8 @@
       }
     },
     "test/foundry/gasCalculation/Users1000.t.sol": {
-      "lastModificationDate": 1687944301547,
-      "contentHash": "f9539dcb31b98d32ee2aa3dac699541c",
+      "lastModificationDate": 1687962358152,
+      "contentHash": "ba0bf7f15e6e82a9d44555de1e44392f",
       "sourceName": "test/foundry/gasCalculation/Users1000.t.sol",
       "solcConfig": {
         "settings": {
@@ -3178,101 +3178,9 @@
         }
       }
     },
-    "test/foundry/gasCalculation/Users10000.t.sol": {
-      "lastModificationDate": 1687944399898,
-      "contentHash": "461dd16f19345b3619c178b0e1ac454d",
-      "sourceName": "test/foundry/gasCalculation/Users10000.t.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "london",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/Exchange.sol",
-        "contracts/ExchangeInfo.sol",
-        "contracts/Token.sol",
-        "contracts/test/LinkToken.sol",
-        "contracts/test/MockApiOracle.sol",
-        "contracts/test/MockV3Aggregator.sol",
-        "contracts/test/libs/LinkTokenReceiver.sol",
-        "contracts/test/libs/SafeMathChainlink.sol",
-        "lib/forge-std/lib/ds-test/src\\test.sol",
-        "lib/forge-std/src/Common.sol",
-        "lib/forge-std/src/Components.sol",
-        "lib/forge-std/src/StdAssertions.sol",
-        "lib/forge-std/src/StdChains.sol",
-        "lib/forge-std/src/StdCheats.sol",
-        "lib/forge-std/src/StdError.sol",
-        "lib/forge-std/src/StdJson.sol",
-        "lib/forge-std/src/StdMath.sol",
-        "lib/forge-std/src/StdStorage.sol",
-        "lib/forge-std/src/StdUtils.sol",
-        "lib/forge-std/src\\Test.sol",
-        "lib/forge-std/src/Vm.sol",
-        "lib/forge-std/src/console.sol",
-        "lib/forge-std/src/console2.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
-        "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
-        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
-        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
-        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
-        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
-        "node_modules/@openzeppelin\\contracts/token/ERC20/ERC20.sol",
-        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
-        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
-        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
-        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
-        "node_modules/@openzeppelin/contracts/utils/Address.sol",
-        "node_modules/@openzeppelin/contracts/utils/Context.sol",
-        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
-        "test/foundry\\ExchangeDeployer.sol",
-        "test/foundry\\helper.sol"
-      ],
-      "versionRequirement": "^0.8.17",
-      "artifacts": {
-        "Users10000": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "Users10000.t.sol\\Users10000.json"
-        }
-      }
-    },
     "test/foundry/gasCalculation/Users2.t.sol": {
-      "lastModificationDate": 1687943705031,
-      "contentHash": "fda43fa738cab6fb627624a5fe8c45e4",
+      "lastModificationDate": 1687961744530,
+      "contentHash": "a8cd7508b94a8cc91791b745d884c275",
       "sourceName": "test/foundry/gasCalculation/Users2.t.sol",
       "solcConfig": {
         "settings": {
@@ -3363,8 +3271,8 @@
       }
     },
     "test/foundry/gasCalculation/Users20.t.sol": {
-      "lastModificationDate": 1687943840213,
-      "contentHash": "dfb6112c26ac0cac190b31fceb0a913d",
+      "lastModificationDate": 1687962212424,
+      "contentHash": "28f3f49f51472fbec8164aac0a9d653d",
       "sourceName": "test/foundry/gasCalculation/Users20.t.sol",
       "solcConfig": {
         "settings": {
@@ -3455,8 +3363,8 @@
       }
     },
     "test/foundry/gasCalculation/Users40.t.sol": {
-      "lastModificationDate": 1687943944095,
-      "contentHash": "d016128ace58a6078eb46febfe645eeb",
+      "lastModificationDate": 1687962331919,
+      "contentHash": "404ed7ad0df608d9f05d9938d065b3b3",
       "sourceName": "test/foundry/gasCalculation/Users40.t.sol",
       "solcConfig": {
         "settings": {
@@ -3547,8 +3455,8 @@
       }
     },
     "test/foundry/gasCalculation/Users60.t.sol": {
-      "lastModificationDate": 1687944057328,
-      "contentHash": "100f04996d2aaac4b19fa505d51b053a",
+      "lastModificationDate": 1687962335845,
+      "contentHash": "4abe61398cf8aa6db013105d6aba536e",
       "sourceName": "test/foundry/gasCalculation/Users60.t.sol",
       "solcConfig": {
         "settings": {
@@ -3639,7 +3547,7 @@
       }
     },
     "test/foundry/helper.sol": {
-      "lastModificationDate": 1687940526839,
+      "lastModificationDate": 1687942274452,
       "contentHash": "f841a8e97ad934173e978e029ebe2f85",
       "sourceName": "test/foundry/helper.sol",
       "solcConfig": {

@@ -4,31 +4,36 @@ pragma solidity ^0.8.7;
 // AutomationCompatible.sol imports the functions from both ./AutomationBase.sol and
 // ./interfaces/AutomationCompatibleInterface.sol
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "../Exchange.sol";
+import "../ExchangeInfo.sol";
 /**
  * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY.
  * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract ExchangePriceListener is AutomationCompatibleInterface {
+contract ExchangePriceListener is AutomationCompatibleInterface, Ownable {
     /**
      * Public counter variable
      */
     Exchange public exchange;
-    uint public counter;
+    ExchangeInfo public exchangeInfo;
+    uint public lastUpdateTime;
 
-    /**
-     * Use an interval in seconds and a timestamp to slow execution of Upkeep
-     */
-    uint public immutable interval;
-    uint public lastTimeStamp;
+    
 
-    constructor(uint updateInterval) {
-        interval = updateInterval;
-        lastTimeStamp = block.timestamp;
+    constructor(address _exchange, address _exchangeInfo) {
+        exchange = Exchange(_exchange);
+        exchangeInfo = ExchangeInfo(_exchangeInfo);
+    }
 
-        counter = 0;
+    function setExchange(address _exchange) public onlyOwner {
+        exchange = Exchange(_exchange);
+    }
+
+    function setExchangeInfo(address _exchangeInfo) public onlyOwner {
+        exchangeInfo = ExchangeInfo(_exchangeInfo);
     }
 
     function checkUpkeep(
@@ -40,16 +45,22 @@ contract ExchangePriceListener is AutomationCompatibleInterface {
         returns (bool upkeepNeeded, bytes memory /* performData */)
     {
         uint marketPrice = exchange.marketPrice();
-        upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
-        
+        uint lastMarketPrice = exchangeInfo.lastMarketPrice();
+
+        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
+            upkeepNeeded = true;
+        }
+    
     }
 
     function performUpkeep(bytes calldata /* performData */) external override {
-        
-        if ((block.timestamp - lastTimeStamp) > interval) {
-            lastTimeStamp = block.timestamp;
-            counter = counter + 1;
+        uint marketPrice = exchange.marketPrice();
+        uint lastMarketPrice = exchangeInfo.lastMarketPrice();
+
+        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
+           exchangeInfo.requestFundingRate();
         }
+        lastUpdateTime = block.timestamp;
         
     }
 }

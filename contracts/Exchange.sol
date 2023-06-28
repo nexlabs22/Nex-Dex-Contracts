@@ -35,6 +35,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   uint8 public swapFee = 10; //=> 10/10000 = 0.1%
   uint256 public latestFeeUpdate;
 
+  uint lastSetFundingRateTime;
+  bool tradingLimit;
 
   struct Pool {
     uint256 vBaycPoolSize;
@@ -172,6 +174,10 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     latestFeeUpdate = block.timestamp;
   }
 
+  function setTradingLimit(bool _enabled) public onlyOwner {
+    tradingLimit = _enabled;
+  }
+
   //deposit collateral
   function depositCollateral(uint256 _amount) public {
     SafeERC20.safeTransferFrom(IERC20(usdc), msg.sender, address(this), _amount);
@@ -280,13 +286,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     uint256 newvUsdPoolSize = pool.vUsdPoolSize + _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
-    /*
+    if(tradingLimit){
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
       "You can't move the price more than 10% away from the oracle price."
     );
-    */
+    }
     bool isNewMarginHardLiquidatable = _isNewMarginLiquidatable(
       msg.sender,
       _usdAmount,
@@ -336,13 +342,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 k = pool.vBaycPoolSize * pool.vUsdPoolSize;
     uint256 newvUsdPoolSize = pool.vUsdPoolSize - _usdAmount;
     uint256 newvBaycPoolSize = k / newvUsdPoolSize;
-    /*
+    if(tradingLimit){
     bool isInTheRightRange = isPriceIntheRightRange(newvBaycPoolSize, newvUsdPoolSize);
     require(
       isInTheRightRange == true,
       "You can't move the price more than 10% away from the oracle price."
     );
-    */
+    }
     bool isNewMarginHardLiquidatable = _isNewMarginLiquidatable(
       msg.sender,
       _usdAmount,
@@ -1117,23 +1123,23 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
 
   function setFundingRate() external onlyOwner {
-    uint256 currentPrice = (pool.vUsdPoolSize * 1e18) / pool.vBaycPoolSize;
-    uint256 oraclePrice = exchangeInfo.oraclePrice();
-
+    
+    int fundingFraction = exchangeInfo.lastFundingRateAmount();
+    uint fundingFractionTime = exchangeInfo.lastFundingRateTime();
     //first the contract check actual vBayc positions balance of users
     int256 allLongvBaycBalance = getAllLongvBaycBalance();
     int256 allShortBaycBalance = getAllShortvBaycBalance();
 
     //check if we dont have one side(long or short balance = 0) this funding action will not run
     if (allLongvBaycBalance > 0 && allShortBaycBalance < 0) {
-      if (currentPrice > oraclePrice) {
+      if (fundingFraction > 0) {
         int256 minOpenInterest = (
           absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
             ? absoluteInt(allShortBaycBalance)
             : absoluteInt(allLongvBaycBalance)
         );
-        uint256 difference = currentPrice - oraclePrice;
-        uint256 fundingFee = (uint256(minOpenInterest) * difference) / 24e18;
+        // uint256 difference = currentPrice - oraclePrice;
+        uint256 fundingFee = (uint256(minOpenInterest) * uint(fundingFraction))/1e18 / 24e18;
         for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (virtualBalances[user].uservBaycBalance > 0) {
@@ -1148,14 +1154,14 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
             virtualBalances[user].virtualCollateral += int256(userFundingFee);
           }
         }
-      } else if (currentPrice < oraclePrice) {
+      } else if (fundingFraction < 0) {
         int256 minOpenInterest = (
           absoluteInt(allLongvBaycBalance) > absoluteInt(allShortBaycBalance)
             ? absoluteInt(allShortBaycBalance)
             : absoluteInt(allLongvBaycBalance)
         );
-        uint256 difference = oraclePrice - currentPrice;
-        uint256 fundingFee = (uint256(minOpenInterest) * difference) / 24e18;
+        // uint256 difference = oraclePrice - currentPrice;
+        uint256 fundingFee = (uint256(minOpenInterest) * positive(fundingFraction))/1e18 / 24e18;
         for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (virtualBalances[user].uservBaycBalance > 0) {
@@ -1171,6 +1177,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
           }
         }
       }
+      lastSetFundingRateTime = block.timestamp;
     }
   }
 

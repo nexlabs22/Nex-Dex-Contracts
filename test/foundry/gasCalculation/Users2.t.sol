@@ -46,6 +46,17 @@ contract Users2 is Test, ExchangeDeployer {
         usdc.transfer(add2, 1000e18);
     }
 
+    function updateFundingFraction() public {
+        uint marketPrice = exchange.marketPrice();
+        uint oraclePrice = exchange.oraclePrice();
+
+        int fundingFraction = (int(marketPrice)-int(oraclePrice)/int(oraclePrice));
+
+        //updating fundingRate
+        bytes32 requestId = exchangeInfo.requestFundingRate();
+        oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
+    }
+
 
     function testActions() public {
         //user 1 open 1000 usd long postion
@@ -72,6 +83,8 @@ contract Users2 is Test, ExchangeDeployer {
        vm.startPrank(add2);
        exchange.closePositionComplete(0);
        vm.stopPrank();
+       //update funding fee
+       updateFundingFraction();
        //funding fee
        exchange.setFundingRate();
     }

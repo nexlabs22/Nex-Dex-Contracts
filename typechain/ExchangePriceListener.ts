@@ -12,7 +12,7 @@ import {
   Signer,
   utils,
 } from "ethers";
-import { FunctionFragment, Result } from "@ethersproject/abi";
+import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
@@ -20,47 +20,98 @@ export interface ExchangePriceListenerInterface extends utils.Interface {
   contractName: "ExchangePriceListener";
   functions: {
     "checkUpkeep(bytes)": FunctionFragment;
-    "counter()": FunctionFragment;
     "exchange()": FunctionFragment;
-    "interval()": FunctionFragment;
-    "lastTimeStamp()": FunctionFragment;
+    "exchangeInfo()": FunctionFragment;
+    "lastUpdateTime()": FunctionFragment;
+    "owner()": FunctionFragment;
     "performUpkeep(bytes)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "setExchange(address)": FunctionFragment;
+    "setExchangeInfo(address)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   encodeFunctionData(
     functionFragment: "checkUpkeep",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "counter", values?: undefined): string;
   encodeFunctionData(functionFragment: "exchange", values?: undefined): string;
-  encodeFunctionData(functionFragment: "interval", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "lastTimeStamp",
+    functionFragment: "exchangeInfo",
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "lastUpdateTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
     functionFragment: "performUpkeep",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "setExchange", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "setExchangeInfo",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
 
   decodeFunctionResult(
     functionFragment: "checkUpkeep",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "counter", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "exchange", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "interval", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "lastTimeStamp",
+    functionFragment: "exchangeInfo",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastUpdateTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "performUpkeep",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setExchange",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setExchangeInfo",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
-  events: {};
+  events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
+
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  { previousOwner: string; newOwner: string }
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface ExchangePriceListener extends BaseContract {
   contractName: "ExchangePriceListener";
@@ -95,16 +146,35 @@ export interface ExchangePriceListener extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
 
-    counter(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     exchange(overrides?: CallOverrides): Promise<[string]>;
 
-    interval(overrides?: CallOverrides): Promise<[BigNumber]>;
+    exchangeInfo(overrides?: CallOverrides): Promise<[string]>;
 
-    lastTimeStamp(overrides?: CallOverrides): Promise<[BigNumber]>;
+    lastUpdateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
     performUpkeep(
       arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setExchange(
+      _exchange: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -114,16 +184,35 @@ export interface ExchangePriceListener extends BaseContract {
     overrides?: CallOverrides
   ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
 
-  counter(overrides?: CallOverrides): Promise<BigNumber>;
-
   exchange(overrides?: CallOverrides): Promise<string>;
 
-  interval(overrides?: CallOverrides): Promise<BigNumber>;
+  exchangeInfo(overrides?: CallOverrides): Promise<string>;
 
-  lastTimeStamp(overrides?: CallOverrides): Promise<BigNumber>;
+  lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
 
   performUpkeep(
     arg0: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setExchange(
+    _exchange: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setExchangeInfo(
+    _exchangeInfo: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  transferOwnership(
+    newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -133,32 +222,74 @@ export interface ExchangePriceListener extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
 
-    counter(overrides?: CallOverrides): Promise<BigNumber>;
-
     exchange(overrides?: CallOverrides): Promise<string>;
 
-    interval(overrides?: CallOverrides): Promise<BigNumber>;
+    exchangeInfo(overrides?: CallOverrides): Promise<string>;
 
-    lastTimeStamp(overrides?: CallOverrides): Promise<BigNumber>;
+    lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     performUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<void>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setExchange(_exchange: string, overrides?: CallOverrides): Promise<void>;
+
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+  };
 
   estimateGas: {
     checkUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
-    counter(overrides?: CallOverrides): Promise<BigNumber>;
-
     exchange(overrides?: CallOverrides): Promise<BigNumber>;
 
-    interval(overrides?: CallOverrides): Promise<BigNumber>;
+    exchangeInfo(overrides?: CallOverrides): Promise<BigNumber>;
 
-    lastTimeStamp(overrides?: CallOverrides): Promise<BigNumber>;
+    lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     performUpkeep(
       arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setExchange(
+      _exchange: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -169,16 +300,35 @@ export interface ExchangePriceListener extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    counter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     exchange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    interval(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    exchangeInfo(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    lastTimeStamp(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    lastUpdateTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     performUpkeep(
       arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setExchange(
+      _exchange: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

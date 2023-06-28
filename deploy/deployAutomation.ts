@@ -14,30 +14,21 @@ async function main() {
   
   const network = await ethers.provider.getNetwork();
   const chainId = network.chainId;
-  // const jobId = ethers.utils.formatBytes32String(networks[chainId].externalJobId)
-  // const jobId = ethers.utils.toUtf8Bytes(networks[chainId].externalJobId)
-  // const myBytes = ethers.utils.toUtf8Bytes('2369c17d81074d13849b7a64ecaccc84');
-  // const myHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('2369c17d81074d13849b7a64ecaccc84'));
-  // const myHash = ethers.utils.formatBytes32String('2369c17d81074d13849b7a64ecaccc84');
-  // const myBytes32 = ethers.utils.hexlify(myHash);
-  // console.log("jobId", myHash);
-  // return;
-  const ExchangeInfo = await ethers.getContractFactory("ExchangeInfo")
-  const exchangeInfo = await ExchangeInfo.deploy(
+
+  const Automation = await ethers.getContractFactory("ExchangePriceListener")
+  const automation = await Automation.deploy(
     networks[chainId].baycExchangeAddress,
-    networks[chainId].linkAddress,
-    networks[chainId].oracleAddress,
-    networks[chainId].externalJobIdBytes32
+    networks[chainId].baycExchangeInfoAddress
   )
 
-  console.log(`ExchangeInfo contract deployed by address ${exchangeInfo.address}`)
+  console.log(`Automation contract deployed by address ${automation.address}`)
 
   return;
   if (network.name == "hardhat" || network.name == "localhost") return
-  await exchangeInfo.deployTransaction.wait(21)
+  await automation.deployTransaction.wait(21)
   console.log("Verifing...")
   await hre.run("verify:verify", {
-    address: exchangeInfo.address,
+    address: automation.address,
     constructorArguments: [
       "0xB677bfBc9B09a3469695f40477d05bc9BcB15F50",//nftOracleFeed
       "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e", // eth/usd price feed

@@ -77,6 +77,7 @@ export interface ExchangeInterface extends utils.Interface {
     "setExchangeInfo(address)": FunctionFragment;
     "setFundingRate()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
+    "setTradingLimit(bool)": FunctionFragment;
     "swapFee()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdc()": FunctionFragment;
@@ -305,6 +306,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setSwapFee",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTradingLimit",
+    values: [boolean]
   ): string;
   encodeFunctionData(functionFragment: "swapFee", values?: undefined): string;
   encodeFunctionData(
@@ -546,6 +551,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setSwapFee", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setTradingLimit",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "swapFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
@@ -1020,6 +1029,11 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setTradingLimit(
+      _enabled: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     swapFee(overrides?: CallOverrides): Promise<[number]>;
 
     transferOwnership(
@@ -1307,6 +1321,11 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setTradingLimit(
+    _enabled: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   swapFee(overrides?: CallOverrides): Promise<number>;
 
   transferOwnership(
@@ -1586,6 +1605,11 @@ export interface Exchange extends BaseContract {
     setFundingRate(overrides?: CallOverrides): Promise<void>;
 
     setSwapFee(_newFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+    setTradingLimit(
+      _enabled: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     swapFee(overrides?: CallOverrides): Promise<number>;
 
@@ -2025,6 +2049,11 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setTradingLimit(
+      _enabled: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     swapFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
@@ -2322,6 +2351,11 @@ export interface Exchange extends BaseContract {
 
     setSwapFee(
       _newFee: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setTradingLimit(
+      _enabled: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

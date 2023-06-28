@@ -13,6 +13,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
 
     //oracle data
     uint public oraclePrice;
+    uint public lastMarketPrice;
     uint public lastFundingRateTime;
     int public lastFundingRateAmount;
 
@@ -87,6 +88,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     oraclePrice = _number0;
     lastFundingRateTime = _number1;
     lastFundingRateAmount = _number2;
+    lastMarketPrice = exchange.marketPrice();
   }
 
   

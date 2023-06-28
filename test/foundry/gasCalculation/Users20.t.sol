@@ -56,6 +56,17 @@ contract Users20 is Test, ExchangeDeployer {
 
     }
 
+    function updateFundingFraction() public {
+        uint marketPrice = exchange.marketPrice();
+        uint oraclePrice = exchange.oraclePrice();
+
+        int fundingFraction = (int(marketPrice)-int(oraclePrice)/int(oraclePrice));
+        //fund link
+        link.transfer(address(exchangeInfo), 1e18);
+        //updating fundingRate
+        bytes32 requestId = exchangeInfo.requestFundingRate();
+        oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
+    }
 
     function testActions() public {
         bool shouldBeLong = true;
@@ -84,6 +95,8 @@ contract Users20 is Test, ExchangeDeployer {
             }
             console.log("exchange market price", exchange.marketPrice()/1e18);
             vm.stopPrank();
+            //update funding fee
+            updateFundingFraction();
             //funding fee
             exchange.setFundingRate();
         }
@@ -102,6 +115,8 @@ contract Users20 is Test, ExchangeDeployer {
             vm.startPrank(users[i]);
             exchange.closePositionComplete(0);
             vm.stopPrank();
+            //update funding fee
+            updateFundingFraction();
             //funding fee
             exchange.setFundingRate();
         }

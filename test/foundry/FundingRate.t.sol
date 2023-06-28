@@ -55,6 +55,17 @@ contract FundingRate is Test, ExchangeDeployer {
 
     }
 
+    function updateFundingFraction() public {
+        uint marketPrice = exchange.marketPrice();
+        uint oraclePrice = exchange.oraclePrice();
+
+        int fundingFraction = (int(marketPrice)-int(oraclePrice)/int(oraclePrice));
+
+        //updating fundingRate
+        bytes32 requestId = exchangeInfo.requestFundingRate();
+        oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
+    }
+
     
 
     function testFundingRewards() public {
@@ -106,6 +117,8 @@ contract FundingRate is Test, ExchangeDeployer {
        vm.startPrank(add4);
        exchange.openShortPosition(1000e18, 0);
        vm.stopPrank();
+       //update funding fee
+       updateFundingFraction();
        // runs fundingRate function
        exchange.setFundingRate();
        int add1FundingFee = exchange.virtualCollateral(add1);

@@ -30,6 +30,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     "getMinimumShortUsdOut(uint256)": FunctionFragment;
     "lastFundingRateAmount()": FunctionFragment;
     "lastFundingRateTime()": FunctionFragment;
+    "lastMarketPrice()": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -75,6 +76,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "lastFundingRateTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastMarketPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -142,6 +147,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "lastFundingRateTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastMarketPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -296,6 +305,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    lastMarketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
@@ -376,6 +387,8 @@ export interface ExchangeInfo extends BaseContract {
 
   lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
+  lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
@@ -455,6 +468,8 @@ export interface ExchangeInfo extends BaseContract {
     lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -572,6 +587,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
+    lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -656,6 +673,8 @@ export interface ExchangeInfo extends BaseContract {
     lastFundingRateTime(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    lastMarketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
