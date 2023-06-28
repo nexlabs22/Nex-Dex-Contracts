@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1684652603088,
-      "contentHash": "f94e5abe3694a285287aac2b76d4e895",
+      "lastModificationDate": 1687027746093,
+      "contentHash": "e222e2fb6094b95e35788ff052ab6bc7",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -45,7 +45,20 @@
         }
       },
       "imports": [
+        "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -60,6 +73,70 @@
       "artifacts": {
         "Exchange": {
           "0.8.17+commit.8df45f5f.Windows.msvc": "Exchange.sol\\Exchange.json"
+        }
+      }
+    },
+    "contracts/ExchangeInfo.sol": {
+      "lastModificationDate": 1687008354361,
+      "contentHash": "7cda4fa5e3e6eea20105473978e15a65",
+      "sourceName": "contracts/ExchangeInfo.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
+        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
+        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol"
+      ],
+      "versionRequirement": "^0.8.17",
+      "artifacts": {
+        "ExchangeInfo": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ExchangeInfo.sol\\ExchangeInfo.json"
         }
       }
     },
@@ -250,6 +327,108 @@
         }
       }
     },
+    "contracts/test/LinkToken.sol": {
+      "lastModificationDate": 1687939427667,
+      "contentHash": "9259cd722cf826b4da5efd1edb7b1633",
+      "sourceName": "contracts/test/LinkToken.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@openzeppelin\\contracts/token/ERC20/ERC20.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol"
+      ],
+      "versionRequirement": "^0.8.6",
+      "artifacts": {
+        "ERC677": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkToken.sol\\ERC677.json"
+        },
+        "ERC677Receiver": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkToken.sol\\ERC677Receiver.json"
+        },
+        "ERC677Token": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkToken.sol\\ERC677Token.json"
+        },
+        "LinkERC20": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkToken.sol\\LinkERC20.json"
+        },
+        "LinkToken": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkToken.sol\\LinkToken.json"
+        }
+      }
+    },
+    "contracts/test/MockApiOracle.sol": {
+      "lastModificationDate": 1687705656072,
+      "contentHash": "059fe4a673e0eb04572fd293ade67bd4",
+      "sourceName": "contracts/test/MockApiOracle.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "MockApiOracle": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "MockApiOracle.sol\\MockApiOracle.json"
+        }
+      }
+    },
     "contracts/test/MockV3Aggregator.sol": {
       "lastModificationDate": 1677019206806,
       "contentHash": "17637cbd899c9197b7d3437ab850acac",
@@ -292,6 +471,86 @@
       "artifacts": {
         "MockV3Aggregator": {
           "0.8.17+commit.8df45f5f.Windows.msvc": "test\\MockV3Aggregator.sol\\MockV3Aggregator.json"
+        }
+      }
+    },
+    "contracts/test/libs/LinkTokenReceiver.sol": {
+      "lastModificationDate": 1686927296745,
+      "contentHash": "6b61e536ba5d79c63017dc4504f29360",
+      "sourceName": "contracts/test/libs/LinkTokenReceiver.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "LinkTokenReceiver": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkTokenReceiver.sol\\LinkTokenReceiver.json"
+        }
+      }
+    },
+    "contracts/test/libs/SafeMathChainlink.sol": {
+      "lastModificationDate": 1686927174224,
+      "contentHash": "e9e73c71474ed323c31d95dc84897aac",
+      "sourceName": "contracts/test/libs/SafeMathChainlink.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "SafeMathChainlink": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "SafeMathChainlink.sol\\SafeMathChainlink.json"
         }
       }
     },
@@ -964,6 +1223,100 @@
         }
       }
     },
+    "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol": {
+      "lastModificationDate": 1675287193433,
+      "contentHash": "9dc050539cdf1579d5650d41d0df9ec2",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Chainlink": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "Chainlink.sol\\Chainlink.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/ChainlinkClient.sol": {
+      "lastModificationDate": 1675287193439,
+      "contentHash": "6af479cbde42f1a7225c9cebc6e32239",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/ChainlinkClient.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ChainlinkClient": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ChainlinkClient.sol\\ChainlinkClient.json"
+        }
+      }
+    },
     "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol": {
       "lastModificationDate": 1675287193340,
       "contentHash": "f00f7f6071813249ee968d1114635a81",
@@ -1087,6 +1440,249 @@
         }
       }
     },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol": {
+      "lastModificationDate": 1675287193449,
+      "contentHash": "14407a6ead15cff8a0e0a7f8037c68f5",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ChainlinkRequestInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ChainlinkRequestInterface.sol\\ChainlinkRequestInterface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol": {
+      "lastModificationDate": 1675287193504,
+      "contentHash": "06b6aefcae95de6d1597ad8e1d73a08b",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ENSInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ENSInterface.sol\\ENSInterface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol": {
+      "lastModificationDate": 1675287193579,
+      "contentHash": "da5a0c3bd86c896f6a407f909c57edf3",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "LinkTokenInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "LinkTokenInterface.sol\\LinkTokenInterface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol": {
+      "lastModificationDate": 1675287193632,
+      "contentHash": "e1822c36361fc3a26b5a68df3ddab15d",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "OperatorInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "OperatorInterface.sol\\OperatorInterface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol": {
+      "lastModificationDate": 1675287193642,
+      "contentHash": "6283e42024961596926c2b5015eef8e0",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "OracleInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "OracleInterface.sol\\OracleInterface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol": {
+      "lastModificationDate": 1675287193663,
+      "contentHash": "27da4b2007d200dd5afff31dbf31ac99",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "PointerInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "PointerInterface.sol\\PointerInterface.json"
+        }
+      }
+    },
     "node_modules/@chainlink/contracts/src/v0.8/tests/MockV3Aggregator.sol": {
       "lastModificationDate": 1675287193613,
       "contentHash": "1ac94788dae0d2659a63a13860d04244",
@@ -1128,6 +1724,128 @@
       "artifacts": {
         "MockV3Aggregator": {
           "0.8.17+commit.8df45f5f.Windows.msvc": "MockV3Aggregator.sol\\MockV3Aggregator.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol": {
+      "lastModificationDate": 1675287193422,
+      "contentHash": "52ac6f99fb0635751ae4ed11139878fd",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "BufferChainlink": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "BufferChainlink.sol\\BufferChainlink.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol": {
+      "lastModificationDate": 1675287193428,
+      "contentHash": "99b3ee2c29bc0d1a5cba583d9e8d835e",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol"
+      ],
+      "versionRequirement": ">=0.4.19",
+      "artifacts": {
+        "CBORChainlink": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "CBORChainlink.sol\\CBORChainlink.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol": {
+      "lastModificationDate": 1675287193508,
+      "contentHash": "24a98b0606654e662097eed9ffa91a11",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ENSResolver": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ENSResolver.sol\\ENSResolver.json"
         }
       }
     },
@@ -1642,9 +2360,99 @@
         }
       }
     },
+    "test/foundry/ExchangeDeployer.sol": {
+      "lastModificationDate": 1687943159720,
+      "contentHash": "acb8bddb0fde3e6521633c186c5e1349",
+      "sourceName": "test/foundry/ExchangeDeployer.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
+        "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
+        "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
+        "lib/forge-std/lib/ds-test/src\\test.sol",
+        "lib/forge-std/src/Common.sol",
+        "lib/forge-std/src/Components.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src\\Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
+        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
+        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/ERC20.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol"
+      ],
+      "versionRequirement": "^0.8.17",
+      "artifacts": {
+        "ExchangeDeployer": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "ExchangeDeployer.sol\\ExchangeDeployer.json"
+        }
+      }
+    },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1684654331409,
-      "contentHash": "1486e1a4291429bd13de9294403b15ae",
+      "lastModificationDate": 1687943308038,
+      "contentHash": "5bed4d022d6bc2bd41c30e0bf0132c63",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -1676,8 +2484,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -1693,10 +2506,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -1708,6 +2532,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -1751,6 +2576,7 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Gold.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1769,10 +2595,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -1827,6 +2664,7 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Index-contracts/Silver.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
@@ -1845,10 +2683,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -1870,8 +2719,8 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1684654422691,
-      "contentHash": "5ce0b99b6193d2045d1fe369a13f14a6",
+      "lastModificationDate": 1687943381408,
+      "contentHash": "2d44e322031b7b359940283d0d09561e",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
         "settings": {
@@ -1903,8 +2752,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -1920,10 +2774,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -1935,6 +2800,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -1945,8 +2811,8 @@
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1684654470529,
-      "contentHash": "22e31e461596d77c46f18927582c6ed7",
+      "lastModificationDate": 1687943482149,
+      "contentHash": "06907b20ea938bfd9e3f11e31975ae09",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
         "settings": {
@@ -1978,8 +2844,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -1995,10 +2866,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2010,6 +2892,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2020,8 +2903,8 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1684654521639,
-      "contentHash": "412d1b2b67fb61203eca926daf5af9c1",
+      "lastModificationDate": 1687943557542,
+      "contentHash": "dec1967ae9542358c712d62c9f14057c",
       "sourceName": "test/foundry/Positions.t.sol",
       "solcConfig": {
         "settings": {
@@ -2053,8 +2936,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2070,10 +2958,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2085,6 +2984,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2095,8 +2995,8 @@
       }
     },
     "test/foundry/gasCalculation/Users100.t.sol": {
-      "lastModificationDate": 1684652875304,
-      "contentHash": "f1dc5c927765e1f2fd91dd83d284eec5",
+      "lastModificationDate": 1687944185844,
+      "contentHash": "97e0012e280ba8c857c7c94be6cde4db",
       "sourceName": "test/foundry/gasCalculation/Users100.t.sol",
       "solcConfig": {
         "settings": {
@@ -2128,8 +3028,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2145,10 +3050,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2160,6 +3076,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2170,8 +3087,8 @@
       }
     },
     "test/foundry/gasCalculation/Users1000.t.sol": {
-      "lastModificationDate": 1684652941361,
-      "contentHash": "303dfbbaa4eabe4e7419546967edcc4b",
+      "lastModificationDate": 1687944301547,
+      "contentHash": "f9539dcb31b98d32ee2aa3dac699541c",
       "sourceName": "test/foundry/gasCalculation/Users1000.t.sol",
       "solcConfig": {
         "settings": {
@@ -2203,8 +3120,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2220,10 +3142,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2235,6 +3168,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2245,8 +3179,8 @@
       }
     },
     "test/foundry/gasCalculation/Users10000.t.sol": {
-      "lastModificationDate": 1684652958544,
-      "contentHash": "c2a285ead7e00b72be0d260f152b8763",
+      "lastModificationDate": 1687944399898,
+      "contentHash": "461dd16f19345b3619c178b0e1ac454d",
       "sourceName": "test/foundry/gasCalculation/Users10000.t.sol",
       "solcConfig": {
         "settings": {
@@ -2278,8 +3212,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2295,10 +3234,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2310,6 +3260,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2320,8 +3271,8 @@
       }
     },
     "test/foundry/gasCalculation/Users2.t.sol": {
-      "lastModificationDate": 1684652745149,
-      "contentHash": "86b60f0b8b034054d2d9263f1254478a",
+      "lastModificationDate": 1687943705031,
+      "contentHash": "fda43fa738cab6fb627624a5fe8c45e4",
       "sourceName": "test/foundry/gasCalculation/Users2.t.sol",
       "solcConfig": {
         "settings": {
@@ -2353,8 +3304,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2370,10 +3326,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2385,6 +3352,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2395,8 +3363,8 @@
       }
     },
     "test/foundry/gasCalculation/Users20.t.sol": {
-      "lastModificationDate": 1684652773201,
-      "contentHash": "681f6caee2463098fb61d2b1502ee80e",
+      "lastModificationDate": 1687943840213,
+      "contentHash": "dfb6112c26ac0cac190b31fceb0a913d",
       "sourceName": "test/foundry/gasCalculation/Users20.t.sol",
       "solcConfig": {
         "settings": {
@@ -2428,8 +3396,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2445,10 +3418,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2460,6 +3444,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2470,8 +3455,8 @@
       }
     },
     "test/foundry/gasCalculation/Users40.t.sol": {
-      "lastModificationDate": 1684652813060,
-      "contentHash": "c12dde40ff375e4de8c0382a637e4abb",
+      "lastModificationDate": 1687943944095,
+      "contentHash": "d016128ace58a6078eb46febfe645eeb",
       "sourceName": "test/foundry/gasCalculation/Users40.t.sol",
       "solcConfig": {
         "settings": {
@@ -2503,8 +3488,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2520,10 +3510,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2535,6 +3536,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2545,8 +3547,8 @@
       }
     },
     "test/foundry/gasCalculation/Users60.t.sol": {
-      "lastModificationDate": 1684652853337,
-      "contentHash": "135cb6643af5af4ea55b1a89ee17c14f",
+      "lastModificationDate": 1687944057328,
+      "contentHash": "100f04996d2aaac4b19fa505d51b053a",
       "sourceName": "test/foundry/gasCalculation/Users60.t.sol",
       "solcConfig": {
         "settings": {
@@ -2578,8 +3580,13 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
         "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
         "lib/forge-std/src/Common.sol",
         "lib/forge-std/src/Components.sol",
@@ -2595,10 +3602,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
@@ -2610,6 +3628,7 @@
         "node_modules/@openzeppelin/contracts/utils/Address.sol",
         "node_modules/@openzeppelin/contracts/utils/Context.sol",
         "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
         "test/foundry\\helper.sol"
       ],
       "versionRequirement": "^0.8.17",
@@ -2620,7 +3639,7 @@
       }
     },
     "test/foundry/helper.sol": {
-      "lastModificationDate": 1678662857304,
+      "lastModificationDate": 1687940526839,
       "contentHash": "f841a8e97ad934173e978e029ebe2f85",
       "sourceName": "test/foundry/helper.sol",
       "solcConfig": {
@@ -2653,6 +3672,7 @@
       },
       "imports": [
         "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
         "contracts/Token.sol",
         "contracts/test/MockV3Aggregator.sol",
         "lib/forge-std/lib/ds-test/src\\test.sol",
@@ -2670,10 +3690,21 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
         "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
         "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
         "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",

@@ -10,27 +10,16 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "./ExchangeInfo.sol";
 
 // @title Nex Exchange smart contract
 
 contract Exchange is Ownable, ReentrancyGuard, Pausable {
   using SafeMath for uint256;
-
-  //test
-  address[] public hardLiquidatedUsers;
-  function getHardLiquidatedUsers() public view returns(address[] memory){
-    return hardLiquidatedUsers;
-  }
-  address[] public partialLiquidatedUsers;
-  function getPartialLiquidatedUsers() public view returns(address[] memory){
-    return partialLiquidatedUsers;
-  }
-
-
-  AggregatorV3Interface internal nftFloorPriceFeed;
-
-  AggregatorV3Interface internal priceFeed;
+  
+  
+  ExchangeInfo public exchangeInfo;
 
   address public usdc;
 
@@ -46,7 +35,6 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   uint8 public swapFee = 10; //=> 10/10000 = 0.1%
   uint256 public latestFeeUpdate;
 
-  address[] liquidateList;
 
   struct Pool {
     uint256 vBaycPoolSize;
@@ -67,6 +55,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   mapping(address => VirtualBalance) public virtualBalances;
   mapping(address => bool) public isUserActive;
 
+  
   event NewOracle(address oracle);
   event Deposit(address token, address user, uint256 amount, uint256 balance);
   event Withdraw(address token, address user, uint256 amount, uint256 balance);
@@ -82,12 +71,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   event Price(uint price, uint volume, uint timestamp, uint vBaycPoolSize, uint vUsdPoolSize);
 
   constructor(
-    address _nftOracleAddress,
-    address _priceFeed,
     address _usdc
   ) {
-    nftFloorPriceFeed = AggregatorV3Interface(_nftOracleAddress);
-    priceFeed = AggregatorV3Interface(_priceFeed);
     usdc = _usdc;
   }
 
@@ -116,45 +101,24 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     return virtualBalances[_user].uservBaycBalance;
   }
 
-  //get nft price in USD
-  function showPriceUSD() public view returns (uint256) {
-    uint256 price = showPriceETH();
-    uint256 ethPrice = getEthUsdPrice();
-    return (price * ethPrice) / 1e18;
+  function setExchangeInfo(address _exchangeInfo) public onlyOwner {
+    require(_exchangeInfo != address(0), "New exchange info address can not be a zero address");
+    exchangeInfo = ExchangeInfo(_exchangeInfo);
   }
 
-  //get eth/usd price
-  function getEthUsdPrice() public view returns (uint256) {
-    (
-      ,
-      /*uint80 roundID*/
-      int256 price, /*uint startedAt*/
-      ,
-      ,
-
-    ) = /*uint timeStamp*/
-      /*uint80 answeredInRound*/
-      priceFeed.latestRoundData();
-      uint8 decimals = priceFeed.decimals();
-      uint roundPrice = uint(price) * (10 **(18 - decimals));
-      return roundPrice;
+  function lastFundingRateAmount() public view returns (int256) {
+    return exchangeInfo.lastFundingRateAmount();
   }
 
-  function showPriceETH() public view returns (uint256) {
-    (
-      ,
-      /*uint80 roundID*/
-      int256 nftFloorPrice, /*uint startedAt*/
-      ,
-      ,
-
-    ) = /*uint timeStamp*/
-      /*uint80 answeredInRound*/
-      nftFloorPriceFeed.latestRoundData();
-      uint decimals = nftFloorPriceFeed.decimals();
-      uint roundedPrice = uint(nftFloorPrice)*10**(18 - decimals);
-      return roundedPrice;
+  function lastFundingRateTime() public view returns (uint256) {
+    return exchangeInfo.lastFundingRateTime();
   }
+
+  function oraclePrice() public view returns (uint256) {
+    return exchangeInfo.oraclePrice();
+  }
+
+  
 
   //check is user exist in activeUsers array
   function doesUserExist(address _user) public view returns (bool) {
@@ -192,15 +156,12 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   //for this time owner can do it
   function initialVirtualPool(uint256 _assetSize) public onlyOwner {
     require(poolInitialized == false, "You cannot initialize pool again");
-    uint256 oraclePrice = showPriceUSD();
+    uint256 oraclePrice = exchangeInfo.oraclePrice();
     pool.vBaycPoolSize = _assetSize;
     pool.vUsdPoolSize = (_assetSize * oraclePrice) / 1e18;
     poolInitialized = true;
   }
 
-  function changeNftOracleAddress(address _newAddress) public onlyOwner {
-    nftFloorPriceFeed = AggregatorV3Interface(_newAddress);
-  }
 
   //Notice: newFee should be between 1 to 100 (0.01% - 1%)
   function setSwapFee(uint8 _newFee) public onlyOwner {
@@ -307,9 +268,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
   }
 
-  function oraclePrice() public view returns (uint256) {
-    return showPriceUSD();
-  }
+  
 
   function getCurrentExchangePrice() public view returns (uint256) {
     return (1e18 * pool.vUsdPoolSize) / pool.vBaycPoolSize;
@@ -571,12 +530,6 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
 
   //return the pnl of user
-  /*
-  user vBayc balance = 2Bayc
-  user vUsd balance = -3000
-  currnent 2 vBayc value =  4000
-  user pnl = 4000 - positive(-3000) = 1000$
-  */
   function getPNL(address _user) public view returns (int256 pnl) {
     if (virtualBalances[_user].uservBaycBalance > 0) {
       uint256 currentBaycValue = getShortVusdAmountOut(
@@ -784,8 +737,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       _isHardLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
       "User is not hard liquidatable."
     );
-    //test
-    hardLiquidatedUsers.push(_user);
+    
 
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
@@ -983,10 +935,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       _isPartialLiquidatable(_user, _vBaycNewPoolSize, _vUsdNewPoolSize),
       "user can not be partially liquidated"
     );
-    //test
-    partialLiquidatedUsers.push(_user);
-
-
+    
     vBaycNewPoolSize = _vBaycNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
 
@@ -1169,7 +1118,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   function setFundingRate() external onlyOwner {
     uint256 currentPrice = (pool.vUsdPoolSize * 1e18) / pool.vBaycPoolSize;
-    uint256 oraclePrice = showPriceUSD();
+    uint256 oraclePrice = exchangeInfo.oraclePrice();
 
     //first the contract check actual vBayc positions balance of users
     int256 allLongvBaycBalance = getAllLongvBaycBalance();
@@ -1241,7 +1190,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     returns (bool)
   {
     uint256 currentPrice = (1e18 * pool.vUsdPoolSize) / pool.vBaycPoolSize;
-    uint256 oraclePrice = showPriceUSD();
+    uint256 oraclePrice = exchangeInfo.oraclePrice();
     uint256 newPrice = (1e18 * _vUsdNewPoolSize) / _vBaycNewPoolSize;
 
     int256 currentDifference = int256(oraclePrice) - int256(currentPrice);

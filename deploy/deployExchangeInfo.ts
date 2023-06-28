@@ -15,7 +15,10 @@ async function main() {
   const exchangeInfo = await ExchangeInfo.deploy(
     // "0xf4338c04b412434943e9301dD357C2Ed54e775Cf" // exchange address
     // "0x6B1383F637d4Ad470c3F27d320340c9189fE8f47" // gold address
-    "0x9b6F6D0994De28DF13d820F7fAA29a2d29224DcB" // silver address
+    "0x9b6F6D0994De28DF13d820F7fAA29a2d29224DcB", // silver address
+    "0x9b6F6D0994De28DF13d820F7fAA29a2d29224DcB", //chaninlink token address
+    "0x9b6F6D0994De28DF13d820F7fAA29a2d29224DcB", //oracle address
+    "0x3233363963313764383130373464313338343962376136346563616363633834" //bytes
   )
 
   console.log(`ExchangeInfo contract deployed by address ${exchangeInfo.address}`)

@@ -11,24 +11,25 @@ import type {
 
 const _abi = [
   {
-    constant: false,
     inputs: [
       {
+        internalType: "address",
         name: "_sender",
         type: "address",
       },
       {
+        internalType: "uint256",
         name: "_value",
         type: "uint256",
       },
       {
+        internalType: "bytes",
         name: "_data",
         type: "bytes",
       },
     ],
     name: "onTokenTransfer",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },

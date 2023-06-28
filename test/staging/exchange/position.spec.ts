@@ -3,7 +3,7 @@ import { assert, expect } from "chai"
 import { BigNumber, ContractReceipt, ContractTransaction } from "ethers"
 import { network, deployments, ethers, run } from "hardhat"
 import { developmentChains, networkConfig } from "../../../helper-hardhat-config"
-import { APIConsumer, LinkToken, MockOracle } from "../../../typechain"
+import { APIConsumer, LinkToken, MockApiOracle, MockOracle } from "../../../typechain"
 
 const chainId = 31337;
 const jobId = ethers.utils.toUtf8Bytes(networkConfig[chainId].jobId!);
@@ -16,28 +16,52 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       let exchange:any
       let nftOracle:any
       let linkToken: LinkToken
-      let mockOracle: MockOracle
+      let mockOracle: MockApiOracle
       let usdc:any
       let accounts:any
       let exchangeInfo:any
 
       beforeEach(async () => {
         await deployments.fixture(["mocks", "nftOracle", "exchange","exchangeInfo", "token"]);
-        // linkToken = await ethers.getContract("LinkToken")
+        linkToken = await ethers.getContract("LinkToken")
         nftOracle = await ethers.getContract("MockV3AggregatorNft")
         exchange = await ethers.getContract("Exchange")
         usdc = await ethers.getContract("Token")
         exchangeInfo = await ethers.getContract("ExchangeInfo");
+        mockOracle = await ethers.getContract("MockApiOracle")
+        usdc = await ethers.getContract("Token")
         accounts = await ethers.provider.getSigner()
+
+        //fund link
+        await run("fund-link", { contract: exchangeInfo.address, linkaddress: linkToken.address })
+        //set exchange info
+        await exchange.setExchangeInfo(exchangeInfo.address);
       })
 
-      async function setOraclePrice(newPrice:any){
-        await nftOracle.updateAnswer((newPrice*10**18).toString())
-        }
+      function numToBytes(num:number) {
+        const value = ethers.BigNumber.from(num.toLocaleString('fullwide', { useGrouping: false }));
+        const bytes32Value = ethers.utils.hexZeroPad(value.toHexString(), 32);
+        return bytes32Value
+      }
+
+      const latestPrice = 100
+      const latestFundingRate = 10
+      let date = new Date();
+      let timestamp = date.getTime();
+
+      async function setOraclePrice(newPrice: any) {
+        // await nftOracle.updateAnswer((1 * 10 ** 18).toString())
+        // await priceFeed.updateAnswer((newPrice * 10 ** 18).toLocaleString('fullwide', {useGrouping:false}))
+        const transaction: ContractTransaction = await exchangeInfo.requestFundingRate();
+        const transactionReceipt: ContractReceipt = await transaction.wait(1);
+        if (!transactionReceipt.events) return
+        const requestId: string = transactionReceipt?.events[0].topics[1]
+        await mockOracle.fulfillOracleFundingRateRequest(requestId, numToBytes(newPrice*10**18), numToBytes(timestamp), numToBytes(latestFundingRate));
+      }
       
       it("Test open and close long position", async () => {
         const [owner, account1, account2] = await ethers.getSigners();
-        await setOraclePrice(1.5);
+        await setOraclePrice(1500);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral
@@ -90,7 +114,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
 
       it("Test open and close short position", async () => {
         const [owner, account1, account2] = await ethers.getSigners();
-        await setOraclePrice(1.5);
+        await setOraclePrice(1500);
         // console.log(toEther(await exchange.showPriceETH()))
         await exchange.initialVirtualPool(toWei('5'));
         //owner deposit collateral

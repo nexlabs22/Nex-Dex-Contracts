@@ -6,8 +6,23 @@ pragma abicoder v2;
 
 import {Exchange} from "./Exchange.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
-contract ExchangeInfo is Ownable {
+contract ExchangeInfo is Ownable, ChainlinkClient {
+    using Chainlink for Chainlink.Request;
+
+    //oracle data
+    uint public oraclePrice;
+    uint public lastFundingRateTime;
+    int public lastFundingRateAmount;
+
+    string baseUrl = "https://app.nexlabs.io/api/lastFundingRate?address=";
+    string urlParams = "&returnType=number&multiplyFunc=18&timesNegFund=true";
+
+    bytes32 private externalJobId;
+    uint256 private oraclePayment;
+
+    event RequestFulfilled(bytes32 indexed requestId,uint256 _number0,uint256 _number1, int256 _number2);
 
     struct Pool {
     uint256 vBaycPoolSize;
@@ -16,15 +31,83 @@ contract ExchangeInfo is Ownable {
 
     Exchange public exchange;
 
-    constructor(address exchangeAddress){
+    constructor(
+      address exchangeAddress, 
+      address _chainlinkToken, 
+      address _oracleAddress, 
+      bytes32 _externalJobId
+      ){
         exchange = Exchange(exchangeAddress);
+        setChainlinkToken(_chainlinkToken);
+        setChainlinkOracle(_oracleAddress);
+        externalJobId = _externalJobId;
+        oraclePayment = ((1 * LINK_DIVISIBILITY) / 10); // n * 10**18
     }
 
-    function changeExchangeAddress(address exchangeAddress) public onlyOwner {
-        exchange = Exchange(exchangeAddress);
-    }
+  function changeExchangeAddress(address exchangeAddress) public onlyOwner {
+      exchange = Exchange(exchangeAddress);
+  }
+
+  function setOracleAddress(address _newOracle) public onlyOwner {
+  require(_newOracle != address(0), "New address can not be a zero address");
+  setChainlinkOracle(_newOracle);
+  }
+
+  function setExternalJobId(bytes32 _jobId) public onlyOwner {
+    externalJobId = _jobId;
+  }
+
+  function setUrl(string memory _beforeAddress, string memory _afterAddress) public onlyOwner{
+    baseUrl = _beforeAddress;
+    urlParams = _afterAddress;
+  }
+
+  function requestFundingRate(
+  )
+    public
+    returns(bytes32)
+  {
+    string memory url = concatenateAddressToString(baseUrl, address(this), urlParams);
+    Chainlink.Request memory req = buildChainlinkRequest(externalJobId, address(this), this.fulfillFundingRate.selector);
+    req.add("get", url);
+    req.add("path1", "price");
+    req.add("path2", "time");
+    req.add("path3", "fundingfractionaverage");
+    req.addInt("times", 1);
+    // sendOperatorRequest(req, oraclePayment);
+    return sendChainlinkRequestTo(chainlinkOracleAddress(), req, oraclePayment);
+  }
+
+
+  function fulfillFundingRate(bytes32 requestId, uint256 _number0, uint256 _number1, int256 _number2)
+    public
+    recordChainlinkFulfillment(requestId)
+  {
+    emit RequestFulfilled(requestId, _number0, _number1, _number2);
+    oraclePrice = _number0;
+    lastFundingRateTime = _number1;
+    lastFundingRateAmount = _number2;
+  }
 
   
+
+
+  function concatenateAddressToString(string memory _string, address _address, string memory _string2) public pure returns (string memory) {
+        return string.concat(_string, addressToString(_address), _string2);
+    }
+
+    function addressToString(address _address) internal pure returns (string memory) {
+    bytes32 _bytes = bytes32(uint256(uint160(_address)));
+    bytes memory HEX = "0123456789abcdef";
+    bytes memory _string = new bytes(42);
+    _string[0] = '0';
+    _string[1] = 'x';
+    for (uint i = 0; i < 20; i++) {
+        _string[2+i*2] = HEX[uint8(_bytes[i + 12] >> 4)];
+        _string[3+i*2] = HEX[uint8(_bytes[i + 12] & 0x0f)];
+    }
+    return string(_string);
+  }
 
   //get minimum long bayc amount that user receives
   function getMinimumLongBaycOut(uint256 _usdAmount) public view returns (uint256) {

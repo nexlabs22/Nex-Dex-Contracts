@@ -16,8 +16,8 @@ async function main() {
 
   const Exchange = await ethers.getContractFactory("Exchange")
   const exchange = await Exchange.deploy(
-    "0xB677bfBc9B09a3469695f40477d05bc9BcB15F50",//nftOracleFeed
-    "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e", // eth/usd price feed
+    // "0xB677bfBc9B09a3469695f40477d05bc9BcB15F50",//nftOracleFeed
+    // "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e", // eth/usd price feed
     process.env.GOERLI_USDT as string
   )
 

@@ -3,14 +3,23 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
+import "./ExchangeDeployer.sol";
 import "../../contracts/Exchange.sol";
+import "../../contracts/ExchangeInfo.sol";
+import "../../contracts/test/LinkToken.sol";
+import "../../contracts/test/MockApiOracle.sol";
 import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
-contract FundingRate is Test {
+contract FundingRate is Test, ExchangeDeployer {
+
     Exchange public exchange;
-    
+    ExchangeInfo public exchangeInfo;
+    LinkToken public link;
+    MockApiOracle public oracle;
+   
+
     Token public usdc;
     MockV3Aggregator public nftOracle;
     MockV3Aggregator public ethPriceOracle;
@@ -25,14 +34,12 @@ contract FundingRate is Test {
     address add6 = vm.addr(6);
 
     function setUp() public {
-        usdc = new Token(1000000e18);
+        
         nftOracle = new MockV3Aggregator(18, 5e18);
         ethPriceOracle = new MockV3Aggregator(18, 2000e18);
-        exchange = new Exchange(
-            address(nftOracle),
-            address(ethPriceOracle),
-            address(usdc)
-        );
+
+        (usdc, exchange, link, oracle, exchangeInfo) = deployContracts();
+       
         helper = new Helper(
             address(exchange),
             address(nftOracle),
@@ -45,8 +52,10 @@ contract FundingRate is Test {
         usdc.transfer(add3, 1000e18);
         usdc.transfer(add4, 1000e18);
         usdc.transfer(add5, 1000e18);
+
     }
 
+    
 
     function testFundingRewards() public {
        
@@ -80,6 +89,7 @@ contract FundingRate is Test {
        assertEq(usdc.balanceOf(address(add4)), 0);
        assertEq(exchange.collateral(address(usdc), address(add4)), 1000e18);
        vm.stopPrank();
+
        //add1 opens a long position
        vm.startPrank(add1);
        exchange.openLongPosition(1000e18, 0);
@@ -96,7 +106,6 @@ contract FundingRate is Test {
        vm.startPrank(add4);
        exchange.openShortPosition(1000e18, 0);
        vm.stopPrank();
-    
        // runs fundingRate function
        exchange.setFundingRate();
        int add1FundingFee = exchange.virtualCollateral(add1);

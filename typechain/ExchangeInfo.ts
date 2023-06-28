@@ -21,13 +21,22 @@ export interface ExchangeInfoInterface extends utils.Interface {
   contractName: "ExchangeInfo";
   functions: {
     "changeExchangeAddress(address)": FunctionFragment;
+    "concatenateAddressToString(string,address,string)": FunctionFragment;
     "exchange()": FunctionFragment;
+    "fulfillFundingRate(bytes32,uint256,uint256,int256)": FunctionFragment;
     "getMinimumLongBaycOut(uint256)": FunctionFragment;
     "getMinimumLongUsdOut(uint256)": FunctionFragment;
     "getMinimumShortBaycOut(uint256)": FunctionFragment;
     "getMinimumShortUsdOut(uint256)": FunctionFragment;
+    "lastFundingRateAmount()": FunctionFragment;
+    "lastFundingRateTime()": FunctionFragment;
+    "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "requestFundingRate()": FunctionFragment;
+    "setExternalJobId(bytes32)": FunctionFragment;
+    "setOracleAddress(address)": FunctionFragment;
+    "setUrl(string,string)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
@@ -35,7 +44,15 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "changeExchangeAddress",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "concatenateAddressToString",
+    values: [string, string, string]
+  ): string;
   encodeFunctionData(functionFragment: "exchange", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "fulfillFundingRate",
+    values: [BytesLike, BigNumberish, BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "getMinimumLongBaycOut",
     values: [BigNumberish]
@@ -52,10 +69,38 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "getMinimumShortUsdOut",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "lastFundingRateAmount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastFundingRateTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "oraclePrice",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "requestFundingRate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setExternalJobId",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setOracleAddress",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUrl",
+    values: [string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -66,7 +111,15 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "changeExchangeAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "concatenateAddressToString",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "exchange", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "fulfillFundingRate",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getMinimumLongBaycOut",
     data: BytesLike
@@ -81,6 +134,18 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getMinimumShortUsdOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastFundingRateAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastFundingRateTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "oraclePrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -89,16 +154,52 @@ export interface ExchangeInfoInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "requestFundingRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setExternalJobId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setOracleAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "setUrl", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
 
   events: {
+    "ChainlinkCancelled(bytes32)": EventFragment;
+    "ChainlinkFulfilled(bytes32)": EventFragment;
+    "ChainlinkRequested(bytes32)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "RequestFulfilled(bytes32,uint256,uint256,int256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ChainlinkCancelled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ChainlinkFulfilled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ChainlinkRequested"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RequestFulfilled"): EventFragment;
 }
+
+export type ChainlinkCancelledEvent = TypedEvent<[string], { id: string }>;
+
+export type ChainlinkCancelledEventFilter =
+  TypedEventFilter<ChainlinkCancelledEvent>;
+
+export type ChainlinkFulfilledEvent = TypedEvent<[string], { id: string }>;
+
+export type ChainlinkFulfilledEventFilter =
+  TypedEventFilter<ChainlinkFulfilledEvent>;
+
+export type ChainlinkRequestedEvent = TypedEvent<[string], { id: string }>;
+
+export type ChainlinkRequestedEventFilter =
+  TypedEventFilter<ChainlinkRequestedEvent>;
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
@@ -107,6 +208,19 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export type RequestFulfilledEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber],
+  {
+    requestId: string;
+    _number0: BigNumber;
+    _number1: BigNumber;
+    _number2: BigNumber;
+  }
+>;
+
+export type RequestFulfilledEventFilter =
+  TypedEventFilter<RequestFulfilledEvent>;
 
 export interface ExchangeInfo extends BaseContract {
   contractName: "ExchangeInfo";
@@ -141,7 +255,22 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    concatenateAddressToString(
+      _string: string,
+      _address: string,
+      _string2: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     exchange(overrides?: CallOverrides): Promise<[string]>;
+
+    fulfillFundingRate(
+      requestId: BytesLike,
+      _number0: BigNumberish,
+      _number1: BigNumberish,
+      _number2: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -163,9 +292,35 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    requestFundingRate(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setExternalJobId(
+      _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setOracleAddress(
+      _newOracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setUrl(
+      _beforeAddress: string,
+      _afterAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -180,7 +335,22 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  concatenateAddressToString(
+    _string: string,
+    _address: string,
+    _string2: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   exchange(overrides?: CallOverrides): Promise<string>;
+
+  fulfillFundingRate(
+    requestId: BytesLike,
+    _number0: BigNumberish,
+    _number1: BigNumberish,
+    _number2: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   getMinimumLongBaycOut(
     _usdAmount: BigNumberish,
@@ -202,9 +372,35 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+  oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  requestFundingRate(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setExternalJobId(
+    _jobId: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setOracleAddress(
+    _newOracle: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setUrl(
+    _beforeAddress: string,
+    _afterAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -219,7 +415,22 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    concatenateAddressToString(
+      _string: string,
+      _address: string,
+      _string2: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     exchange(overrides?: CallOverrides): Promise<string>;
+
+    fulfillFundingRate(
+      requestId: BytesLike,
+      _number0: BigNumberish,
+      _number1: BigNumberish,
+      _number2: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -241,9 +452,33 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    requestFundingRate(overrides?: CallOverrides): Promise<string>;
+
+    setExternalJobId(
+      _jobId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setOracleAddress(
+      _newOracle: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUrl(
+      _beforeAddress: string,
+      _afterAddress: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     transferOwnership(
       newOwner: string,
@@ -252,6 +487,21 @@ export interface ExchangeInfo extends BaseContract {
   };
 
   filters: {
+    "ChainlinkCancelled(bytes32)"(
+      id?: BytesLike | null
+    ): ChainlinkCancelledEventFilter;
+    ChainlinkCancelled(id?: BytesLike | null): ChainlinkCancelledEventFilter;
+
+    "ChainlinkFulfilled(bytes32)"(
+      id?: BytesLike | null
+    ): ChainlinkFulfilledEventFilter;
+    ChainlinkFulfilled(id?: BytesLike | null): ChainlinkFulfilledEventFilter;
+
+    "ChainlinkRequested(bytes32)"(
+      id?: BytesLike | null
+    ): ChainlinkRequestedEventFilter;
+    ChainlinkRequested(id?: BytesLike | null): ChainlinkRequestedEventFilter;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -260,6 +510,19 @@ export interface ExchangeInfo extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
+
+    "RequestFulfilled(bytes32,uint256,uint256,int256)"(
+      requestId?: BytesLike | null,
+      _number0?: null,
+      _number1?: null,
+      _number2?: null
+    ): RequestFulfilledEventFilter;
+    RequestFulfilled(
+      requestId?: BytesLike | null,
+      _number0?: null,
+      _number1?: null,
+      _number2?: null
+    ): RequestFulfilledEventFilter;
   };
 
   estimateGas: {
@@ -268,7 +531,22 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    concatenateAddressToString(
+      _string: string,
+      _address: string,
+      _string2: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     exchange(overrides?: CallOverrides): Promise<BigNumber>;
+
+    fulfillFundingRate(
+      requestId: BytesLike,
+      _number0: BigNumberish,
+      _number1: BigNumberish,
+      _number2: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -290,9 +568,35 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    requestFundingRate(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setExternalJobId(
+      _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setOracleAddress(
+      _newOracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setUrl(
+      _beforeAddress: string,
+      _afterAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -308,7 +612,22 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    concatenateAddressToString(
+      _string: string,
+      _address: string,
+      _string2: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     exchange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    fulfillFundingRate(
+      requestId: BytesLike,
+      _number0: BigNumberish,
+      _number1: BigNumberish,
+      _number2: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     getMinimumLongBaycOut(
       _usdAmount: BigNumberish,
@@ -330,9 +649,39 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    lastFundingRateAmount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lastFundingRateTime(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    requestFundingRate(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setExternalJobId(
+      _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setOracleAddress(
+      _newOracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUrl(
+      _beforeAddress: string,
+      _afterAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

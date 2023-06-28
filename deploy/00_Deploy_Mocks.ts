@@ -56,6 +56,12 @@ const deployFunction: DeployFunction = async () => {
       log: true,
       args: [linkToken.address],
     })
+
+    await deploy(`MockApiOracle`, {
+      from: deployer,
+      log: true,
+      args: [linkToken.address],
+    })
     
     log(`Mocks Deployed!`)
     log(`----------------------------------------------------`)

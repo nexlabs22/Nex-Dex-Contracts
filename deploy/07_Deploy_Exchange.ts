@@ -16,6 +16,7 @@ const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments })
   let linkTokenAddress: string | undefined
   let oracle: string | undefined
   let nftOracle: string | undefined
+  let apiOralce: string | undefined
   let usdc: string | undefined
   let additionalMessage: string = ``
   let ethUsdPriceFeedAddress:string | undefined
@@ -29,10 +30,12 @@ const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments })
     let MockOracle = await get(`MockOracle`)
     // let NftOracle = await get(`NftOracle`)
     let NftOracle = await get(`MockV3AggregatorNft`)
+    let ApiOralce = await get(`MockApiOracle`)
     let Usdc = await get(`Token`)
     linkTokenAddress = linkToken.address
     oracle = MockOracle.address
     nftOracle = NftOracle.address
+    apiOralce = ApiOralce.address
     usdc = Usdc.address
     additionalMessage = ` --linkaddress ${linkTokenAddress}`
   } else {
@@ -48,7 +51,7 @@ const deployFunction: DeployFunction = async ({ getNamedAccounts, deployments })
   const waitBlockConfirmations: number = developmentChains.includes(network.name)
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS
-  const args = [nftOracle, ethUsdPriceFeedAddress, usdc]
+  const args = [usdc]
   const exchange = await deploy(`Exchange`, {
     from: deployer,
     args: args,

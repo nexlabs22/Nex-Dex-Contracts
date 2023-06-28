@@ -3,7 +3,7 @@ import { assert, expect } from "chai"
 import { BigNumber, ContractReceipt, ContractTransaction } from "ethers"
 import { network, deployments, ethers, run } from "hardhat"
 import { developmentChains, networkConfig } from "../../../helper-hardhat-config"
-import { APIConsumer, LinkToken, MockOracle } from "../../../typechain"
+import { APIConsumer, LinkToken, MockApiOracle, MockOracle } from "../../../typechain"
 
 const chainId = 31337;
 const jobId = ethers.utils.toUtf8Bytes(networkConfig[chainId].jobId!);
@@ -16,7 +16,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
       let exchange:any
       let nftOracle:any
       let linkToken: LinkToken
-      let mockOracle: MockOracle
+      let mockOracle: MockApiOracle
       let usdc:any
       let accounts:any
       let exchangeInfo:any
@@ -28,11 +28,33 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         exchange = await ethers.getContract("Exchange")
         usdc = await ethers.getContract("Token")
         exchangeInfo = await ethers.getContract("ExchangeInfo");
+        mockOracle = await ethers.getContract("MockApiOracle")
         accounts = await ethers.provider.getSigner()
+
+        //fund link
+        await run("fund-link", { contract: exchangeInfo.address, linkaddress: linkToken.address })
+        //set exchange info
+        await exchange.setExchangeInfo(exchangeInfo.address);
       })
 
+      function numToBytes(num:number) {
+        const value = ethers.BigNumber.from(num.toString());
+        const bytes32Value = ethers.utils.hexZeroPad(value.toHexString(), 32);
+        return bytes32Value
+      }
+
+      const latestPrice = 100
+      const latestFundingRate = 10
+      let date = new Date();
+      let timestamp = date.getTime();
+
       async function setOraclePrice(newPrice:any){
-        await nftOracle.updateAnswer((newPrice*10**18).toString())
+        // await nftOracle.updateAnswer((newPrice*10**18).toString())
+        const transaction: ContractTransaction = await exchangeInfo.requestFundingRate();
+        const transactionReceipt: ContractReceipt = await transaction.wait(1);
+        if (!transactionReceipt.events) return
+        const requestId: string = transactionReceipt?.events[0].topics[1]
+        await mockOracle.fulfillOracleFundingRateRequest(requestId, numToBytes(newPrice*1e18), numToBytes(timestamp), numToBytes(latestFundingRate));
         }
       
       it("Test Insurance funds 1", async () => {

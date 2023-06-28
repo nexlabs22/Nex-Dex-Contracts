@@ -3,13 +3,20 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
+import "./ExchangeDeployer.sol";
 import "../../contracts/Exchange.sol";
+import "../../contracts/ExchangeInfo.sol";
+import "../../contracts/test/LinkToken.sol";
+import "../../contracts/test/MockApiOracle.sol";
 import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
-contract Liquidation is Test {
+contract Liquidation is Test, ExchangeDeployer {
     Exchange public exchange;
+    ExchangeInfo public exchangeInfo;
+    LinkToken public link;
+    MockApiOracle public oracle;
     
     Token public usdc;
     MockV3Aggregator public nftOracle;
@@ -25,14 +32,10 @@ contract Liquidation is Test {
     address add6 = vm.addr(6);
 
     function setUp() public {
-        usdc = new Token(1000000e18);
         nftOracle = new MockV3Aggregator(18, 5e18);
         ethPriceOracle = new MockV3Aggregator(18, 2000e18);
-        exchange = new Exchange(
-            address(nftOracle),
-            address(ethPriceOracle),
-            address(usdc)
-        );
+        (usdc, exchange, link, oracle, exchangeInfo) = deployContracts();
+
         helper = new Helper(
             address(exchange),
             address(nftOracle),

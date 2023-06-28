@@ -32,28 +32,24 @@ export interface ExchangeInterface extends utils.Interface {
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
-    "changeNftOracleAddress(address)": FunctionFragment;
     "closePosition(uint256,uint256)": FunctionFragment;
     "closePositionComplete(uint256)": FunctionFragment;
     "collateral(address,address)": FunctionFragment;
     "depositCollateral(uint256)": FunctionFragment;
     "discountRate()": FunctionFragment;
     "doesUserExist(address)": FunctionFragment;
+    "exchangeInfo()": FunctionFragment;
     "getAccountValue(address)": FunctionFragment;
     "getAllActiveUsers()": FunctionFragment;
     "getAllLongvBaycBalance()": FunctionFragment;
     "getAllShortvBaycBalance()": FunctionFragment;
     "getCurrentExchangePrice()": FunctionFragment;
-    "getEthUsdPrice()": FunctionFragment;
-    "getHardLiquidatedUsers()": FunctionFragment;
     "getLongBaycAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
-    "getPartialLiquidatedUsers()": FunctionFragment;
     "getPositionNotional(address)": FunctionFragment;
     "getShortBaycAmountOut(uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256)": FunctionFragment;
-    "hardLiquidatedUsers(uint256)": FunctionFragment;
     "initialVirtualPool(uint256)": FunctionFragment;
     "insuranceFunds()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
@@ -62,6 +58,8 @@ export interface ExchangeInterface extends utils.Interface {
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
     "isUserActive(address)": FunctionFragment;
+    "lastFundingRateAmount()": FunctionFragment;
+    "lastFundingRateTime()": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "marketPrice()": FunctionFragment;
@@ -69,7 +67,6 @@ export interface ExchangeInterface extends utils.Interface {
     "openShortPosition(uint256,uint256)": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
-    "partialLiquidatedUsers(uint256)": FunctionFragment;
     "paused()": FunctionFragment;
     "pool()": FunctionFragment;
     "poolInitialized()": FunctionFragment;
@@ -77,10 +74,9 @@ export interface ExchangeInterface extends utils.Interface {
     "removeInsuranceFunds(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
+    "setExchangeInfo(address)": FunctionFragment;
     "setFundingRate()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
-    "showPriceETH()": FunctionFragment;
-    "showPriceUSD()": FunctionFragment;
     "swapFee()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdc()": FunctionFragment;
@@ -143,10 +139,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "changeNftOracleAddress",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "closePosition",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -171,6 +163,10 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "exchangeInfo",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getAccountValue",
     values: [string]
   ): string;
@@ -191,14 +187,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getEthUsdPrice",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getHardLiquidatedUsers",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "getLongBaycAmountOut",
     values: [BigNumberish]
   ): string;
@@ -207,10 +195,6 @@ export interface ExchangeInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "getPNL", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "getPartialLiquidatedUsers",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "getPositionNotional",
     values: [string]
@@ -221,10 +205,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getShortVusdAmountOut",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hardLiquidatedUsers",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -260,6 +240,14 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "lastFundingRateAmount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastFundingRateTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "latestFeeUpdate",
     values?: undefined
   ): string;
@@ -284,10 +272,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "partialLiquidatedUsers",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(functionFragment: "pool", values?: undefined): string;
   encodeFunctionData(
@@ -311,20 +295,16 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "setExchangeInfo",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setFundingRate",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "setSwapFee",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "showPriceETH",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "showPriceUSD",
-    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "swapFee", values?: undefined): string;
   encodeFunctionData(
@@ -408,10 +388,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "changeNftOracleAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "closePosition",
     data: BytesLike
   ): Result;
@@ -430,6 +406,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "doesUserExist",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "exchangeInfo",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -453,14 +433,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEthUsdPrice",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getHardLiquidatedUsers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getLongBaycAmountOut",
     data: BytesLike
   ): Result;
@@ -469,10 +441,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPNL", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getPartialLiquidatedUsers",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getPositionNotional",
     data: BytesLike
@@ -483,10 +451,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getShortVusdAmountOut",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "hardLiquidatedUsers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -522,6 +486,14 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "lastFundingRateAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastFundingRateTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "latestFeeUpdate",
     data: BytesLike
   ): Result;
@@ -546,10 +518,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "partialLiquidatedUsers",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pool", data: BytesLike): Result;
   decodeFunctionResult(
@@ -570,18 +538,14 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setExchangeInfo",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setFundingRate",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setSwapFee", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "showPriceETH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "showPriceUSD",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "swapFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
@@ -881,11 +845,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { x: BigNumber }>;
 
-    changeNftOracleAddress(
-      _newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
@@ -912,6 +871,8 @@ export interface Exchange extends BaseContract {
 
     doesUserExist(_user: string, overrides?: CallOverrides): Promise<[boolean]>;
 
+    exchangeInfo(overrides?: CallOverrides): Promise<[string]>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
@@ -924,10 +885,6 @@ export interface Exchange extends BaseContract {
     getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getEthUsdPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<[string[]]>;
 
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
@@ -944,8 +901,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { pnl: BigNumber }>;
 
-    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<[string[]]>;
-
     getPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -960,11 +915,6 @@ export interface Exchange extends BaseContract {
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
-
-    hardLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
 
     initialVirtualPool(
       _assetSize: BigNumberish,
@@ -1001,6 +951,10 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
@@ -1022,11 +976,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    partialLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
 
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -1057,6 +1006,11 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<[number]>;
 
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -1065,10 +1019,6 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    showPriceETH(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    showPriceUSD(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     swapFee(overrides?: CallOverrides): Promise<[number]>;
 
@@ -1188,11 +1138,6 @@ export interface Exchange extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  changeNftOracleAddress(
-    _newAddress: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   closePosition(
     _assetSize: BigNumberish,
     _minimumUsdOut: BigNumberish,
@@ -1219,6 +1164,8 @@ export interface Exchange extends BaseContract {
 
   doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
 
+  exchangeInfo(overrides?: CallOverrides): Promise<string>;
+
   getAccountValue(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
@@ -1228,10 +1175,6 @@ export interface Exchange extends BaseContract {
   getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
   getLongBaycAmountOut(
     _vUsdAmount: BigNumberish,
@@ -1244,8 +1187,6 @@ export interface Exchange extends BaseContract {
   ): Promise<BigNumber>;
 
   getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-  getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
   getPositionNotional(
     _user: string,
@@ -1261,11 +1202,6 @@ export interface Exchange extends BaseContract {
     _vBaycAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
-
-  hardLiquidatedUsers(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   initialVirtualPool(
     _assetSize: BigNumberish,
@@ -1302,6 +1238,10 @@ export interface Exchange extends BaseContract {
 
   isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+  lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1323,11 +1263,6 @@ export interface Exchange extends BaseContract {
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
-
-  partialLiquidatedUsers(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   paused(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1358,6 +1293,11 @@ export interface Exchange extends BaseContract {
 
   saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
+  setExchangeInfo(
+    _exchangeInfo: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setFundingRate(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -1366,10 +1306,6 @@ export interface Exchange extends BaseContract {
     _newFee: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
-
-  showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
   swapFee(overrides?: CallOverrides): Promise<number>;
 
@@ -1486,11 +1422,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    changeNftOracleAddress(
-      _newAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
@@ -1517,6 +1448,8 @@ export interface Exchange extends BaseContract {
 
     doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
 
+    exchangeInfo(overrides?: CallOverrides): Promise<string>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
@@ -1530,10 +1463,6 @@ export interface Exchange extends BaseContract {
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
-
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1545,8 +1474,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
     getPositionNotional(
       _user: string,
@@ -1562,11 +1489,6 @@ export interface Exchange extends BaseContract {
       _vBaycAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    hardLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     initialVirtualPool(
       _assetSize: BigNumberish,
@@ -1603,6 +1525,10 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
@@ -1624,11 +1550,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    partialLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     paused(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1657,13 +1578,14 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setFundingRate(overrides?: CallOverrides): Promise<void>;
 
     setSwapFee(_newFee: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
-
-    showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
     swapFee(overrides?: CallOverrides): Promise<number>;
 
@@ -1938,11 +1860,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    changeNftOracleAddress(
-      _newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
@@ -1969,6 +1886,8 @@ export interface Exchange extends BaseContract {
 
     doesUserExist(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    exchangeInfo(overrides?: CallOverrides): Promise<BigNumber>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
@@ -1982,10 +1901,6 @@ export interface Exchange extends BaseContract {
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getEthUsdPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getHardLiquidatedUsers(overrides?: CallOverrides): Promise<BigNumber>;
-
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -1997,8 +1912,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     getPNL(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    getPartialLiquidatedUsers(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPositionNotional(
       _user: string,
@@ -2012,11 +1925,6 @@ export interface Exchange extends BaseContract {
 
     getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    hardLiquidatedUsers(
-      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -2055,6 +1963,10 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
@@ -2076,11 +1988,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    partialLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2104,6 +2011,11 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -2112,10 +2024,6 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    showPriceETH(overrides?: CallOverrides): Promise<BigNumber>;
-
-    showPriceUSD(overrides?: CallOverrides): Promise<BigNumber>;
 
     swapFee(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2233,11 +2141,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    changeNftOracleAddress(
-      _newAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     closePosition(
       _assetSize: BigNumberish,
       _minimumUsdOut: BigNumberish,
@@ -2267,6 +2170,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    exchangeInfo(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getAccountValue(
       _user: string,
       overrides?: CallOverrides
@@ -2286,12 +2191,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getEthUsdPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getHardLiquidatedUsers(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getLongBaycAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -2307,10 +2206,6 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getPartialLiquidatedUsers(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getPositionNotional(
       _user: string,
       overrides?: CallOverrides
@@ -2323,11 +2218,6 @@ export interface Exchange extends BaseContract {
 
     getShortVusdAmountOut(
       _vBaycAmount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    hardLiquidatedUsers(
-      arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2369,6 +2259,14 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    lastFundingRateAmount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lastFundingRateTime(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2390,11 +2288,6 @@ export interface Exchange extends BaseContract {
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    partialLiquidatedUsers(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -2418,6 +2311,11 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    setExchangeInfo(
+      _exchangeInfo: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     setFundingRate(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -2426,10 +2324,6 @@ export interface Exchange extends BaseContract {
       _newFee: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    showPriceETH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    showPriceUSD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     swapFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
