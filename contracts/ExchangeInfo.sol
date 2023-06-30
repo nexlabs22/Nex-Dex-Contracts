@@ -16,7 +16,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     uint public lastMarketPrice;
     uint public lastFundingRateTime;
     int public lastFundingRateAmount;
-
+    
     string baseUrl = "https://app.nexlabs.io/api/lastFundingRate?address=";
     string urlParams = "&returnType=number&multiplyFunc=18&timesNegFund=true";
 
@@ -42,6 +42,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
         setChainlinkToken(_chainlinkToken);
         setChainlinkOracle(_oracleAddress);
         externalJobId = _externalJobId;
+        // externalJobId = "81027ac9198848d79a8d14235bf30e16";
         oraclePayment = ((1 * LINK_DIVISIBILITY) / 10); // n * 10**18
     }
 
@@ -68,7 +69,8 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     public
     returns(bytes32)
   {
-    string memory url = concatenateAddressToString(baseUrl, address(this), urlParams);
+    
+    string memory url = concatenateAddressToString(baseUrl, address(exchange), urlParams);
     Chainlink.Request memory req = buildChainlinkRequest(externalJobId, address(this), this.fulfillFundingRate.selector);
     req.add("get", url);
     req.add("path1", "price");
@@ -88,10 +90,30 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     oraclePrice = _number0;
     lastFundingRateTime = _number1;
     lastFundingRateAmount = _number2;
-    lastMarketPrice = exchange.marketPrice();
+    lastMarketPrice = market();
   }
 
-  
+  /**
+     * Allow withdraw of Link tokens from the contract
+     */
+    function withdrawLink() public onlyOwner {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(
+            link.transfer(msg.sender, link.balanceOf(address(this))),
+            "Unable to transfer"
+        );
+    }
+
+  function market() public view returns(uint){
+      uint vUsdPoolSize = exchange.vUsdPoolSize();
+      uint vBaycPoolSize = exchange.vBaycPoolSize();
+      if(vUsdPoolSize > 0 && vBaycPoolSize > 0){
+      uint marketPrice = (1e18 *vUsdPoolSize) / vBaycPoolSize;
+      return marketPrice;
+      }else{
+          return 0;
+      }
+  }
 
 
   function concatenateAddressToString(string memory _string, address _address, string memory _string2) public pure returns (string memory) {

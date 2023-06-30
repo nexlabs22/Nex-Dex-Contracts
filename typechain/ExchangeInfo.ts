@@ -31,6 +31,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     "lastFundingRateAmount()": FunctionFragment;
     "lastFundingRateTime()": FunctionFragment;
     "lastMarketPrice()": FunctionFragment;
+    "market()": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -39,6 +40,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     "setOracleAddress(address)": FunctionFragment;
     "setUrl(string,string)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "withdrawLink()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -82,6 +84,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "lastMarketPrice",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "market", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "oraclePrice",
     values?: undefined
@@ -110,6 +113,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawLink",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -153,6 +160,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "lastMarketPrice",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "market", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "oraclePrice",
     data: BytesLike
@@ -177,6 +185,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "setUrl", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawLink",
     data: BytesLike
   ): Result;
 
@@ -307,6 +319,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    market(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
@@ -337,6 +351,10 @@ export interface ExchangeInfo extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    withdrawLink(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -389,6 +407,8 @@ export interface ExchangeInfo extends BaseContract {
 
   lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+  market(overrides?: CallOverrides): Promise<BigNumber>;
+
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
@@ -419,6 +439,10 @@ export interface ExchangeInfo extends BaseContract {
 
   transferOwnership(
     newOwner: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  withdrawLink(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -471,6 +495,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    market(overrides?: CallOverrides): Promise<BigNumber>;
+
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
@@ -499,6 +525,8 @@ export interface ExchangeInfo extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    withdrawLink(overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -589,6 +617,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    market(overrides?: CallOverrides): Promise<BigNumber>;
+
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -619,6 +649,10 @@ export interface ExchangeInfo extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    withdrawLink(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -676,6 +710,8 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    market(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -706,6 +742,10 @@ export interface ExchangeInfo extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawLink(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

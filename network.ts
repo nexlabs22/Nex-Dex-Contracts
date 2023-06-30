@@ -1,5 +1,5 @@
 const goerliBaycExchangeAddress = '0xA4808e5E0F6814f9548e5DBc158667FD9dE2EBfF'
-const goerliBaycExchangeInfoAddress = '0xB52Fa0924BbE020A9b8Fcd806B64d96cD7BE93f8'
+const goerliBaycExchangeInfoAddress = '0x0C3a77de2438281067e518649F05539099E8fD2D'
 const goerliBaycAutomation = '0x15c4E77701180E742c65c20Dd38d14F3C29b60f1'
 
 

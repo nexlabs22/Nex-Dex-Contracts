@@ -14,14 +14,7 @@ async function main() {
   
   const network = await ethers.provider.getNetwork();
   const chainId = network.chainId;
-  // const jobId = ethers.utils.formatBytes32String(networks[chainId].externalJobId)
-  // const jobId = ethers.utils.toUtf8Bytes(networks[chainId].externalJobId)
-  // const myBytes = ethers.utils.toUtf8Bytes('2369c17d81074d13849b7a64ecaccc84');
-  // const myHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('2369c17d81074d13849b7a64ecaccc84'));
-  // const myHash = ethers.utils.formatBytes32String('2369c17d81074d13849b7a64ecaccc84');
-  // const myBytes32 = ethers.utils.hexlify(myHash);
-  // console.log("jobId", myHash);
-  // return;
+ 
   const ExchangeInfo = await ethers.getContractFactory("ExchangeInfo")
   const exchangeInfo = await ExchangeInfo.deploy(
     networks[chainId].baycExchangeAddress,
