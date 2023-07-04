@@ -41,21 +41,20 @@ export interface GoldInterface extends utils.Interface {
     "doesUserExist(address)": FunctionFragment;
     "getAccountValue(address)": FunctionFragment;
     "getAllActiveUsers()": FunctionFragment;
-    "getAllLongvBaycBalance()": FunctionFragment;
-    "getAllShortvBaycBalance()": FunctionFragment;
+    "getAllLongvAssetBalance()": FunctionFragment;
+    "getAllShortvAssetBalance()": FunctionFragment;
     "getCurrentExchangePrice()": FunctionFragment;
     "getEthUsdPrice()": FunctionFragment;
     "getHardLiquidatedUsers()": FunctionFragment;
-    "getLongBaycAmountOut(uint256)": FunctionFragment;
+    "getLongAssetAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
     "getPartialLiquidatedUsers()": FunctionFragment;
     "getPositionNotional(address)": FunctionFragment;
-    "getShortBaycAmountOut(uint256)": FunctionFragment;
+    "getShortAssetAmountOut(uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256)": FunctionFragment;
     "hardLiquidatedUsers(uint256)": FunctionFragment;
     "initialVirtualPool(uint256,uint256)": FunctionFragment;
-    "insuranceFunds()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
     "isLongInRightRange(uint256)": FunctionFragment;
     "isPartialLiquidatable(address)": FunctionFragment;
@@ -63,6 +62,7 @@ export interface GoldInterface extends utils.Interface {
     "isShortInRightRange(uint256)": FunctionFragment;
     "isUserActive(address)": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
+    "liquidationFee()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
     "marketPrice()": FunctionFragment;
     "openLongPosition(uint256,uint256)": FunctionFragment;
@@ -74,7 +74,7 @@ export interface GoldInterface extends utils.Interface {
     "pool()": FunctionFragment;
     "poolInitialized()": FunctionFragment;
     "positive(int256)": FunctionFragment;
-    "removeInsuranceFunds(uint256)": FunctionFragment;
+    "removeLiquidationFee(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
     "setFundingRate()": FunctionFragment;
@@ -85,9 +85,9 @@ export interface GoldInterface extends utils.Interface {
     "transferOwnership(address)": FunctionFragment;
     "usdc()": FunctionFragment;
     "userMargin(address)": FunctionFragment;
-    "uservBaycBalance(address)": FunctionFragment;
+    "uservAssetBalance(address)": FunctionFragment;
     "uservUsdBalance(address)": FunctionFragment;
-    "vBaycPoolSize()": FunctionFragment;
+    "vAssetPoolSize()": FunctionFragment;
     "vUsdPoolSize()": FunctionFragment;
     "virtualBalances(address)": FunctionFragment;
     "virtualCollateral(address)": FunctionFragment;
@@ -179,11 +179,11 @@ export interface GoldInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getAllLongvBaycBalance",
+    functionFragment: "getAllLongvAssetBalance",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getAllShortvBaycBalance",
+    functionFragment: "getAllShortvAssetBalance",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -199,7 +199,7 @@ export interface GoldInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getLongBaycAmountOut",
+    functionFragment: "getLongAssetAmountOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -216,7 +216,7 @@ export interface GoldInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "getShortBaycAmountOut",
+    functionFragment: "getShortAssetAmountOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -230,10 +230,6 @@ export interface GoldInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "initialVirtualPool",
     values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "insuranceFunds",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "isHardLiquidatable",
@@ -261,6 +257,10 @@ export interface GoldInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "latestFeeUpdate",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "liquidationFee",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -299,7 +299,7 @@ export interface GoldInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeInsuranceFunds",
+    functionFragment: "removeLiquidationFee",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -334,7 +334,7 @@ export interface GoldInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "usdc", values?: undefined): string;
   encodeFunctionData(functionFragment: "userMargin", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "uservBaycBalance",
+    functionFragment: "uservAssetBalance",
     values: [string]
   ): string;
   encodeFunctionData(
@@ -342,7 +342,7 @@ export interface GoldInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "vBaycPoolSize",
+    functionFragment: "vAssetPoolSize",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -441,11 +441,11 @@ export interface GoldInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAllLongvBaycBalance",
+    functionFragment: "getAllLongvAssetBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAllShortvBaycBalance",
+    functionFragment: "getAllShortvAssetBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -461,7 +461,7 @@ export interface GoldInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getLongBaycAmountOut",
+    functionFragment: "getLongAssetAmountOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -478,7 +478,7 @@ export interface GoldInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getShortBaycAmountOut",
+    functionFragment: "getShortAssetAmountOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -491,10 +491,6 @@ export interface GoldInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "initialVirtualPool",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "insuranceFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -523,6 +519,10 @@ export interface GoldInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "latestFeeUpdate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "liquidationFee",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -558,7 +558,7 @@ export interface GoldInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "positive", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "removeInsuranceFunds",
+    functionFragment: "removeLiquidationFee",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -590,7 +590,7 @@ export interface GoldInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "usdc", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "userMargin", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "uservBaycBalance",
+    functionFragment: "uservAssetBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -598,7 +598,7 @@ export interface GoldInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "vBaycPoolSize",
+    functionFragment: "vAssetPoolSize",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -655,7 +655,7 @@ export type CloseLongPositionEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -669,7 +669,7 @@ export type CloseShortPositionEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -690,7 +690,7 @@ export type HardLiquidateEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -707,7 +707,7 @@ export type OpenLongPositionEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -721,7 +721,7 @@ export type OpenShortPositionEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -743,7 +743,7 @@ export type PartialLiquidateEvent = TypedEvent<
     user: string;
     price: BigNumber;
     timestamp: BigNumber;
-    vBaycAmount: BigNumber;
+    vAssetAmount: BigNumber;
     vUsdAmount: BigNumber;
   }
 >;
@@ -761,7 +761,7 @@ export type PriceEvent = TypedEvent<
     price: BigNumber;
     volume: BigNumber;
     timestamp: BigNumber;
-    vBaycPoolSize: BigNumber;
+    vAssetPoolSize: BigNumber;
     vUsdPoolSize: BigNumber;
   }
 >;
@@ -811,35 +811,35 @@ export interface Gold extends BaseContract {
 
     _calculatePartialLiquidateValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     _getNewAccountValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     _getNewPNL(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     _getNewPositionNotional(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     _isHardLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -847,21 +847,21 @@ export interface Gold extends BaseContract {
     _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     _isPartialLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     _userNewMargin(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -919,9 +919,9 @@ export interface Gold extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<[string[]]>;
 
-    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -929,13 +929,13 @@ export interface Gold extends BaseContract {
 
     getHardLiquidatedUsers(overrides?: CallOverrides): Promise<[string[]]>;
 
-    getLongBaycAmountOut(
+    getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getLongVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -951,13 +951,13 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -971,8 +971,6 @@ export interface Gold extends BaseContract {
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isHardLiquidatable(
       _user: string,
@@ -990,7 +988,7 @@ export interface Gold extends BaseContract {
     ): Promise<[boolean]>;
 
     isPriceIntheRightRange(
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -1004,19 +1002,21 @@ export interface Gold extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    liquidationFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
 
     marketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -1035,7 +1035,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & {
-        vBaycPoolSize: BigNumber;
+        vAssetPoolSize: BigNumber;
         vUsdPoolSize: BigNumber;
       }
     >;
@@ -1047,7 +1047,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    removeInsuranceFunds(
+    removeLiquidationFee(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -1082,7 +1082,7 @@ export interface Gold extends BaseContract {
 
     userMargin(_user: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    uservBaycBalance(
+    uservAssetBalance(
       _user: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -1092,7 +1092,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    vBaycPoolSize(overrides?: CallOverrides): Promise<[BigNumber]>;
+    vAssetPoolSize(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -1103,7 +1103,7 @@ export interface Gold extends BaseContract {
       [BigNumber, BigNumber, BigNumber] & {
         virtualCollateral: BigNumber;
         uservUsdBalance: BigNumber;
-        uservBaycBalance: BigNumber;
+        uservAssetBalance: BigNumber;
       }
     >;
 
@@ -1122,35 +1122,35 @@ export interface Gold extends BaseContract {
 
   _calculatePartialLiquidateValue(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   _getNewAccountValue(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   _getNewPNL(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   _getNewPositionNotional(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   _isHardLiquidatable(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -1158,21 +1158,21 @@ export interface Gold extends BaseContract {
   _isNewMarginLiquidatable(
     _user: string,
     _usdAmount: BigNumberish,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   _isPartialLiquidatable(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   _userNewMargin(
     _user: string,
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -1224,9 +1224,9 @@ export interface Gold extends BaseContract {
 
   getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
 
-  getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+  getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
-  getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+  getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1234,13 +1234,13 @@ export interface Gold extends BaseContract {
 
   getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
-  getLongBaycAmountOut(
+  getLongAssetAmountOut(
     _vUsdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getLongVusdAmountOut(
-    _vBaycAmount: BigNumberish,
+    _vAssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -1253,13 +1253,13 @@ export interface Gold extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  getShortBaycAmountOut(
+  getShortAssetAmountOut(
     _vUsdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getShortVusdAmountOut(
-    _vBaycAmount: BigNumberish,
+    _vAssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -1273,8 +1273,6 @@ export interface Gold extends BaseContract {
     _price: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
   isHardLiquidatable(
     _user: string,
@@ -1292,7 +1290,7 @@ export interface Gold extends BaseContract {
   ): Promise<boolean>;
 
   isPriceIntheRightRange(
-    _vBaycNewPoolSize: BigNumberish,
+    _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -1306,19 +1304,21 @@ export interface Gold extends BaseContract {
 
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
+  liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
+
   maintenanceMargin(overrides?: CallOverrides): Promise<number>;
 
   marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   openLongPosition(
     _usdAmount: BigNumberish,
-    _minimumBaycAmountOut: BigNumberish,
+    _minimumAssetAmountOut: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   openShortPosition(
     _usdAmount: BigNumberish,
-    _minimumBaycAmountOut: BigNumberish,
+    _minimumAssetAmountOut: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1337,7 +1337,7 @@ export interface Gold extends BaseContract {
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & {
-      vBaycPoolSize: BigNumber;
+      vAssetPoolSize: BigNumber;
       vUsdPoolSize: BigNumber;
     }
   >;
@@ -1349,7 +1349,7 @@ export interface Gold extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  removeInsuranceFunds(
+  removeLiquidationFee(
     _amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -1384,14 +1384,14 @@ export interface Gold extends BaseContract {
 
   userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  uservBaycBalance(
+  uservAssetBalance(
     _user: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   uservUsdBalance(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  vBaycPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
+  vAssetPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
   vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1402,7 +1402,7 @@ export interface Gold extends BaseContract {
     [BigNumber, BigNumber, BigNumber] & {
       virtualCollateral: BigNumber;
       uservUsdBalance: BigNumber;
-      uservBaycBalance: BigNumber;
+      uservAssetBalance: BigNumber;
     }
   >;
 
@@ -1421,35 +1421,35 @@ export interface Gold extends BaseContract {
 
     _calculatePartialLiquidateValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewAccountValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewPNL(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewPositionNotional(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _isHardLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1457,21 +1457,21 @@ export interface Gold extends BaseContract {
     _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     _isPartialLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     _userNewMargin(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1526,9 +1526,9 @@ export interface Gold extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
 
-    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1536,13 +1536,13 @@ export interface Gold extends BaseContract {
 
     getHardLiquidatedUsers(overrides?: CallOverrides): Promise<string[]>;
 
-    getLongBaycAmountOut(
+    getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getLongVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1555,13 +1555,13 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1575,8 +1575,6 @@ export interface Gold extends BaseContract {
       _price: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -1594,7 +1592,7 @@ export interface Gold extends BaseContract {
     ): Promise<boolean>;
 
     isPriceIntheRightRange(
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -1608,19 +1606,21 @@ export interface Gold extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
+    liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<number>;
 
     marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1639,7 +1639,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & {
-        vBaycPoolSize: BigNumber;
+        vAssetPoolSize: BigNumber;
         vUsdPoolSize: BigNumber;
       }
     >;
@@ -1651,7 +1651,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    removeInsuranceFunds(
+    removeLiquidationFee(
       _amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1679,7 +1679,7 @@ export interface Gold extends BaseContract {
 
     userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    uservBaycBalance(
+    uservAssetBalance(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1689,7 +1689,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    vBaycPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
+    vAssetPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1700,7 +1700,7 @@ export interface Gold extends BaseContract {
       [BigNumber, BigNumber, BigNumber] & {
         virtualCollateral: BigNumber;
         uservUsdBalance: BigNumber;
-        uservBaycBalance: BigNumber;
+        uservAssetBalance: BigNumber;
       }
     >;
 
@@ -1720,14 +1720,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): CloseLongPositionEventFilter;
     CloseLongPosition(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): CloseLongPositionEventFilter;
 
@@ -1735,14 +1735,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): CloseShortPositionEventFilter;
     CloseShortPosition(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): CloseShortPositionEventFilter;
 
@@ -1763,14 +1763,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): HardLiquidateEventFilter;
     HardLiquidate(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): HardLiquidateEventFilter;
 
@@ -1781,14 +1781,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): OpenLongPositionEventFilter;
     OpenLongPosition(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): OpenLongPositionEventFilter;
 
@@ -1796,14 +1796,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): OpenShortPositionEventFilter;
     OpenShortPosition(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): OpenShortPositionEventFilter;
 
@@ -1820,14 +1820,14 @@ export interface Gold extends BaseContract {
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): PartialLiquidateEventFilter;
     PartialLiquidate(
       user?: null,
       price?: null,
       timestamp?: null,
-      vBaycAmount?: null,
+      vAssetAmount?: null,
       vUsdAmount?: null
     ): PartialLiquidateEventFilter;
 
@@ -1838,14 +1838,14 @@ export interface Gold extends BaseContract {
       price?: null,
       volume?: null,
       timestamp?: null,
-      vBaycPoolSize?: null,
+      vAssetPoolSize?: null,
       vUsdPoolSize?: null
     ): PriceEventFilter;
     Price(
       price?: null,
       volume?: null,
       timestamp?: null,
-      vBaycPoolSize?: null,
+      vAssetPoolSize?: null,
       vUsdPoolSize?: null
     ): PriceEventFilter;
 
@@ -1871,35 +1871,35 @@ export interface Gold extends BaseContract {
 
     _calculatePartialLiquidateValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewAccountValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewPNL(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _getNewPositionNotional(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _isHardLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1907,21 +1907,21 @@ export interface Gold extends BaseContract {
     _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _isPartialLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _userNewMargin(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1979,9 +1979,9 @@ export interface Gold extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getAllLongvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getAllShortvBaycBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1989,13 +1989,13 @@ export interface Gold extends BaseContract {
 
     getHardLiquidatedUsers(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getLongBaycAmountOut(
+    getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getLongVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -2008,13 +2008,13 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -2028,8 +2028,6 @@ export interface Gold extends BaseContract {
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -2047,7 +2045,7 @@ export interface Gold extends BaseContract {
     ): Promise<BigNumber>;
 
     isPriceIntheRightRange(
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -2061,19 +2059,21 @@ export interface Gold extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
+    liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
     marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -2097,7 +2097,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    removeInsuranceFunds(
+    removeLiquidationFee(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -2132,7 +2132,7 @@ export interface Gold extends BaseContract {
 
     userMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    uservBaycBalance(
+    uservAssetBalance(
       _user: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -2142,7 +2142,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    vBaycPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
+    vAssetPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2167,35 +2167,35 @@ export interface Gold extends BaseContract {
 
     _calculatePartialLiquidateValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _getNewAccountValue(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _getNewPNL(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _getNewPositionNotional(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _isHardLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2203,21 +2203,21 @@ export interface Gold extends BaseContract {
     _isNewMarginLiquidatable(
       _user: string,
       _usdAmount: BigNumberish,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _isPartialLiquidatable(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _userNewMargin(
       _user: string,
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2278,11 +2278,11 @@ export interface Gold extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getAllLongvBaycBalance(
+    getAllLongvAssetBalance(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getAllShortvBaycBalance(
+    getAllShortvAssetBalance(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2296,13 +2296,13 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getLongBaycAmountOut(
+    getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getLongVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2320,13 +2320,13 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
+      _vAssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2340,8 +2340,6 @@ export interface Gold extends BaseContract {
       _price: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isHardLiquidatable(
       _user: string,
@@ -2359,7 +2357,7 @@ export interface Gold extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     isPriceIntheRightRange(
-      _vBaycNewPoolSize: BigNumberish,
+      _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2376,19 +2374,21 @@ export interface Gold extends BaseContract {
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    liquidationFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     maintenanceMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     marketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     openLongPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     openShortPosition(
       _usdAmount: BigNumberish,
-      _minimumBaycAmountOut: BigNumberish,
+      _minimumAssetAmountOut: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -2412,7 +2412,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    removeInsuranceFunds(
+    removeLiquidationFee(
       _amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -2450,7 +2450,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    uservBaycBalance(
+    uservAssetBalance(
       _user: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2460,7 +2460,7 @@ export interface Gold extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    vBaycPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    vAssetPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     vUsdPoolSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

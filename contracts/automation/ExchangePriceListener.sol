@@ -1,22 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-// AutomationCompatible.sol imports the functions from both ./AutomationBase.sol and
 // ./interfaces/AutomationCompatibleInterface.sol
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "../Exchange.sol";
 import "../ExchangeInfo.sol";
-/**
- * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY.
- * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
- * DO NOT USE THIS CODE IN PRODUCTION.
- */
+
 
 contract ExchangePriceListener is AutomationCompatibleInterface, Ownable {
-    /**
-     * Public counter variable
-     */
+    
     Exchange public exchange;
     ExchangeInfo public exchangeInfo;
     uint public lastUpdateTime;

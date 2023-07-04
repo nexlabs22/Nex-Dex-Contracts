@@ -21,19 +21,22 @@ export interface ExchangeInfoInterface extends utils.Interface {
   contractName: "ExchangeInfo";
   functions: {
     "changeExchangeAddress(address)": FunctionFragment;
+    "checkUpkeep(bytes)": FunctionFragment;
     "concatenateAddressToString(string,address,string)": FunctionFragment;
     "exchange()": FunctionFragment;
     "fulfillFundingRate(bytes32,uint256,uint256,int256)": FunctionFragment;
-    "getMinimumLongBaycOut(uint256)": FunctionFragment;
+    "getMinimumLongAssetOut(uint256)": FunctionFragment;
     "getMinimumLongUsdOut(uint256)": FunctionFragment;
-    "getMinimumShortBaycOut(uint256)": FunctionFragment;
+    "getMinimumShortAssetOut(uint256)": FunctionFragment;
     "getMinimumShortUsdOut(uint256)": FunctionFragment;
     "lastFundingRateAmount()": FunctionFragment;
     "lastFundingRateTime()": FunctionFragment;
     "lastMarketPrice()": FunctionFragment;
+    "lastUpdateTime()": FunctionFragment;
     "market()": FunctionFragment;
     "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
+    "performUpkeep(bytes)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestFundingRate()": FunctionFragment;
     "setExternalJobId(bytes32)": FunctionFragment;
@@ -48,6 +51,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "checkUpkeep",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "concatenateAddressToString",
     values: [string, string, string]
   ): string;
@@ -57,7 +64,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     values: [BytesLike, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getMinimumLongBaycOut",
+    functionFragment: "getMinimumLongAssetOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -65,7 +72,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getMinimumShortBaycOut",
+    functionFragment: "getMinimumShortAssetOut",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -84,12 +91,20 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "lastMarketPrice",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "lastUpdateTime",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "market", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "oraclePrice",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "performUpkeep",
+    values: [BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -124,6 +139,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "checkUpkeep",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "concatenateAddressToString",
     data: BytesLike
   ): Result;
@@ -133,7 +152,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMinimumLongBaycOut",
+    functionFragment: "getMinimumLongAssetOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -141,7 +160,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMinimumShortBaycOut",
+    functionFragment: "getMinimumShortAssetOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -160,12 +179,20 @@ export interface ExchangeInfoInterface extends utils.Interface {
     functionFragment: "lastMarketPrice",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastUpdateTime",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "market", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "oraclePrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "performUpkeep",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -276,6 +303,11 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
     concatenateAddressToString(
       _string: string,
       _address: string,
@@ -293,23 +325,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getMinimumLongBaycOut(
+    getMinimumLongAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getMinimumLongUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getMinimumShortBaycOut(
+    getMinimumShortAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getMinimumShortUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -319,11 +351,18 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    lastUpdateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     market(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -364,6 +403,11 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  checkUpkeep(
+    arg0: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
   concatenateAddressToString(
     _string: string,
     _address: string,
@@ -381,23 +425,23 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getMinimumLongBaycOut(
+  getMinimumLongAssetOut(
     _usdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getMinimumLongUsdOut(
-    _BaycAmount: BigNumberish,
+    _AssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  getMinimumShortBaycOut(
+  getMinimumShortAssetOut(
     _usdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getMinimumShortUsdOut(
-    _BaycAmount: BigNumberish,
+    _AssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -407,11 +451,18 @@ export interface ExchangeInfo extends BaseContract {
 
   lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+  lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
   market(overrides?: CallOverrides): Promise<BigNumber>;
 
   oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  performUpkeep(
+    arg0: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -452,6 +503,11 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
     concatenateAddressToString(
       _string: string,
       _address: string,
@@ -469,23 +525,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getMinimumLongBaycOut(
+    getMinimumLongAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumLongUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getMinimumShortBaycOut(
+    getMinimumShortAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -495,11 +551,15 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     market(overrides?: CallOverrides): Promise<BigNumber>;
 
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    performUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -574,6 +634,8 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    checkUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
     concatenateAddressToString(
       _string: string,
       _address: string,
@@ -591,23 +653,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getMinimumLongBaycOut(
+    getMinimumLongAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumLongUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getMinimumShortBaycOut(
+    getMinimumShortAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -617,11 +679,18 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
+    lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     market(overrides?: CallOverrides): Promise<BigNumber>;
 
     oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -663,6 +732,11 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     concatenateAddressToString(
       _string: string,
       _address: string,
@@ -680,23 +754,23 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getMinimumLongBaycOut(
+    getMinimumLongAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMinimumLongUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getMinimumShortBaycOut(
+    getMinimumShortAssetOut(
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMinimumShortUsdOut(
-      _BaycAmount: BigNumberish,
+      _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -710,11 +784,18 @@ export interface ExchangeInfo extends BaseContract {
 
     lastMarketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    lastUpdateTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     market(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }

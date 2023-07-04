@@ -672,7 +672,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "insuranceFunds",
+    name: "liquidationFee",
     outputs: [
       {
         internalType: "uint256",

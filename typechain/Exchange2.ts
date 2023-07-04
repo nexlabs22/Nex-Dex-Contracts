@@ -119,7 +119,7 @@ export interface Exchange2Interface extends utils.Interface {
     "getAverageEntryPrice(address)": FunctionFragment;
     "getIndexPrice()": FunctionFragment;
     "getUserMargin(address)": FunctionFragment;
-    "insuranceFunds()": FunctionFragment;
+    "liquidationFee()": FunctionFragment;
     "isHardLiquidatable(address)": FunctionFragment;
     "isPartialLiquidatable(address)": FunctionFragment;
     "lastRequestId()": FunctionFragment;
@@ -255,7 +255,7 @@ export interface Exchange2Interface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "insuranceFunds",
+    functionFragment: "liquidationFee",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -461,7 +461,7 @@ export interface Exchange2Interface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "insuranceFunds",
+    functionFragment: "liquidationFee",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -760,7 +760,7 @@ export interface Exchange2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    insuranceFunds(overrides?: CallOverrides): Promise<[BigNumber]>;
+    liquidationFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     isHardLiquidatable(
       _user: string,
@@ -1031,7 +1031,7 @@ export interface Exchange2 extends BaseContract {
 
   getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
+  liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
 
   isHardLiquidatable(
     _user: string,
@@ -1290,7 +1290,7 @@ export interface Exchange2 extends BaseContract {
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
+    liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -1595,7 +1595,7 @@ export interface Exchange2 extends BaseContract {
 
     getUserMargin(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    insuranceFunds(overrides?: CallOverrides): Promise<BigNumber>;
+    liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     isHardLiquidatable(
       _user: string,
@@ -1827,7 +1827,7 @@ export interface Exchange2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    insuranceFunds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    liquidationFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isHardLiquidatable(
       _user: string,

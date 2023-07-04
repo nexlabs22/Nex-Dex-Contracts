@@ -37,19 +37,19 @@ contract Helper {
 
     
 
-    function getShortVusdAmountOut(uint _vBaycAmount) public view returns(uint) {
-        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
-        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() + _vBaycAmount;
-        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+    function getShortVusdAmountOut(uint _vAssetAmount) public view returns(uint) {
+        uint256 k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();
+        uint256 newvAssetPoolSize = exchange.vAssetPoolSize() + _vAssetAmount;
+        uint256 newvUsdPoolSize = k / newvAssetPoolSize;
         uint256 uservUsd = exchange.vUsdPoolSize() - newvUsdPoolSize;
     return uservUsd;
     }
 
 
-    function getLongVusdAmountOut(uint _vBaycAmount) public view returns(uint) {
-        uint256 k = exchange.vBaycPoolSize() * exchange.vUsdPoolSize();
-        uint256 newvBaycPoolSize = exchange.vBaycPoolSize() - _vBaycAmount;
-        uint256 newvUsdPoolSize = k / newvBaycPoolSize;
+    function getLongVusdAmountOut(uint _vAssetAmount) public view returns(uint) {
+        uint256 k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();
+        uint256 newvAssetPoolSize = exchange.vAssetPoolSize() - _vAssetAmount;
+        uint256 newvUsdPoolSize = k / newvAssetPoolSize;
         uint256 uservUsd = newvUsdPoolSize - exchange.vUsdPoolSize();
         return uservUsd;
     }
@@ -64,16 +64,16 @@ contract Helper {
   }
 
     function getPNL(address _user) public view returns (int256 pnl) {
-    if (exchange.uservBaycBalance(_user) > 0) {
-      uint256 currentBaycValue = getShortVusdAmountOut(
-        uint256(exchange.uservBaycBalance(_user))
+    if (exchange.uservAssetBalance(_user) > 0) {
+      uint256 currentAssetValue = getShortVusdAmountOut(
+        uint256(exchange.uservAssetBalance(_user))
       );
-      pnl = int256(currentBaycValue) + (exchange.uservUsdBalance(_user));
-    } else if (exchange.uservBaycBalance(_user) < 0) {
-      uint256 currentBaycValue = getLongVusdAmountOut(
-        positive(exchange.uservBaycBalance(_user))
+      pnl = int256(currentAssetValue) + (exchange.uservUsdBalance(_user));
+    } else if (exchange.uservAssetBalance(_user) < 0) {
+      uint256 currentAssetValue = getLongVusdAmountOut(
+        positive(exchange.uservAssetBalance(_user))
       );
-      pnl = exchange.uservUsdBalance(_user) - int256(currentBaycValue);
+      pnl = exchange.uservUsdBalance(_user) - int256(currentAssetValue);
     } else {
       pnl = 0;
     }
@@ -90,14 +90,14 @@ contract Helper {
 
 
     function getPositionNotional(address _user) public view returns (uint256) {
-        if (exchange.uservBaycBalance(_user) > 0) {
+        if (exchange.uservAssetBalance(_user) > 0) {
         uint256 positionNotionalValue = getShortVusdAmountOut(
-            uint256(exchange.uservBaycBalance(_user))
+            uint256(exchange.uservAssetBalance(_user))
         );
         return positionNotionalValue;
-        } else if (exchange.uservBaycBalance(_user) < 0) {
+        } else if (exchange.uservAssetBalance(_user) < 0) {
         uint256 positionNotionalValue = getLongVusdAmountOut(
-            uint256(absoluteInt((exchange.uservBaycBalance(_user))))
+            uint256(absoluteInt((exchange.uservAssetBalance(_user))))
         );
         return positionNotionalValue;
         } else {

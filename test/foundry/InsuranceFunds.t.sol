@@ -12,7 +12,7 @@ import "../../contracts/Token.sol";
 import "../../contracts/test/MockV3Aggregator.sol";
 import "./helper.sol";
 
-contract InsuranceFunds is Test, ExchangeDeployer {
+contract liquidationFee is Test, ExchangeDeployer {
     Exchange public exchange;
     ExchangeInfo public exchangeInfo;
     LinkToken public link;
@@ -53,7 +53,7 @@ contract InsuranceFunds is Test, ExchangeDeployer {
 
     function testHardLiquidation() public {
        
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
        vm.startPrank(add1);
@@ -101,14 +101,14 @@ contract InsuranceFunds is Test, ExchangeDeployer {
        assertEq(exchange.userMargin(add1), 0);
        vm.stopPrank();
 
-       uint insuranceFunds = exchange.insuranceFunds();
-       exchange.removeInsuranceFunds(insuranceFunds);
+       uint liquidationFee = exchange.liquidationFee();
+       exchange.removeLiquidationFee(liquidationFee);
     }
 
 
-    function testInsuranceFunds() public {
+    function testliquidationFee() public {
        
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
        vm.startPrank(add1);
@@ -156,8 +156,8 @@ contract InsuranceFunds is Test, ExchangeDeployer {
        assertEq(exchange.userMargin(add1) > 60, true);
        vm.stopPrank();
 
-       uint insuranceFunds = exchange.insuranceFunds();
-       exchange.removeInsuranceFunds(insuranceFunds);
+       uint liquidationFee = exchange.liquidationFee();
+       exchange.removeLiquidationFee(liquidationFee);
     }
 
     

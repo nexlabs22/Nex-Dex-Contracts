@@ -88,14 +88,14 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         // await exchange.openLongPosition(toWei('250'), 0)
         // await exchange.openShortPosition(toWei('250'))
         // console.log("vUsdSize:", toEther(await exchange.vUsdPoolSize()))
-        // console.log("vbaycSize:", toEther(await exchange.vBaycPoolSize()))
+        // console.log("vAssetSize:", toEther(await exchange.vAssetPoolSize()))
         
-        let minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('25'))
-        await expect(exchange.openLongPosition(toWei('25'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
+        let minimumAsset = await exchangeInfo.getMinimumLongAssetOut(toWei('25'))
+        await expect(exchange.openLongPosition(toWei('25'), minimumAsset)).to.be.revertedWith("Insufficient margin to open position with requested size.");
         console.log('owner margin:', Number(await exchange.userMargin(owner.address)))
         // await exchange.openShortPosition(toWei('25'), 0)
-        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('250'))
-        await expect(exchange.openShortPosition(toWei('250'), minimumBayc)).to.be.revertedWith("Insufficient margin to open position with requested size.");
+        minimumAsset = await exchangeInfo.getMinimumShortAssetOut(toWei('250'))
+        await expect(exchange.openShortPosition(toWei('250'), minimumAsset)).to.be.revertedWith("Insufficient margin to open position with requested size.");
         return;
         
       })

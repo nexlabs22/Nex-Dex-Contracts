@@ -29,7 +29,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -58,7 +58,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -87,7 +87,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -116,7 +116,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -145,7 +145,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -179,7 +179,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -208,7 +208,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -237,7 +237,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -461,7 +461,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getAllLongvBaycBalance",
+    name: "getAllLongvAssetBalance",
     outputs: [
       {
         internalType: "int256",
@@ -474,7 +474,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "getAllShortvBaycBalance",
+    name: "getAllShortvAssetBalance",
     outputs: [
       {
         internalType: "int256",
@@ -519,7 +519,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getLongBaycAmountOut",
+    name: "getLongAssetAmountOut",
     outputs: [
       {
         internalType: "uint256",
@@ -534,7 +534,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_vBaycAmount",
+        name: "_vAssetAmount",
         type: "uint256",
       },
     ],
@@ -557,7 +557,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getMinimumLongBaycOut",
+    name: "getMinimumLongAssetOut",
     outputs: [
       {
         internalType: "uint256",
@@ -572,7 +572,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_BaycAmount",
+        name: "_AssetAmount",
         type: "uint256",
       },
     ],
@@ -595,7 +595,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getMinimumShortBaycOut",
+    name: "getMinimumShortAssetOut",
     outputs: [
       {
         internalType: "uint256",
@@ -610,7 +610,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_BaycAmount",
+        name: "_AssetAmount",
         type: "uint256",
       },
     ],
@@ -671,7 +671,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "getShortBaycAmountOut",
+    name: "getShortAssetAmountOut",
     outputs: [
       {
         internalType: "uint256",
@@ -686,7 +686,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_vBaycAmount",
+        name: "_vAssetAmount",
         type: "uint256",
       },
     ],
@@ -712,19 +712,6 @@ const _abi = [
     name: "initialVirtualPool",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "insuranceFunds",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -788,7 +775,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_vBaycNewPoolSize",
+        name: "_vAssetNewPoolSize",
         type: "uint256",
       },
       {
@@ -842,6 +829,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "liquidationFee",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "maintenanceMargin",
     outputs: [
       {
@@ -875,7 +875,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_minimumBaycAmountOut",
+        name: "_minimumAssetAmountOut",
         type: "uint256",
       },
     ],
@@ -893,7 +893,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_minimumBaycAmountOut",
+        name: "_minimumAssetAmountOut",
         type: "uint256",
       },
     ],
@@ -934,7 +934,7 @@ const _abi = [
     outputs: [
       {
         internalType: "uint256",
-        name: "vBaycPoolSize",
+        name: "vAssetPoolSize",
         type: "uint256",
       },
       {
@@ -999,7 +999,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "removeInsuranceFunds",
+    name: "removeLiquidationFee",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1136,7 +1136,7 @@ const _abi = [
         type: "address",
       },
     ],
-    name: "uservBaycBalance",
+    name: "uservAssetBalance",
     outputs: [
       {
         internalType: "int256",
@@ -1168,7 +1168,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "vBaycPoolSize",
+    name: "vAssetPoolSize",
     outputs: [
       {
         internalType: "uint256",
@@ -1214,7 +1214,7 @@ const _abi = [
       },
       {
         internalType: "int256",
-        name: "uservBaycBalance",
+        name: "uservAssetBalance",
         type: "int256",
       },
     ],

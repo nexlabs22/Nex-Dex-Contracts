@@ -22,7 +22,7 @@ export default function (contract: any): any {
       const pnl           = this.getPNL(address)
       const margin        = this.userMargin(address)
       const vUsdBalance   = this.uservUsdBalance(address)
-      const vBaycBalance  = this.uservBaycBalance(address)
+      const vAssetBalance  = this.uservAssetBalance(address)
 
       result.push({
         Name: name,
@@ -32,7 +32,7 @@ export default function (contract: any): any {
         PNL: WeitoNumber(pnl),
         Margin: +margin.toFixed(2),
         VirtualUsdBalance: WeitoNumber(vUsdBalance),
-        VirtualBaycBalance: WeitoNumber(vBaycBalance)
+        VirtualAssetBalance: WeitoNumber(vAssetBalance)
       })
     }
 
@@ -50,7 +50,7 @@ export default function (contract: any): any {
     result.push({
       Name: 'Contract',
       Collateral: WeitoNumber(this.getCurrentExchangePrice()),
-      AccountValue: WeitoNumber(this.insuranceFunds),
+      AccountValue: WeitoNumber(this.liquidationFee),
       NotionalValue: WeitoNumber(this[ATTR_CONTRACT_TOKEN][this.usdc]),
       PNL: owner && WeitoNumber(owner[ATTR_CONTRACT_TOKEN][this.usdc] || 0),
     })

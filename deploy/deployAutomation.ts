@@ -17,8 +17,8 @@ async function main() {
 
   const Automation = await ethers.getContractFactory("ExchangePriceListener")
   const automation = await Automation.deploy(
-    networks[chainId].baycExchangeAddress,
-    networks[chainId].baycExchangeInfoAddress
+    networks[chainId].assetExchangeAddress,
+    networks[chainId].assetExchangeInfoAddress
   )
 
   console.log(`Automation contract deployed by address ${automation.address}`)

@@ -70,7 +70,7 @@ contract FundingRate is Test, ExchangeDeployer {
 
     function testFundingRewards() public {
        
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
        vm.startPrank(add1);

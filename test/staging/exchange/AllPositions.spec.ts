@@ -73,8 +73,8 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
       const getMargin = async (user: any) => Number(await exchange.userMargin(user.address))
       const getvUsdBalance = async (user: any) =>
         toEther(await exchange.uservUsdBalance(user.address))
-      const getvBaycBalance = async (user: any) =>
-        toEther(await exchange.uservBaycBalance(user.address))
+      const getvAssetBalance = async (user: any) =>
+        toEther(await exchange.uservAssetBalance(user.address))
 
       async function printCurrentStatus() {
         const accounts = await ethers.getSigners()
@@ -88,7 +88,7 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
             PNL: await getPnl(accounts[i]),
             Margin: await getMargin(accounts[i]),
             VirtuaUsdBalance: await getvUsdBalance(accounts[i]),
-            VirtuaBaycBalance: await getvBaycBalance(accounts[i]),
+            VirtuaAssetBalance: await getvAssetBalance(accounts[i]),
           })
         }
 
@@ -133,40 +133,40 @@ const toWei = (e: string) => ethers.utils.parseEther(e)
         await printCurrentStatus()
 
         console.log("First, user0 will open Long Position with $490.")
-        const minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei("490"))
-        console.log("minimumBayc :", toEther(minimumBayc))
-        await exchange.openLongPosition(toWei("490"), minimumBayc)
+        const minimumAsset = await exchangeInfo.getMinimumLongAssetOut(toWei("490"))
+        console.log("minimumAsset :", toEther(minimumAsset))
+        await exchange.openLongPosition(toWei("490"), minimumAsset)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
 
         console.log(
           "Second, user1 will open Short Position with $4500. At that time, user0 will be liquidated partially because his margin is 50% for new pool state."
         )
-        const minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWei("4500"))
-        console.log("minimumBayc :", toEther(minimumBayc1))
-        await exchange.connect(account1).openShortPosition(toWei("4500"), minimumBayc1)
+        const minimumAsset1 = await exchangeInfo.getMinimumShortAssetOut(toWei("4500"))
+        console.log("minimumAsset :", toEther(minimumAsset1))
+        await exchange.connect(account1).openShortPosition(toWei("4500"), minimumAsset1)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
 
         console.log(
           "Third, user2 will open Short Position with $7000 and user0 will be liquidated hardly."
         )
-        const minimumBayc2 = await exchangeInfo.getMinimumShortBaycOut(toWei("7500"))
-        console.log("minimumBayc :", toEther(minimumBayc2))
-        await exchange.connect(account2).openShortPosition(toWei("7500"), minimumBayc2)
+        const minimumAsset2 = await exchangeInfo.getMinimumShortAssetOut(toWei("7500"))
+        console.log("minimumAsset :", toEther(minimumAsset2))
+        await exchange.connect(account2).openShortPosition(toWei("7500"), minimumAsset2)
         console.log("price:", toEther(await exchange.getCurrentExchangePrice()))
         await printCurrentStatus()
 
         console.log(
           "Finally, user1 will close Position completely, and user2 will be liquidated hardly because of this."
         )
-        const account1BaycBalance = await exchange.uservBaycBalance(account1.address)
-        console.log(account1BaycBalance.abs())
-        const minimumUsdOut = await exchangeInfo.getMinimumLongUsdOut(account1BaycBalance.abs())
+        const account1AssetBalance = await exchange.uservAssetBalance(account1.address)
+        console.log(account1AssetBalance.abs())
+        const minimumUsdOut = await exchangeInfo.getMinimumLongUsdOut(account1AssetBalance.abs())
         console.log("by liq:", toEther(minimumUsdOut))
         console.log(
           "without liq:",
-          toEther(await exchange.getLongVusdAmountOut(account1BaycBalance.abs()))
+          toEther(await exchange.getLongVusdAmountOut(account1AssetBalance.abs()))
         )
         //return
         await exchange.connect(account1).closePositionComplete(minimumUsdOut)

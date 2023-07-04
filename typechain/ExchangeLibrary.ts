@@ -18,12 +18,12 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface ExchangeLibraryInterface extends utils.Interface {
   contractName: "ExchangeLibrary";
   functions: {
-    "getShortBaycAmountOut(uint256,uint256,uint256)": FunctionFragment;
+    "getShortAssetAmountOut(uint256,uint256,uint256)": FunctionFragment;
     "getShortVusdAmountOut(uint256,uint256,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "getShortBaycAmountOut",
+    functionFragment: "getShortAssetAmountOut",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -32,7 +32,7 @@ export interface ExchangeLibraryInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "getShortBaycAmountOut",
+    functionFragment: "getShortAssetAmountOut",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -71,46 +71,46 @@ export interface ExchangeLibrary extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      _vAssetAmount: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
   };
 
-  getShortBaycAmountOut(
+  getShortAssetAmountOut(
     _vUsdAmount: BigNumberish,
-    vBaycPoolSize: BigNumberish,
+    vAssetPoolSize: BigNumberish,
     vUsdPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getShortVusdAmountOut(
-    _vBaycAmount: BigNumberish,
-    vBaycPoolSize: BigNumberish,
+    _vAssetAmount: BigNumberish,
+    vAssetPoolSize: BigNumberish,
     vUsdPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   callStatic: {
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      _vAssetAmount: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -119,32 +119,32 @@ export interface ExchangeLibrary extends BaseContract {
   filters: {};
 
   estimateGas: {
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      _vAssetAmount: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    getShortBaycAmountOut(
+    getShortAssetAmountOut(
       _vUsdAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getShortVusdAmountOut(
-      _vBaycAmount: BigNumberish,
-      vBaycPoolSize: BigNumberish,
+      _vAssetAmount: BigNumberish,
+      vAssetPoolSize: BigNumberish,
       vUsdPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

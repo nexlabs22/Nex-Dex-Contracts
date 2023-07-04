@@ -7,8 +7,9 @@ pragma abicoder v2;
 import {Exchange} from "./Exchange.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 
-contract ExchangeInfo is Ownable, ChainlinkClient {
+contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface {
     using Chainlink for Chainlink.Request;
 
     //oracle data
@@ -16,6 +17,9 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     uint public lastMarketPrice;
     uint public lastFundingRateTime;
     int public lastFundingRateAmount;
+
+    //automation data
+    uint public lastUpdateTime;
     
     string baseUrl = "https://app.nexlabs.io/api/lastFundingRate?address=";
     string urlParams = "&returnType=number&multiplyFunc=18&timesNegFund=true";
@@ -26,7 +30,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     event RequestFulfilled(bytes32 indexed requestId,uint256 _number0,uint256 _number1, int256 _number2);
 
     struct Pool {
-    uint256 vBaycPoolSize;
+    uint256 vAssetPoolSize;
     uint256 vUsdPoolSize;
     }
 
@@ -63,6 +67,33 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     baseUrl = _beforeAddress;
     urlParams = _afterAddress;
   }
+
+
+  function checkUpkeep(
+        bytes calldata /* checkData */
+    )
+        external
+        view
+        override
+        returns (bool upkeepNeeded, bytes memory /* performData */)
+    {
+        uint marketPrice = exchange.marketPrice();
+
+        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
+            upkeepNeeded = true;
+        }
+    
+    }
+
+    function performUpkeep(bytes calldata /* performData */) external override {
+        uint marketPrice = exchange.marketPrice();
+
+        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
+           requestFundingRate();
+        }
+        lastUpdateTime = block.timestamp;
+        
+    }
 
   function requestFundingRate(
   )
@@ -106,9 +137,9 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
 
   function market() public view returns(uint){
       uint vUsdPoolSize = exchange.vUsdPoolSize();
-      uint vBaycPoolSize = exchange.vBaycPoolSize();
-      if(vUsdPoolSize > 0 && vBaycPoolSize > 0){
-      uint marketPrice = (1e18 *vUsdPoolSize) / vBaycPoolSize;
+      uint vAssetPoolSize = exchange.vAssetPoolSize();
+      if(vUsdPoolSize > 0 && vAssetPoolSize > 0){
+      uint marketPrice = (1e18 *vUsdPoolSize) / vAssetPoolSize;
       return marketPrice;
       }else{
           return 0;
@@ -133,31 +164,31 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     return string(_string);
   }
 
-  //get minimum long bayc amount that user receives
-  function getMinimumLongBaycOut(uint256 _usdAmount) public view returns (uint256) {
-    int256 vBaycPoolSize = int256(exchange.vBaycPoolSize());
+  //get minimum long Asset amount that user receives
+  function getMinimumLongAssetOut(uint256 _usdAmount) public view returns (uint256) {
+    int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
-    int256 k = vBaycPoolSize * vUsdPoolSize;
+    int256 k = vAssetPoolSize * vUsdPoolSize;
     int256 newvUsdPoolSize = vUsdPoolSize + int256(_usdAmount);
-    int256 newvBaycPoolSize = k / newvUsdPoolSize;
+    int256 newvAssetPoolSize = k / newvUsdPoolSize;
 
     address[] memory activeUsers = exchange.getAllActiveUsers();
     for (uint256 i; i < activeUsers.length; i++) {
       if (activeUsers[i] != address(0)) {
         bool isHardLiquidatable = exchange._isHardLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isHardLiquidatable == true) {
           //update new pool
-          k = newvBaycPoolSize * newvUsdPoolSize;
-          newvBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          newvUsdPoolSize = k / newvBaycPoolSize;
+          k = newvAssetPoolSize * newvUsdPoolSize;
+          newvAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          newvUsdPoolSize = k / newvAssetPoolSize;
           //update pool
-          k = vBaycPoolSize * vUsdPoolSize;
-          vBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          vUsdPoolSize = k / vBaycPoolSize;
+          k = vAssetPoolSize * vUsdPoolSize;
+          vAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          vUsdPoolSize = k / vAssetPoolSize;
         }
       }
     }
@@ -166,71 +197,71 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
       if (activeUsers[i] != address(0)) {
         bool isPartialLiquidatable = exchange._isPartialLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isPartialLiquidatable == true) {
           uint256 vUsdPartialLiquidateAmount = exchange._calculatePartialLiquidateValue(
             activeUsers[i],
-            uint256(newvBaycPoolSize),
+            uint256(newvAssetPoolSize),
             uint256(newvUsdPoolSize)
           );
-          if (exchange.uservBaycBalance(activeUsers[i]) > 0) {
+          if (exchange.uservAssetBalance(activeUsers[i]) > 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
-          } else if (exchange.uservBaycBalance(activeUsers[i]) < 0) {
+            vAssetPoolSize = k / vUsdPoolSize;
+          } else if (exchange.uservAssetBalance(activeUsers[i]) < 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
+            vAssetPoolSize = k / vUsdPoolSize;
           }
         }
       }
     }
 
-    k = vBaycPoolSize * vUsdPoolSize;
+    k = vAssetPoolSize * vUsdPoolSize;
     int256 finalvUsdPoolSize = vUsdPoolSize + int256(_usdAmount);
-    int256 finalvBaycPoolSize = k / finalvUsdPoolSize;
-    int256 userBaycOut = vBaycPoolSize - finalvBaycPoolSize;
-    return uint256(userBaycOut);
+    int256 finalvAssetPoolSize = k / finalvUsdPoolSize;
+    int256 userAssetOut = vAssetPoolSize - finalvAssetPoolSize;
+    return uint256(userAssetOut);
   }
 
 
-  //get minimum short bayc amount that user receives
-  function getMinimumShortBaycOut(uint256 _usdAmount) public view returns (uint) {
-    int256 vBaycPoolSize = int256(exchange.vBaycPoolSize());
+  //get minimum short Asset amount that user receives
+  function getMinimumShortAssetOut(uint256 _usdAmount) public view returns (uint) {
+    int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
-    int256 k = vBaycPoolSize * vUsdPoolSize;
+    int256 k = vAssetPoolSize * vUsdPoolSize;
     int256 newvUsdPoolSize = vUsdPoolSize - int256(_usdAmount);
-    int256 newvBaycPoolSize = k / newvUsdPoolSize;
+    int256 newvAssetPoolSize = k / newvUsdPoolSize;
 
     address[] memory activeUsers = exchange.getAllActiveUsers();
     for (uint256 i; i < activeUsers.length; i++) {
       if (activeUsers[i] != address(0)) {
         bool isHardLiquidatable = exchange._isHardLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isHardLiquidatable == true) { 
           //update new pool
-          k = newvBaycPoolSize * newvUsdPoolSize;
-          newvBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          newvUsdPoolSize = k / newvBaycPoolSize;
+          k = newvAssetPoolSize * newvUsdPoolSize;
+          newvAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          newvUsdPoolSize = k / newvAssetPoolSize;
           //update pool
-          k = vBaycPoolSize * vUsdPoolSize;
-          vBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          vUsdPoolSize = k / vBaycPoolSize;
+          k = vAssetPoolSize * vUsdPoolSize;
+          vAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          vUsdPoolSize = k / vAssetPoolSize;
           
         }
       }
@@ -239,75 +270,75 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
       if (activeUsers[i] != address(0)) {
         bool isPartialLiquidatable = exchange._isPartialLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isPartialLiquidatable == true) {
           
           uint256 vUsdPartialLiquidateAmount = exchange._calculatePartialLiquidateValue(
             activeUsers[i],
-            uint256(newvBaycPoolSize),
+            uint256(newvAssetPoolSize),
             uint256(newvUsdPoolSize)
           );
-          if (exchange.uservBaycBalance(activeUsers[i]) > 0) {
+          if (exchange.uservAssetBalance(activeUsers[i]) > 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
-          } else if (exchange.uservBaycBalance(activeUsers[i]) < 0) {
+            vAssetPoolSize = k / vUsdPoolSize;
+          } else if (exchange.uservAssetBalance(activeUsers[i]) < 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
+            vAssetPoolSize = k / vUsdPoolSize;
           }
         }
       }
     }
 
-    k = vBaycPoolSize * vUsdPoolSize;
+    k = vAssetPoolSize * vUsdPoolSize;
     int256 finalvUsdPoolSize = vUsdPoolSize - int256(_usdAmount);
-    int256 finalvBaycPoolSize = k / finalvUsdPoolSize;
-    int256 userBaycOut = finalvBaycPoolSize - vBaycPoolSize;
+    int256 finalvAssetPoolSize = k / finalvUsdPoolSize;
+    int256 userAssetOut = finalvAssetPoolSize - vAssetPoolSize;
 
-    return uint256(userBaycOut);
+    return uint256(userAssetOut);
 
   }
 
     
   //get minimum long usd amount that user receives
-  function getMinimumLongUsdOut(uint256 _BaycAmount) public view returns (uint256) {
-    int256 vBaycPoolSize = int256(exchange.vBaycPoolSize());
+  function getMinimumLongUsdOut(uint256 _AssetAmount) public view returns (uint256) {
+    int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
-    int256 k = vBaycPoolSize * vUsdPoolSize;
-    int256 newvBaycPoolSize = vBaycPoolSize - int256(_BaycAmount);
-    int256 newvUsdPoolSize = k / newvBaycPoolSize;  
+    int256 k = vAssetPoolSize * vUsdPoolSize;
+    int256 newvAssetPoolSize = vAssetPoolSize - int256(_AssetAmount);
+    int256 newvUsdPoolSize = k / newvAssetPoolSize;  
 
     address[] memory activeUsers = exchange.getAllActiveUsers();
     for (uint256 i; i < activeUsers.length; i++) {
       if (activeUsers[i] != address(0)) {
         bool isHardLiquidatable = exchange._isHardLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isHardLiquidatable == true) {
           
           //update new pool
-          k = newvBaycPoolSize * newvUsdPoolSize;
-          newvBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          newvUsdPoolSize = k / newvBaycPoolSize;
+          k = newvAssetPoolSize * newvUsdPoolSize;
+          newvAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          newvUsdPoolSize = k / newvAssetPoolSize;
           //update pool
-          k = vBaycPoolSize * vUsdPoolSize;
-          vBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          vUsdPoolSize = k / vBaycPoolSize;
+          k = vAssetPoolSize * vUsdPoolSize;
+          vAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          vUsdPoolSize = k / vAssetPoolSize;
         }
       }
     }
@@ -316,42 +347,42 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
       if (activeUsers[i] != address(0)) {
         bool isPartialLiquidatable = exchange._isPartialLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isPartialLiquidatable == true) {
           uint256 vUsdPartialLiquidateAmount = exchange._calculatePartialLiquidateValue(
             activeUsers[i],
-            uint256(newvBaycPoolSize),
+            uint256(newvAssetPoolSize),
             uint256(newvUsdPoolSize)
           );
-          if (exchange.uservBaycBalance(activeUsers[i]) > 0) {
+          if (exchange.uservAssetBalance(activeUsers[i]) > 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
-          } else if (exchange.uservBaycBalance(activeUsers[i]) < 0) {
+            vAssetPoolSize = k / vUsdPoolSize;
+          } else if (exchange.uservAssetBalance(activeUsers[i]) < 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
+            vAssetPoolSize = k / vUsdPoolSize;
           }
         }
       }
     }
 
 
-    k = vBaycPoolSize * vUsdPoolSize;
-    int256 finalvBaycPoolSize = vBaycPoolSize - int256(_BaycAmount);
-    int256 finalvUsdPoolSize = k / finalvBaycPoolSize;
+    k = vAssetPoolSize * vUsdPoolSize;
+    int256 finalvAssetPoolSize = vAssetPoolSize - int256(_AssetAmount);
+    int256 finalvUsdPoolSize = k / finalvAssetPoolSize;
     int256 userUsdOut = finalvUsdPoolSize - vUsdPoolSize;
     return uint256(userUsdOut);
   }
@@ -359,31 +390,31 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
 
 
   //get minimum short usd amount that user receives
-  function getMinimumShortUsdOut(uint256 _BaycAmount) public view returns (uint256) {
-    int256 vBaycPoolSize = int256(exchange.vBaycPoolSize());
+  function getMinimumShortUsdOut(uint256 _AssetAmount) public view returns (uint256) {
+    int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
-    int256 k = vBaycPoolSize * vUsdPoolSize;
-    int256 newvBaycPoolSize = vBaycPoolSize + int256(_BaycAmount);
-    int256 newvUsdPoolSize = k / newvBaycPoolSize;  
+    int256 k = vAssetPoolSize * vUsdPoolSize;
+    int256 newvAssetPoolSize = vAssetPoolSize + int256(_AssetAmount);
+    int256 newvUsdPoolSize = k / newvAssetPoolSize;  
 
     address[] memory activeUsers = exchange.getAllActiveUsers();
     for (uint256 i; i < activeUsers.length; i++) {
       if (activeUsers[i] != address(0)) {
         bool isHardLiquidatable = exchange._isHardLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isHardLiquidatable == true) {
           
           //update new pool
-          k = newvBaycPoolSize * newvUsdPoolSize;
-          newvBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          newvUsdPoolSize = k / newvBaycPoolSize;
+          k = newvAssetPoolSize * newvUsdPoolSize;
+          newvAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          newvUsdPoolSize = k / newvAssetPoolSize;
           //update pool
-          k = vBaycPoolSize * vUsdPoolSize;
-          vBaycPoolSize += exchange.uservBaycBalance(activeUsers[i]);
-          vUsdPoolSize = k / vBaycPoolSize;
+          k = vAssetPoolSize * vUsdPoolSize;
+          vAssetPoolSize += exchange.uservAssetBalance(activeUsers[i]);
+          vUsdPoolSize = k / vAssetPoolSize;
         }
       }
     }
@@ -392,41 +423,41 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
       if (activeUsers[i] != address(0)) {
         bool isPartialLiquidatable = exchange._isPartialLiquidatable(
           activeUsers[i],
-          uint256(newvBaycPoolSize),
+          uint256(newvAssetPoolSize),
           uint256(newvUsdPoolSize)
         );
         if (isPartialLiquidatable == true) {
           uint256 vUsdPartialLiquidateAmount = exchange._calculatePartialLiquidateValue(
             activeUsers[i],
-            uint256(newvBaycPoolSize),
+            uint256(newvAssetPoolSize),
             uint256(newvUsdPoolSize)
           );
-          if (exchange.uservBaycBalance(activeUsers[i]) > 0) {
+          if (exchange.uservAssetBalance(activeUsers[i]) > 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize -= int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
-          } else if (exchange.uservBaycBalance(activeUsers[i]) < 0) {
+            vAssetPoolSize = k / vUsdPoolSize;
+          } else if (exchange.uservAssetBalance(activeUsers[i]) < 0) {
             //update new pool
-            k = newvBaycPoolSize * newvUsdPoolSize;
+            k = newvAssetPoolSize * newvUsdPoolSize;
             newvUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            newvBaycPoolSize = k / newvUsdPoolSize;
+            newvAssetPoolSize = k / newvUsdPoolSize;
             //update pool
-            k = vBaycPoolSize * vUsdPoolSize;
+            k = vAssetPoolSize * vUsdPoolSize;
             vUsdPoolSize += int256(vUsdPartialLiquidateAmount);
-            vBaycPoolSize = k / vUsdPoolSize;
+            vAssetPoolSize = k / vUsdPoolSize;
           }
         }
       }
     }
 
-    k = vBaycPoolSize * vUsdPoolSize;
-    int256 finalvBaycPoolSize = vBaycPoolSize + int256(_BaycAmount);
-    int256 finalvUsdPoolSize = k / finalvBaycPoolSize;
+    k = vAssetPoolSize * vUsdPoolSize;
+    int256 finalvAssetPoolSize = vAssetPoolSize + int256(_AssetAmount);
+    int256 finalvUsdPoolSize = k / finalvAssetPoolSize;
     int256 userUsdOut = vUsdPoolSize - finalvUsdPoolSize;
     return uint256(userUsdOut);
   }

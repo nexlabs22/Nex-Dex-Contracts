@@ -109,7 +109,7 @@ contract Users40 is Test, ExchangeDeployer {
             console.log("***");
             console.log("index", i);
             console.log("user margin", exchange.positive(exchange.userMargin(users[i])));
-            console.log("bayc balance", exchange.positive(exchange.uservBaycBalance(users[i]))/1e16);
+            console.log("Asset balance", exchange.positive(exchange.uservAssetBalance(users[i]))/1e16);
             console.log("usd balance", exchange.positive(exchange.uservUsdBalance(users[i]))/1e16);
             // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
             console.log("***");

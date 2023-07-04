@@ -178,9 +178,9 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         console.log('owner position national 3 :',toEther(await exchange.getPositionNotional(owner.address)));
         console.log('final collateral:', toEther(await exchange.collateral(usdc.address, owner.address)));
 
-        console.log('insurance funds 1 :', toEther(await exchange.insuranceFunds()))
-        // await exchange.removeInsuranceFunds(toWei('10'))
-        console.log('insurance funds 2 :', toEther(await exchange.insuranceFunds()))
+        console.log('insurance funds 1 :', toEther(await exchange.liquidationFee()))
+        // await exchange.removeLiquidationFee(toWei('10'))
+        console.log('insurance funds 2 :', toEther(await exchange.liquidationFee()))
       })
       
     })

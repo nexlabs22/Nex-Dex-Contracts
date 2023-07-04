@@ -88,14 +88,14 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        let minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('1000'))
-        await exchange.openLongPosition(toWei('1000'), minimumBayc)
+        let minimumAsset = await exchangeInfo.getMinimumLongAssetOut(toWei('1000'))
+        await exchange.openLongPosition(toWei('1000'), minimumAsset)
 
-        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('130'))
-        await exchange.connect(account1).openShortPosition(toWei('130'), minimumBayc)
-        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('600'))
-        await exchange.connect(account2).openShortPosition(toWei('600'), minimumBayc)
-        console.log(toEther(await exchange.uservBaycBalance(owner.address)))
+        minimumAsset = await exchangeInfo.getMinimumShortAssetOut(toWei('130'))
+        await exchange.connect(account1).openShortPosition(toWei('130'), minimumAsset)
+        minimumAsset = await exchangeInfo.getMinimumShortAssetOut(toWei('600'))
+        await exchange.connect(account2).openShortPosition(toWei('600'), minimumAsset)
+        console.log(toEther(await exchange.uservAssetBalance(owner.address)))
         await setOraclePrice(2300);
         
         await exchange.setFundingRate();
@@ -134,14 +134,14 @@ const toWei = (e: string) => ethers.utils.parseEther(e);
         await exchange.connect(account3).depositCollateral(toWei('1000'));
         expect(toEther(await exchange.collateral(usdc.address, account3.address))).to.equal('1000.0')
         
-        let minimumBayc = await exchangeInfo.getMinimumLongBaycOut(toWei('1000'))
-        await exchange.openLongPosition(toWei('1000'), minimumBayc)
-        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('130'))
-        await exchange.connect(account1).openShortPosition(toWei('130'), minimumBayc)
+        let minimumAsset = await exchangeInfo.getMinimumLongAssetOut(toWei('1000'))
+        await exchange.openLongPosition(toWei('1000'), minimumAsset)
+        minimumAsset = await exchangeInfo.getMinimumShortAssetOut(toWei('130'))
+        await exchange.connect(account1).openShortPosition(toWei('130'), minimumAsset)
         
-        minimumBayc = await exchangeInfo.getMinimumShortBaycOut(toWei('600'))
-        await exchange.connect(account2).openShortPosition(toWei('600'), minimumBayc)
-        console.log(toEther(await exchange.uservBaycBalance(owner.address)))
+        minimumAsset = await exchangeInfo.getMinimumShortAssetOut(toWei('600'))
+        await exchange.connect(account2).openShortPosition(toWei('600'), minimumAsset)
+        console.log(toEther(await exchange.uservAssetBalance(owner.address)))
         await setOraclePrice(1000);
         // console.log(toEther(await exchange.setFundingRate2()));
         // return

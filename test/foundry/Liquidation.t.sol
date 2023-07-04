@@ -53,7 +53,7 @@ contract Liquidation is Test, ExchangeDeployer {
 
     function testHardLiquidation() public {
        
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
        vm.startPrank(add1);
@@ -105,7 +105,7 @@ contract Liquidation is Test, ExchangeDeployer {
 
     function testPartialLiquidation() public {
        
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
        vm.startPrank(add1);

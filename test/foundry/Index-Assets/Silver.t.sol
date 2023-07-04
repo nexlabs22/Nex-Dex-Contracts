@@ -51,11 +51,11 @@ contract SilverTest is Test {
 
 
     function testAddAndWithdrawCollateral() public {
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        uint marketPrice = exchange.marketPrice();
        assertEq(startvUsdPoolSize, 5000e18);
-       assertEq(startvBaycPoolSize, 10000e18);
+       assertEq(startvAssetPoolSize, 10000e18);
        assertEq(marketPrice, 5e17);
 
        vm.startPrank(add1);
@@ -66,16 +66,16 @@ contract SilverTest is Test {
        exchange.withdrawCollateral(1000e18);
        assertEq(usdc.balanceOf(address(add1)), 1000e18);
        assertEq(exchange.collateral(address(usdc), address(add1)), 0);
-       uint endvBaycPoolSize = exchange.vBaycPoolSize();
+       uint endvAssetPoolSize = exchange.vAssetPoolSize();
        uint endvUsdPoolSize = exchange.vUsdPoolSize();
-       assertEq(startvBaycPoolSize, endvBaycPoolSize);
+       assertEq(startvAssetPoolSize, endvAssetPoolSize);
        assertEq(startvUsdPoolSize, endvUsdPoolSize);
        
     }
 
     
     function testOpenAndClosePosition() public {
-       uint startvBaycPoolSize = exchange.vBaycPoolSize();
+       uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startUsdPoolSize = exchange.vUsdPoolSize();
        vm.startPrank(add1);
        usdc.approve(address(exchange), 1000e18);
@@ -85,18 +85,18 @@ contract SilverTest is Test {
        assertEq(usdc.balanceOf(address(add1)), 0);
        assertEq(exchange.collateral(address(usdc), address(add1)), 1000e18);
        exchange.openLongPosition(1000e18, 0);
-       uint baycValue = exchange.getShortVusdAmountOut(exchange.positive(exchange.uservBaycBalance(add1)));
+       uint AssetValue = exchange.getShortVusdAmountOut(exchange.positive(exchange.uservAssetBalance(add1)));
        
-       int baycBalance = exchange.uservUsdBalance(add1);
+       int AssetBalance = exchange.uservUsdBalance(add1);
     
-       uint middlevBaycPoolSize = exchange.vBaycPoolSize();
+       uint middlevAssetPoolSize = exchange.vAssetPoolSize();
        exchange.closePositionComplete(0);
        uint endCollateral = exchange.collateral(address(usdc), address(add1));
-       uint endvBaycPoolSize = exchange.vBaycPoolSize();
+       uint endvAssetPoolSize = exchange.vAssetPoolSize();
        uint endUsdPoolSize = exchange.vUsdPoolSize();
        uint endExchangeBalance = usdc.balanceOf(address(exchange));
        
-       assertEq(startvBaycPoolSize, endvBaycPoolSize);
+       assertEq(startvAssetPoolSize, endvAssetPoolSize);
 
        
     }
@@ -122,11 +122,11 @@ contract SilverTest is Test {
        exchange.openLongPosition(1600e18, 0);
         vm.stopPrank();
        vm.startPrank(add1);
-       uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
+       uint newUsdValue = helper.getShortVusdAmountOut(uint(exchange.uservAssetBalance(add1)));
        int pnl =  int(newUsdValue) - (-exchange.uservUsdBalance(add1));
        assertEq(exchange.getPNL(add1), pnl);
        uint lastCollateral = exchange.collateral(address(usdc), add1);
-       uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservBaycBalance(add1)));
+       uint lastPositionValue = exchange.getShortVusdAmountOut(uint(exchange.uservAssetBalance(add1)));
        exchange.closePositionComplete(0);
         /*
        */

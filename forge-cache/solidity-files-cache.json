@@ -3,7 +3,7 @@
   "paths": {
     "artifacts": "out",
     "build_infos": "out/build-info",
-    "sources": "exchange",
+    "sources": "Exchange",
     "tests": "test/foundry",
     "scripts": "script",
     "libraries": [
@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1687963205989,
-      "contentHash": "57c8ef04eba61eea6b13080ef390f1e3",
+      "lastModificationDate": 1688476787698,
+      "contentHash": "91d99c7e7b9a65bb65bdf2cc5a2efd82",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -47,9 +47,12 @@
       "imports": [
         "contracts/Exchange.sol",
         "contracts/ExchangeInfo.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -77,8 +80,8 @@
       }
     },
     "contracts/ExchangeInfo.sol": {
-      "lastModificationDate": 1687008354361,
-      "contentHash": "7cda4fa5e3e6eea20105473978e15a65",
+      "lastModificationDate": 1688476078822,
+      "contentHash": "93125836d7b82d284beb0d6dfd48a68b",
       "sourceName": "contracts/ExchangeInfo.sol",
       "solcConfig": {
         "settings": {
@@ -111,9 +114,12 @@
       "imports": [
         "contracts/Exchange.sol",
         "contracts/ExchangeInfo.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -141,8 +147,8 @@
       }
     },
     "contracts/Index-contracts/Gold.sol": {
-      "lastModificationDate": 1684653929414,
-      "contentHash": "fbac805c934bf884d7350cf5423ff4bb",
+      "lastModificationDate": 1688476927902,
+      "contentHash": "d340920a8cab65ced33271c482d0500a",
       "sourceName": "contracts/Index-contracts/Gold.sol",
       "solcConfig": {
         "settings": {
@@ -192,8 +198,8 @@
       }
     },
     "contracts/Index-contracts/Silver.sol": {
-      "lastModificationDate": 1684654038523,
-      "contentHash": "b94c28d908cf2506085490c512cd16cc",
+      "lastModificationDate": 1688476933299,
+      "contentHash": "fadcf0ac94179fe331588bb159f0fc10",
       "sourceName": "contracts/Index-contracts/Silver.sol",
       "solcConfig": {
         "settings": {
@@ -1223,6 +1229,89 @@
         }
       }
     },
+    "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol": {
+      "lastModificationDate": 1675287193395,
+      "contentHash": "80067f44d8bddd615599f8d73b9726a5",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "AutomationBase": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "AutomationBase.sol\\AutomationBase.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/AutomationCompatible.sol": {
+      "lastModificationDate": 1675287193396,
+      "contentHash": "c962c53a75d722542c83859d848edd5b",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/AutomationCompatible.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "AutomationCompatible": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "AutomationCompatible.sol\\AutomationCompatible.json"
+        }
+      }
+    },
     "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol": {
       "lastModificationDate": 1675287193433,
       "contentHash": "9dc050539cdf1579d5650d41d0df9ec2",
@@ -1437,6 +1526,46 @@
       "artifacts": {
         "AggregatorV3Interface": {
           "0.8.17+commit.8df45f5f.Windows.msvc": "AggregatorV3Interface.sol\\AggregatorV3Interface.json"
+        }
+      }
+    },
+    "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol": {
+      "lastModificationDate": 1675287193397,
+      "contentHash": "c52969cee392918edbf23f914e01c0dc",
+      "sourceName": "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "AutomationCompatibleInterface": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "AutomationCompatibleInterface.sol\\AutomationCompatibleInterface.json"
         }
       }
     },
@@ -2416,11 +2545,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2451,8 +2583,8 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1687961611824,
-      "contentHash": "b2b893b11c330d270c188e3805227db9",
+      "lastModificationDate": 1688474680873,
+      "contentHash": "d20b5aab72093b56ae92e8b25d288822",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -2506,11 +2638,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2543,8 +2678,8 @@
       }
     },
     "test/foundry/Index-Assets/Gold.t.sol": {
-      "lastModificationDate": 1684654143963,
-      "contentHash": "24cdc9658be1fedfda987930572dc5b5",
+      "lastModificationDate": 1688474551260,
+      "contentHash": "a5974014e8111d0f42ab57b72f2d54f6",
       "sourceName": "test/foundry/Index-Assets/Gold.t.sol",
       "solcConfig": {
         "settings": {
@@ -2595,11 +2730,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2631,8 +2769,8 @@
       }
     },
     "test/foundry/Index-Assets/Silver.t.sol": {
-      "lastModificationDate": 1687944534408,
-      "contentHash": "4d07b1bbdb1ff2bc50272acbf04157b2",
+      "lastModificationDate": 1688474668075,
+      "contentHash": "9f4c8729435fa7254f8078ca0d49e2e9",
       "sourceName": "test/foundry/Index-Assets/Silver.t.sol",
       "solcConfig": {
         "settings": {
@@ -2683,11 +2821,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2719,8 +2860,8 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1687943391261,
-      "contentHash": "2d44e322031b7b359940283d0d09561e",
+      "lastModificationDate": 1688476975996,
+      "contentHash": "d049c498af24b5d457c547150fe094ce",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
         "settings": {
@@ -2774,11 +2915,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2805,14 +2949,14 @@
       ],
       "versionRequirement": "^0.8.17",
       "artifacts": {
-        "InsuranceFunds": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "InsuranceFunds.t.sol\\InsuranceFunds.json"
+        "liquidationFee": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "InsuranceFunds.t.sol\\liquidationFee.json"
         }
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1687943504090,
-      "contentHash": "06907b20ea938bfd9e3f11e31975ae09",
+      "lastModificationDate": 1688474131152,
+      "contentHash": "48345d9c250c34387660f7fffc9f8496",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
         "settings": {
@@ -2866,11 +3010,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2903,8 +3050,8 @@
       }
     },
     "test/foundry/Positions.t.sol": {
-      "lastModificationDate": 1687943582899,
-      "contentHash": "dec1967ae9542358c712d62c9f14057c",
+      "lastModificationDate": 1688474855476,
+      "contentHash": "bbb09384c1eafdee5347d2165210da0b",
       "sourceName": "test/foundry/Positions.t.sol",
       "solcConfig": {
         "settings": {
@@ -2958,11 +3105,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -2995,8 +3145,8 @@
       }
     },
     "test/foundry/gasCalculation/Users100.t.sol": {
-      "lastModificationDate": 1687962342503,
-      "contentHash": "7e97ad3ba2f209e6cdbdaea70d52b950",
+      "lastModificationDate": 1688474534595,
+      "contentHash": "5d1dea2010036bfdbe9564fc9f55c999",
       "sourceName": "test/foundry/gasCalculation/Users100.t.sol",
       "solcConfig": {
         "settings": {
@@ -3050,11 +3200,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3087,8 +3240,8 @@
       }
     },
     "test/foundry/gasCalculation/Users1000.t.sol": {
-      "lastModificationDate": 1687962358152,
-      "contentHash": "ba0bf7f15e6e82a9d44555de1e44392f",
+      "lastModificationDate": 1688474155557,
+      "contentHash": "276f49c51554c9dd19a8d6684a407db6",
       "sourceName": "test/foundry/gasCalculation/Users1000.t.sol",
       "solcConfig": {
         "settings": {
@@ -3142,11 +3295,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3234,11 +3390,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3271,8 +3430,8 @@
       }
     },
     "test/foundry/gasCalculation/Users20.t.sol": {
-      "lastModificationDate": 1687962212424,
-      "contentHash": "28f3f49f51472fbec8164aac0a9d653d",
+      "lastModificationDate": 1688474138686,
+      "contentHash": "28c57aca25af10a952914644b6298526",
       "sourceName": "test/foundry/gasCalculation/Users20.t.sol",
       "solcConfig": {
         "settings": {
@@ -3326,11 +3485,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3363,8 +3525,8 @@
       }
     },
     "test/foundry/gasCalculation/Users40.t.sol": {
-      "lastModificationDate": 1687962331919,
-      "contentHash": "404ed7ad0df608d9f05d9938d065b3b3",
+      "lastModificationDate": 1688474545549,
+      "contentHash": "0b62a1e482b11ee547bc5071c645c4de",
       "sourceName": "test/foundry/gasCalculation/Users40.t.sol",
       "solcConfig": {
         "settings": {
@@ -3418,11 +3580,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3455,8 +3620,8 @@
       }
     },
     "test/foundry/gasCalculation/Users60.t.sol": {
-      "lastModificationDate": 1687962335845,
-      "contentHash": "4abe61398cf8aa6db013105d6aba536e",
+      "lastModificationDate": 1688474149531,
+      "contentHash": "ff28e5b0bdf17de9cee5c51a858ad53e",
       "sourceName": "test/foundry/gasCalculation/Users60.t.sol",
       "solcConfig": {
         "settings": {
@@ -3510,11 +3675,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
@@ -3547,8 +3715,8 @@
       }
     },
     "test/foundry/helper.sol": {
-      "lastModificationDate": 1687942274452,
-      "contentHash": "f841a8e97ad934173e978e029ebe2f85",
+      "lastModificationDate": 1688474123916,
+      "contentHash": "daba1ed64bc9ecb5686be9c030a0919b",
       "sourceName": "test/foundry/helper.sol",
       "solcConfig": {
         "settings": {
@@ -3598,11 +3766,14 @@
         "lib/forge-std/src/Vm.sol",
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
         "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
         "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
         "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",

@@ -32,10 +32,10 @@ async function compareResultExchange(contract: any, testContract: any) {
     testContract.getCurrentExchangePrice()
   )).to.equal(true);
 
-  // compare bayc virtual pool size
+  // compare Asset virtual pool size
   expect(compareResult(
-    toBigNumber(await contract.vBaycPoolSize()), 
-    testContract.vBaycPoolSize()
+    toBigNumber(await contract.vAssetPoolSize()), 
+    testContract.vAssetPoolSize()
   )).to.equal(true);
 
   // compare usd virtual pool size
@@ -59,10 +59,10 @@ async function compareResultExchange(contract: any, testContract: any) {
       testContract.uservUsdBalance(user)
     )).to.equal(true);
 
-    // compare virtual bayc balance of each user
+    // compare virtual Asset balance of each user
     expect(compareResult(
-      toBigNumber(await contract.uservBaycBalance(user)), 
-      testContract.uservBaycBalance(user)
+      toBigNumber(await contract.uservAssetBalance(user)), 
+      testContract.uservAssetBalance(user)
     )).to.equal(true);
 
     // compare real collateral of each user
@@ -201,11 +201,11 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user0 open long position($490) in contract's pool
-      let minimumBayc1 = await exchangeInfo.getMinimumLongBaycOut(toWeiN(longPositionUSD1.toNumber()));
-      // let minimumBayc2 = contract.getMinimumLongBaycOut(uint256(toWeiBigNumber(longPositionUSD1)));
-      // expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
+      let minimumAsset1 = await exchangeInfo.getMinimumLongAssetOut(toWeiN(longPositionUSD1.toNumber()));
+      // let minimumAsset2 = contract.getMinimumLongAssetOut(uint256(toWeiBigNumber(longPositionUSD1)));
+      // expect(compareResult(toBigNumber(minimumAsset1), minimumAsset2)).to.equal(true);
 
-      await exchange.connect(account0).openLongPosition(toWeiN(longPositionUSD1.toNumber()), minimumBayc1);
+      await exchange.connect(account0).openLongPosition(toWeiN(longPositionUSD1.toNumber()), minimumAsset1);
       contract.connect(account0).openLongPosition(uint256(toWeiBigNumber(longPositionUSD1)), 0);
 
       console.log('First Step Result - User0 opened Long Position $490');
@@ -214,11 +214,11 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user1 open short position($4500) in contract's pool
-      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
-      // minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
-      // expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
+      minimumAsset1 = await exchangeInfo.getMinimumShortAssetOut(toWeiN(shortPositionUSD2.toNumber()));
+      // minimumAsset2 = contract.getMinimumShortAssetOut(uint256(toWeiBigNumber(shortPositionUSD2)));
+      // expect(compareResult(toBigNumber(minimumAsset1), minimumAsset2)).to.equal(true);
 
-      await exchange.connect(account1).openShortPosition(toWeiN(shortPositionUSD2.toNumber()), minimumBayc1);
+      await exchange.connect(account1).openShortPosition(toWeiN(shortPositionUSD2.toNumber()), minimumAsset1);
       contract.connect(account1).openShortPosition(uint256(toWeiBigNumber(shortPositionUSD2)), 0);
 
       console.log('Second Step Result - User1 opened Short Position $4500');
@@ -227,11 +227,11 @@ async function compareResultExchange(contract: any, testContract: any) {
 
 
       // user2 open short position($7500) in contract's pool
-      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD3.toNumber()));
-      // minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD3)));
-      // expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2)).to.equal(true);
+      minimumAsset1 = await exchangeInfo.getMinimumShortAssetOut(toWeiN(shortPositionUSD3.toNumber()));
+      // minimumAsset2 = contract.getMinimumShortAssetOut(uint256(toWeiBigNumber(shortPositionUSD3)));
+      // expect(compareResult(toBigNumber(minimumAsset1), minimumAsset2)).to.equal(true);
 
-      await exchange.connect(account2).openShortPosition(toWeiN(shortPositionUSD3.toNumber()), minimumBayc1);
+      await exchange.connect(account2).openShortPosition(toWeiN(shortPositionUSD3.toNumber()), minimumAsset1);
       contract.connect(account2).openShortPosition(uint256(toWeiBigNumber(shortPositionUSD3)), 0);
 
       console.log('Third Step Result - User2 opened Short Position $7500');
@@ -240,11 +240,11 @@ async function compareResultExchange(contract: any, testContract: any) {
 
       
       // user1 close position($4500)
-      minimumBayc1 = await exchangeInfo.getMinimumShortBaycOut(toWeiN(shortPositionUSD2.toNumber()));
-      // minimumBayc2 = contract.getMinimumShortBaycOut(uint256(toWeiBigNumber(shortPositionUSD2)));
-      // expect(compareResult(toBigNumber(minimumBayc1), minimumBayc2.value)).to.equal(true);
+      minimumAsset1 = await exchangeInfo.getMinimumShortAssetOut(toWeiN(shortPositionUSD2.toNumber()));
+      // minimumAsset2 = contract.getMinimumShortAssetOut(uint256(toWeiBigNumber(shortPositionUSD2)));
+      // expect(compareResult(toBigNumber(minimumAsset1), minimumAsset2.value)).to.equal(true);
 
-      await exchange.connect(account1).closePositionComplete(minimumBayc1);
+      await exchange.connect(account1).closePositionComplete(minimumAsset1);
       contract.connect(account1).closePositionComplete(0);
 
       console.log('Last Step Result - User1 closed position $4500');
