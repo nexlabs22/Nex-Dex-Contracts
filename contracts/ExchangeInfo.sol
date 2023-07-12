@@ -74,6 +74,10 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     urlParams = _afterAddress;
   }
 
+  function isFundingRateUsed(string memory _name) public view returns(bool){
+    return assetInfo[_name].fundingRateUsed;
+  }
+
   function assetPrice(string memory _name) public view returns(uint){
     return assetInfo[_name].assetPrice;
   }

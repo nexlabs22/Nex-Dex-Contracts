@@ -1132,7 +1132,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   function setFundingRate() external {
     uint fundingFractionTime = exchangeInfo.lastUpdateTime();
+    bool isFundingRateUsed = exchangeInfo.isFundingRateUsed(assetName);
     require(block.timestamp - fundingFractionTime < 60 minutes, "Funding rate update time should not pass more than 60 minutes.");
+    require(isFundingRateUsed == false, "This funding rate is used befor");
     int fundingFraction = exchangeInfo.assetFundingfractionaverage(assetName);
     uint oraclePrice = exchangeInfo.assetPrice(assetName);
     require(fundingFraction != 0, "Funding fraction should not be zero");

@@ -7,11 +7,11 @@ export const maycAssetName = 'mayc'
 export const goldAssetName = 'gold'
 
 
-const goerliExchangeInfoAddress = '0xa4C4d6b5107913c8d94B0D58A60E63a0268cf5d8'
+const goerliExchangeInfoAddress = '0x2aa3abB7b6a1680540861009F61eAf912416c3af'
 
-const goerliBaycExchangeAddress = '0x7097DD42cFb7898E6025A4E2e5DeD3D262EB4725'
-const goerliMaycExchangeAddress = '0x5B4D13Fd14c081440e296Df9B2BCE6beE2A178a7'
-const goerliGoldExchangeAddress = '0x163DA20e2d224b7A5Cf7669B2161bc477df9bb73'
+const goerliBaycExchangeAddress = '0xd027D642ED36E2f08FF2Aa3077402CFEF73fFf39'
+const goerliMaycExchangeAddress = '0xeF621F20010953b615c618dE232BF14D897d6cD4'
+const goerliGoldExchangeAddress = '0x4ca07071a8BB0f26A6834b82157a86770b810Ca8'
 
 
 

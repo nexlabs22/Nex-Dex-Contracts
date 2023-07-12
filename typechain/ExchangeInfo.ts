@@ -31,6 +31,7 @@ export interface ExchangeInfoInterface extends utils.Interface {
     "getMinimumLongUsdOut(address,uint256)": FunctionFragment;
     "getMinimumShortAssetOut(address,uint256)": FunctionFragment;
     "getMinimumShortUsdOut(address,uint256)": FunctionFragment;
+    "isFundingRateUsed(string)": FunctionFragment;
     "lastUpdateTime()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -87,6 +88,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getMinimumShortUsdOut",
     values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isFundingRateUsed",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "lastUpdateTime",
@@ -162,6 +167,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getMinimumShortUsdOut",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isFundingRateUsed",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -342,6 +351,11 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    isFundingRateUsed(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     lastUpdateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
@@ -450,6 +464,8 @@ export interface ExchangeInfo extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  isFundingRateUsed(_name: string, overrides?: CallOverrides): Promise<boolean>;
+
   lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
@@ -557,6 +573,11 @@ export interface ExchangeInfo extends BaseContract {
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    isFundingRateUsed(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -689,6 +710,11 @@ export interface ExchangeInfo extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    isFundingRateUsed(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -796,6 +822,11 @@ export interface ExchangeInfo extends BaseContract {
     getMinimumShortUsdOut(
       _exchangeAddress: string,
       _AssetAmount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isFundingRateUsed(
+      _name: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
