@@ -9,20 +9,25 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 
-contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface {
+contract ExchangeInfo is Ownable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
 
-    //oracle data
-    uint public oraclePrice;
-    uint public lastMarketPrice;
-    uint public lastFundingRateTime;
-    int public lastFundingRateAmount;
+
+    struct Info {
+    uint256 assetPrice;
+    int256 assetFundingfractionaverage;
+    string assetContract;
+    address assetAddress;
+    bool fundingRateUsed;
+    }
+
+    mapping(string => Info) public assetInfo;
 
     //automation data
     uint public lastUpdateTime;
     
-    string baseUrl = "https://app.nexlabs.io/api/lastFundingRate?address=";
-    string urlParams = "&returnType=number&multiplyFunc=18&timesNegFund=true";
+    string baseUrl = "https://app.nexlabs.io/api/allFundingRates";
+    string urlParams = "?multiplyFunc=10&timesNegFund=true&arrays=true";
 
     bytes32 private externalJobId;
     uint256 private oraclePayment;
@@ -34,15 +39,15 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
     uint256 vUsdPoolSize;
     }
 
-    Exchange public exchange;
+    // Exchange public exchange;
 
     constructor(
-      address exchangeAddress, 
+      // address exchangeAddress, 
       address _chainlinkToken, 
       address _oracleAddress, 
       bytes32 _externalJobId
       ){
-        exchange = Exchange(exchangeAddress);
+        // exchange = Exchange(exchangeAddress);
         setChainlinkToken(_chainlinkToken);
         setChainlinkOracle(_oracleAddress);
         externalJobId = _externalJobId;
@@ -50,8 +55,9 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
         oraclePayment = ((1 * LINK_DIVISIBILITY) / 10); // n * 10**18
     }
 
-  function changeExchangeAddress(address exchangeAddress) public onlyOwner {
-      exchange = Exchange(exchangeAddress);
+  
+  function setFundingRateUsed(string memory _name, bool _bool) public onlyOwner {
+      assetInfo[_name].fundingRateUsed = _bool;
   }
 
   function setOracleAddress(address _newOracle) public onlyOwner {
@@ -68,32 +74,21 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
     urlParams = _afterAddress;
   }
 
+  function assetPrice(string memory _name) public view returns(uint){
+    return assetInfo[_name].assetPrice;
+  }
 
-  function checkUpkeep(
-        bytes calldata /* checkData */
-    )
-        external
-        view
-        override
-        returns (bool upkeepNeeded, bytes memory /* performData */)
-    {
-        uint marketPrice = exchange.marketPrice();
+  function assetFundingfractionaverage(string memory _name) public view returns(int){
+    return assetInfo[_name].assetFundingfractionaverage;
+  }
 
-        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
-            upkeepNeeded = true;
-        }
-    
-    }
+  function assetAddress(string memory _name) public view returns(address){
+    return assetInfo[_name].assetAddress;
+  }
 
-    function performUpkeep(bytes calldata /* performData */) external override {
-        uint marketPrice = exchange.marketPrice();
-
-        if(marketPrice*100/lastMarketPrice < 90 || marketPrice*100/lastMarketPrice > 110){
-           requestFundingRate();
-        }
-        lastUpdateTime = block.timestamp;
-        
-    }
+  function assetContract(string memory _name) public view returns(string memory){
+    return assetInfo[_name].assetContract;
+  }
 
   function requestFundingRate(
   )
@@ -101,27 +96,38 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
     returns(bytes32)
   {
     
-    string memory url = concatenateAddressToString(baseUrl, address(exchange), urlParams);
+    string memory url = concatenation(baseUrl, urlParams);
     Chainlink.Request memory req = buildChainlinkRequest(externalJobId, address(this), this.fulfillFundingRate.selector);
     req.add("get", url);
-    req.add("path1", "price");
-    req.add("path2", "time");
-    req.add("path3", "fundingfractionaverage");
-    req.addInt("times", 1);
+    req.add("path1", "results,prices");
+    req.add("path2", "results,fundingfractionaverages");
+    req.add("path3", "results,names");
+    req.add("path4", "results,contracts");
+    req.add("path5", "results,addresses");
     // sendOperatorRequest(req, oraclePayment);
     return sendChainlinkRequestTo(chainlinkOracleAddress(), req, oraclePayment);
   }
 
 
-  function fulfillFundingRate(bytes32 requestId, uint256 _number0, uint256 _number1, int256 _number2)
+  function fulfillFundingRate(bytes32 requestId, uint256[] memory _prices, int256[] memory _fundingfractionaverages, string[] memory _names, string[] memory _contracts, address[] memory _addresses)
     public
     recordChainlinkFulfillment(requestId)
   {
-    emit RequestFulfilled(requestId, _number0, _number1, _number2);
-    oraclePrice = _number0;
-    lastFundingRateTime = _number1;
-    lastFundingRateAmount = _number2;
-    lastMarketPrice = market();
+    uint[] memory prices0 = _prices;
+    int[] memory fundingfractionaverages0 = _fundingfractionaverages;
+    string[] memory names0 = _names;
+    string[] memory contracts0 = _contracts;
+    address[] memory addresses0 = _addresses;
+
+    //save mappings
+    for(uint i =0; i < names0.length; i++){
+        assetInfo[names0[i]].assetPrice = prices0[i];
+        assetInfo[names0[i]].assetFundingfractionaverage = fundingfractionaverages0[i];
+        assetInfo[names0[i]].assetContract = contracts0[i];
+        assetInfo[names0[i]].assetAddress = addresses0[i];
+        assetInfo[names0[i]].fundingRateUsed = false;
+    }
+    lastUpdateTime = block.timestamp;
   }
 
   /**
@@ -135,37 +141,17 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
         );
     }
 
-  function market() public view returns(uint){
-      uint vUsdPoolSize = exchange.vUsdPoolSize();
-      uint vAssetPoolSize = exchange.vAssetPoolSize();
-      if(vUsdPoolSize > 0 && vAssetPoolSize > 0){
-      uint marketPrice = (1e18 *vUsdPoolSize) / vAssetPoolSize;
-      return marketPrice;
-      }else{
-          return 0;
-      }
-  }
+  
 
 
-  function concatenateAddressToString(string memory _string, address _address, string memory _string2) public pure returns (string memory) {
-        return string.concat(_string, addressToString(_address), _string2);
+  function concatenation(string memory a, string memory b) public pure returns (string memory) {
+        return string(bytes.concat(bytes(a), bytes(b)));
     }
-
-    function addressToString(address _address) internal pure returns (string memory) {
-    bytes32 _bytes = bytes32(uint256(uint160(_address)));
-    bytes memory HEX = "0123456789abcdef";
-    bytes memory _string = new bytes(42);
-    _string[0] = '0';
-    _string[1] = 'x';
-    for (uint i = 0; i < 20; i++) {
-        _string[2+i*2] = HEX[uint8(_bytes[i + 12] >> 4)];
-        _string[3+i*2] = HEX[uint8(_bytes[i + 12] & 0x0f)];
-    }
-    return string(_string);
-  }
+  
 
   //get minimum long Asset amount that user receives
-  function getMinimumLongAssetOut(uint256 _usdAmount) public view returns (uint256) {
+  function getMinimumLongAssetOut(address _exchangeAddress, uint256 _usdAmount) public view returns (uint256) {
+    Exchange exchange = Exchange(_exchangeAddress);
     int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
     int256 k = vAssetPoolSize * vUsdPoolSize;
@@ -238,7 +224,8 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
 
 
   //get minimum short Asset amount that user receives
-  function getMinimumShortAssetOut(uint256 _usdAmount) public view returns (uint) {
+  function getMinimumShortAssetOut(address _exchangeAddress, uint256 _usdAmount) public view returns (uint) {
+    Exchange exchange = Exchange(_exchangeAddress);
     int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
     int256 k = vAssetPoolSize * vUsdPoolSize;
@@ -314,7 +301,8 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
 
     
   //get minimum long usd amount that user receives
-  function getMinimumLongUsdOut(uint256 _AssetAmount) public view returns (uint256) {
+  function getMinimumLongUsdOut(address _exchangeAddress, uint256 _AssetAmount) public view returns (uint256) {
+    Exchange exchange = Exchange(_exchangeAddress);
     int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
     int256 k = vAssetPoolSize * vUsdPoolSize;
@@ -390,7 +378,8 @@ contract ExchangeInfo is Ownable, ChainlinkClient, AutomationCompatibleInterface
 
 
   //get minimum short usd amount that user receives
-  function getMinimumShortUsdOut(uint256 _AssetAmount) public view returns (uint256) {
+  function getMinimumShortUsdOut(address _exchangeAddress, uint256 _AssetAmount) public view returns (uint256) {
+    Exchange exchange = Exchange(_exchangeAddress);
     int256 vAssetPoolSize = int256(exchange.vAssetPoolSize());
     int256 vUsdPoolSize = int256(exchange.vUsdPoolSize());
     int256 k = vAssetPoolSize * vUsdPoolSize;

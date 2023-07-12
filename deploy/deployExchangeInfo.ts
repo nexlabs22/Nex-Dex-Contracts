@@ -17,7 +17,6 @@ async function main() {
  
   const ExchangeInfo = await ethers.getContractFactory("ExchangeInfo")
   const exchangeInfo = await ExchangeInfo.deploy(
-    networks[chainId].silverExchangeAddress,
     networks[chainId].linkAddress,
     networks[chainId].oracleAddress,
     networks[chainId].externalJobIdBytes32

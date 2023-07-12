@@ -18,17 +18,20 @@ contract ExchangeDeployer {
     function deployContracts() public returns(Token, Exchange, LinkToken, MockApiOracle, ExchangeInfo) {
         Token usdc = new Token(1000000e18);
 
-        Exchange exchange = new Exchange(
-            address(usdc)
-        );
         LinkToken link = new LinkToken();
         MockApiOracle oracle = new MockApiOracle(address(link));
         ExchangeInfo exchangeInfo = new ExchangeInfo(
-            address(exchange),
             address(link),
             address(oracle),
             jobId
         );
+
+        Exchange exchange = new Exchange(
+            address(usdc),
+            address(exchangeInfo),
+            ""
+        );
+       
 
         //set exchangeInfo
         exchange.setExchangeInfo(address(exchangeInfo));
@@ -36,7 +39,13 @@ contract ExchangeDeployer {
         link.transfer(address(exchangeInfo), 1e18);
         //set oracle price
         bytes32 requestId = exchangeInfo.requestFundingRate();
-        oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(10000e18), uintToBytes32(block.timestamp), uintToBytes32(1e17));
+        uint[] memory price = new uint[](1);
+        price[0] = (10000e18);
+        int[] memory fundingRate = new int[](1);
+        fundingRate[0] = 1e17;
+        string[] memory emptyString = new string[](1);
+        emptyString[0] = "";
+        oracle.fulfillOracleFundingRateRequest(requestId, uintArrayToBytes32(price), intArrayToBytes32(fundingRate), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString));
 
         return (
             usdc,
@@ -66,4 +75,29 @@ contract ExchangeDeployer {
         return out;
     }
     
+    function uintArrayToBytes32(uint[] memory arr) public pure returns (bytes32) {
+    bytes memory result = new bytes(32);
+    assembly {
+        mstore(add(result, 32), mload(add(arr, 32)))
+    }
+    return bytes32(result);
+    }
+
+
+    function intArrayToBytes32(int[] memory arr) public pure returns (bytes32) {
+    bytes memory result = new bytes(32);
+    assembly {
+        mstore(add(result, 32), mload(add(arr, 32)))
+    }
+    return bytes32(result);
+    }
+
+
+    function stringArrayToBytes32(string[] memory arr) public pure returns (bytes32) {
+    bytes memory result = new bytes(32);
+    assembly {
+        mstore(add(result, 32), mload(add(arr, 32)))
+    }
+    return bytes32(result);
+    }
 }

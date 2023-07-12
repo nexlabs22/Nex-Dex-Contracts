@@ -54,7 +54,14 @@ contract Users2 is Test, ExchangeDeployer {
 
         //updating fundingRate
         bytes32 requestId = exchangeInfo.requestFundingRate();
-        oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
+        uint[] memory price = new uint[](1);
+        price[0] = (oraclePrice);
+        int[] memory fundingRate = new int[](1);
+        fundingRate[0] = fundingFraction*10*18;
+        string[] memory emptyString = new string[](1);
+        emptyString[0] = "";
+        oracle.fulfillOracleFundingRateRequest(requestId, uintArrayToBytes32(price), intArrayToBytes32(fundingRate), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString));
+        // oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
     }
 
 

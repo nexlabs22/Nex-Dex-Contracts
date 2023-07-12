@@ -20,26 +20,23 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface ExchangeInfoInterface extends utils.Interface {
   contractName: "ExchangeInfo";
   functions: {
-    "changeExchangeAddress(address)": FunctionFragment;
-    "checkUpkeep(bytes)": FunctionFragment;
-    "concatenateAddressToString(string,address,string)": FunctionFragment;
-    "exchange()": FunctionFragment;
-    "fulfillFundingRate(bytes32,uint256,uint256,int256)": FunctionFragment;
-    "getMinimumLongAssetOut(uint256)": FunctionFragment;
-    "getMinimumLongUsdOut(uint256)": FunctionFragment;
-    "getMinimumShortAssetOut(uint256)": FunctionFragment;
-    "getMinimumShortUsdOut(uint256)": FunctionFragment;
-    "lastFundingRateAmount()": FunctionFragment;
-    "lastFundingRateTime()": FunctionFragment;
-    "lastMarketPrice()": FunctionFragment;
+    "assetAddress(string)": FunctionFragment;
+    "assetContract(string)": FunctionFragment;
+    "assetFundingfractionaverage(string)": FunctionFragment;
+    "assetInfo(string)": FunctionFragment;
+    "assetPrice(string)": FunctionFragment;
+    "concatenation(string,string)": FunctionFragment;
+    "fulfillFundingRate(bytes32,uint256[],int256[],string[],string[],address[])": FunctionFragment;
+    "getMinimumLongAssetOut(address,uint256)": FunctionFragment;
+    "getMinimumLongUsdOut(address,uint256)": FunctionFragment;
+    "getMinimumShortAssetOut(address,uint256)": FunctionFragment;
+    "getMinimumShortUsdOut(address,uint256)": FunctionFragment;
     "lastUpdateTime()": FunctionFragment;
-    "market()": FunctionFragment;
-    "oraclePrice()": FunctionFragment;
     "owner()": FunctionFragment;
-    "performUpkeep(bytes)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestFundingRate()": FunctionFragment;
     "setExternalJobId(bytes32)": FunctionFragment;
+    "setFundingRateUsed(string,bool)": FunctionFragment;
     "setOracleAddress(address)": FunctionFragment;
     "setUrl(string,string)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -47,64 +44,55 @@ export interface ExchangeInfoInterface extends utils.Interface {
   };
 
   encodeFunctionData(
-    functionFragment: "changeExchangeAddress",
+    functionFragment: "assetAddress",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkUpkeep",
-    values: [BytesLike]
+    functionFragment: "assetContract",
+    values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "concatenateAddressToString",
-    values: [string, string, string]
+    functionFragment: "assetFundingfractionaverage",
+    values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "exchange", values?: undefined): string;
+  encodeFunctionData(functionFragment: "assetInfo", values: [string]): string;
+  encodeFunctionData(functionFragment: "assetPrice", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "concatenation",
+    values: [string, string]
+  ): string;
   encodeFunctionData(
     functionFragment: "fulfillFundingRate",
-    values: [BytesLike, BigNumberish, BigNumberish, BigNumberish]
+    values: [
+      BytesLike,
+      BigNumberish[],
+      BigNumberish[],
+      string[],
+      string[],
+      string[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getMinimumLongAssetOut",
-    values: [BigNumberish]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getMinimumLongUsdOut",
-    values: [BigNumberish]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getMinimumShortAssetOut",
-    values: [BigNumberish]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getMinimumShortUsdOut",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastFundingRateAmount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastFundingRateTime",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastMarketPrice",
-    values?: undefined
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "lastUpdateTime",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "market", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "oraclePrice",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "performUpkeep",
-    values: [BytesLike]
-  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -116,6 +104,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setExternalJobId",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setFundingRateUsed",
+    values: [string, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "setOracleAddress",
@@ -135,18 +127,23 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "changeExchangeAddress",
+    functionFragment: "assetAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "checkUpkeep",
+    functionFragment: "assetContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "concatenateAddressToString",
+    functionFragment: "assetFundingfractionaverage",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "exchange", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "assetInfo", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "assetPrice", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "concatenation",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "fulfillFundingRate",
     data: BytesLike
@@ -168,31 +165,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "lastFundingRateAmount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "lastFundingRateTime",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "lastMarketPrice",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "lastUpdateTime",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "market", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "oraclePrice",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "performUpkeep",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -203,6 +179,10 @@ export interface ExchangeInfoInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setExternalJobId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setFundingRateUsed",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -298,71 +278,73 @@ export interface ExchangeInfo extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    changeExchangeAddress(
-      exchangeAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    assetAddress(_name: string, overrides?: CallOverrides): Promise<[string]>;
 
-    checkUpkeep(
-      arg0: BytesLike,
+    assetContract(_name: string, overrides?: CallOverrides): Promise<[string]>;
+
+    assetFundingfractionaverage(
+      _name: string,
       overrides?: CallOverrides
-    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+    ): Promise<[BigNumber]>;
 
-    concatenateAddressToString(
-      _string: string,
-      _address: string,
-      _string2: string,
+    assetInfo(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, string, string, boolean] & {
+        assetPrice: BigNumber;
+        assetFundingfractionaverage: BigNumber;
+        assetContract: string;
+        assetAddress: string;
+        fundingRateUsed: boolean;
+      }
+    >;
+
+    assetPrice(_name: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    concatenation(
+      a: string,
+      b: string,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    exchange(overrides?: CallOverrides): Promise<[string]>;
-
     fulfillFundingRate(
       requestId: BytesLike,
-      _number0: BigNumberish,
-      _number1: BigNumberish,
-      _number2: BigNumberish,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     getMinimumLongAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getMinimumLongUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getMinimumShortAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getMinimumShortUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    lastMarketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     lastUpdateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    market(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    oraclePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    performUpkeep(
-      arg0: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -374,6 +356,12 @@ export interface ExchangeInfo extends BaseContract {
 
     setExternalJobId(
       _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setFundingRateUsed(
+      _name: string,
+      _bool: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -398,71 +386,73 @@ export interface ExchangeInfo extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  changeExchangeAddress(
-    exchangeAddress: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  assetAddress(_name: string, overrides?: CallOverrides): Promise<string>;
 
-  checkUpkeep(
-    arg0: BytesLike,
+  assetContract(_name: string, overrides?: CallOverrides): Promise<string>;
+
+  assetFundingfractionaverage(
+    _name: string,
     overrides?: CallOverrides
-  ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+  ): Promise<BigNumber>;
 
-  concatenateAddressToString(
-    _string: string,
-    _address: string,
-    _string2: string,
+  assetInfo(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, string, string, boolean] & {
+      assetPrice: BigNumber;
+      assetFundingfractionaverage: BigNumber;
+      assetContract: string;
+      assetAddress: string;
+      fundingRateUsed: boolean;
+    }
+  >;
+
+  assetPrice(_name: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  concatenation(
+    a: string,
+    b: string,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  exchange(overrides?: CallOverrides): Promise<string>;
-
   fulfillFundingRate(
     requestId: BytesLike,
-    _number0: BigNumberish,
-    _number1: BigNumberish,
-    _number2: BigNumberish,
+    _prices: BigNumberish[],
+    _fundingfractionaverages: BigNumberish[],
+    _names: string[],
+    _contracts: string[],
+    _addresses: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   getMinimumLongAssetOut(
+    _exchangeAddress: string,
     _usdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getMinimumLongUsdOut(
+    _exchangeAddress: string,
     _AssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getMinimumShortAssetOut(
+    _exchangeAddress: string,
     _usdAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getMinimumShortUsdOut(
+    _exchangeAddress: string,
     _AssetAmount: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-  lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
   lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
-  market(overrides?: CallOverrides): Promise<BigNumber>;
-
-  oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
   owner(overrides?: CallOverrides): Promise<string>;
-
-  performUpkeep(
-    arg0: BytesLike,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -474,6 +464,12 @@ export interface ExchangeInfo extends BaseContract {
 
   setExternalJobId(
     _jobId: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setFundingRateUsed(
+    _name: string,
+    _bool: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -498,68 +494,73 @@ export interface ExchangeInfo extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    changeExchangeAddress(
-      exchangeAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    assetAddress(_name: string, overrides?: CallOverrides): Promise<string>;
 
-    checkUpkeep(
-      arg0: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+    assetContract(_name: string, overrides?: CallOverrides): Promise<string>;
 
-    concatenateAddressToString(
-      _string: string,
-      _address: string,
-      _string2: string,
+    assetFundingfractionaverage(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    assetInfo(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, string, string, boolean] & {
+        assetPrice: BigNumber;
+        assetFundingfractionaverage: BigNumber;
+        assetContract: string;
+        assetAddress: string;
+        fundingRateUsed: boolean;
+      }
+    >;
+
+    assetPrice(_name: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    concatenation(
+      a: string,
+      b: string,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    exchange(overrides?: CallOverrides): Promise<string>;
-
     fulfillFundingRate(
       requestId: BytesLike,
-      _number0: BigNumberish,
-      _number1: BigNumberish,
-      _number2: BigNumberish,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     getMinimumLongAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumLongUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
-    market(overrides?: CallOverrides): Promise<BigNumber>;
-
-    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     owner(overrides?: CallOverrides): Promise<string>;
-
-    performUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -567,6 +568,12 @@ export interface ExchangeInfo extends BaseContract {
 
     setExternalJobId(
       _jobId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setFundingRateUsed(
+      _name: string,
+      _bool: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -629,68 +636,62 @@ export interface ExchangeInfo extends BaseContract {
   };
 
   estimateGas: {
-    changeExchangeAddress(
-      exchangeAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    assetAddress(_name: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    checkUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+    assetContract(_name: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    concatenateAddressToString(
-      _string: string,
-      _address: string,
-      _string2: string,
+    assetFundingfractionaverage(
+      _name: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    exchange(overrides?: CallOverrides): Promise<BigNumber>;
+    assetInfo(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    assetPrice(_name: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    concatenation(
+      a: string,
+      b: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     fulfillFundingRate(
       requestId: BytesLike,
-      _number0: BigNumberish,
-      _number1: BigNumberish,
-      _number2: BigNumberish,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     getMinimumLongAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumLongUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getMinimumShortUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastMarketPrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     lastUpdateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
-    market(overrides?: CallOverrides): Promise<BigNumber>;
-
-    oraclePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    performUpkeep(
-      arg0: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -702,6 +703,12 @@ export interface ExchangeInfo extends BaseContract {
 
     setExternalJobId(
       _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setFundingRateUsed(
+      _name: string,
+      _bool: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -727,75 +734,74 @@ export interface ExchangeInfo extends BaseContract {
   };
 
   populateTransaction: {
-    changeExchangeAddress(
-      exchangeAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    checkUpkeep(
-      arg0: BytesLike,
+    assetAddress(
+      _name: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    concatenateAddressToString(
-      _string: string,
-      _address: string,
-      _string2: string,
+    assetContract(
+      _name: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    exchange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    assetFundingfractionaverage(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    assetInfo(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    assetPrice(
+      _name: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    concatenation(
+      a: string,
+      b: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     fulfillFundingRate(
       requestId: BytesLike,
-      _number0: BigNumberish,
-      _number1: BigNumberish,
-      _number2: BigNumberish,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     getMinimumLongAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMinimumLongUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMinimumShortAssetOut(
+      _exchangeAddress: string,
       _usdAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getMinimumShortUsdOut(
+      _exchangeAddress: string,
       _AssetAmount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    lastFundingRateAmount(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    lastFundingRateTime(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    lastMarketPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     lastUpdateTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    market(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    oraclePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    performUpkeep(
-      arg0: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -807,6 +813,12 @@ export interface ExchangeInfo extends BaseContract {
 
     setExternalJobId(
       _jobId: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setFundingRateUsed(
+      _name: string,
+      _bool: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

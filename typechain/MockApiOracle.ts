@@ -22,7 +22,8 @@ export interface MockApiOracleInterface extends utils.Interface {
   functions: {
     "EXPIRY_TIME()": FunctionFragment;
     "cancelOracleRequest(bytes32,uint256,bytes4,uint256)": FunctionFragment;
-    "fulfillOracleFundingRateRequest(bytes32,bytes32,bytes32,bytes32)": FunctionFragment;
+    "fulfillOracleFundingRateRequest(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)": FunctionFragment;
+    "fulfillOracleOjectRequest(bytes32,bytes32)": FunctionFragment;
     "fulfillOracleStatusRequest(bytes32,string)": FunctionFragment;
     "getChainlinkToken()": FunctionFragment;
     "onTokenTransfer(address,uint256,bytes)": FunctionFragment;
@@ -39,7 +40,11 @@ export interface MockApiOracleInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "fulfillOracleFundingRateRequest",
-    values: [BytesLike, BytesLike, BytesLike, BytesLike]
+    values: [BytesLike, BytesLike, BytesLike, BytesLike, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fulfillOracleOjectRequest",
+    values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "fulfillOracleStatusRequest",
@@ -77,6 +82,10 @@ export interface MockApiOracleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "fulfillOracleFundingRateRequest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "fulfillOracleOjectRequest",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -183,6 +192,14 @@ export interface MockApiOracle extends BaseContract {
       _data1: BytesLike,
       _data2: BytesLike,
       _data3: BytesLike,
+      _data4: BytesLike,
+      _data5: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    fulfillOracleOjectRequest(
+      _requestId: BytesLike,
+      _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -229,6 +246,14 @@ export interface MockApiOracle extends BaseContract {
     _data1: BytesLike,
     _data2: BytesLike,
     _data3: BytesLike,
+    _data4: BytesLike,
+    _data5: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  fulfillOracleOjectRequest(
+    _requestId: BytesLike,
+    _data: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -275,6 +300,14 @@ export interface MockApiOracle extends BaseContract {
       _data1: BytesLike,
       _data2: BytesLike,
       _data3: BytesLike,
+      _data4: BytesLike,
+      _data5: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    fulfillOracleOjectRequest(
+      _requestId: BytesLike,
+      _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -354,6 +387,14 @@ export interface MockApiOracle extends BaseContract {
       _data1: BytesLike,
       _data2: BytesLike,
       _data3: BytesLike,
+      _data4: BytesLike,
+      _data5: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    fulfillOracleOjectRequest(
+      _requestId: BytesLike,
+      _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -401,6 +442,14 @@ export interface MockApiOracle extends BaseContract {
       _data1: BytesLike,
       _data2: BytesLike,
       _data3: BytesLike,
+      _data4: BytesLike,
+      _data5: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    fulfillOracleOjectRequest(
+      _requestId: BytesLike,
+      _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -18,7 +18,7 @@ import "./ExchangeInfo.sol";
 contract Exchange is Ownable, ReentrancyGuard, Pausable {
   using SafeMath for uint256;
   
-  
+  string assetName;
   ExchangeInfo public exchangeInfo;
 
   address public usdc;
@@ -73,9 +73,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   event Price(uint price, uint volume, uint timestamp, uint vAssetPoolSize, uint vUsdPoolSize);
 
   constructor(
-    address _usdc
+    address _usdc,
+    address _exchangeInfo,
+    string memory _assetName
   ) {
     usdc = _usdc;
+    exchangeInfo = ExchangeInfo(_exchangeInfo);
+    assetName = _assetName;
   }
 
   //return Asset virtual pool size of the market
@@ -103,21 +107,25 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     return virtualBalances[_user].uservAssetBalance;
   }
 
+  function setAssetName(string memory _assetName) public onlyOwner {
+    assetName = _assetName;
+  }
+
   function setExchangeInfo(address _exchangeInfo) public onlyOwner {
     require(_exchangeInfo != address(0), "New exchange info address can not be a zero address");
     exchangeInfo = ExchangeInfo(_exchangeInfo);
   }
 
   function lastFundingRateAmount() public view returns (int256) {
-    return exchangeInfo.lastFundingRateAmount();
+    return exchangeInfo.assetFundingfractionaverage(assetName);
   }
 
   function lastFundingRateTime() public view returns (uint256) {
-    return exchangeInfo.lastFundingRateTime();
+    return exchangeInfo.lastUpdateTime();
   }
 
   function oraclePrice() public view returns (uint256) {
-    return exchangeInfo.oraclePrice();
+    return exchangeInfo.assetPrice(assetName);
   }
 
   
@@ -158,7 +166,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   //for this time owner can do it
   function initialVirtualPool(uint256 _assetSize) public onlyOwner {
     require(poolInitialized == false, "You cannot initialize pool again");
-    uint256 oraclePrice = exchangeInfo.oraclePrice();
+    uint256 oraclePrice = exchangeInfo.assetPrice(assetName);
     pool.vAssetPoolSize = _assetSize;
     pool.vUsdPoolSize = (_assetSize * oraclePrice) / 1e18;
     poolInitialized = true;
@@ -1122,10 +1130,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     return allShortAssetBalance;
   }
 
-  function setFundingRate() external onlyOwner {
-    
-    int fundingFraction = exchangeInfo.lastFundingRateAmount();
-    uint fundingFractionTime = exchangeInfo.lastFundingRateTime();
+  function setFundingRate() external {
+    uint fundingFractionTime = exchangeInfo.lastUpdateTime();
+    require(block.timestamp - fundingFractionTime < 60 minutes, "Funding rate update time should not pass more than 60 minutes.");
+    int fundingFraction = exchangeInfo.assetFundingfractionaverage(assetName);
+    uint oraclePrice = exchangeInfo.assetPrice(assetName);
+    require(fundingFraction != 0, "Funding fraction should not be zero");
+    require(oraclePrice != 0, "Oracle price should not be zero");
     //first the contract check actual vAsset positions balance of users
     int256 allLongvAssetBalance = getAllLongvAssetBalance();
     int256 allShortAssetBalance = getAllShortvAssetBalance();
@@ -1178,6 +1189,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
         }
       }
       lastSetFundingRateTime = block.timestamp;
+      exchangeInfo.setFundingRateUsed(assetName, true);
     }
   }
 
@@ -1197,7 +1209,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     returns (bool)
   {
     uint256 currentPrice = (1e18 * pool.vUsdPoolSize) / pool.vAssetPoolSize;
-    uint256 oraclePrice = exchangeInfo.oraclePrice();
+    uint256 oraclePrice = exchangeInfo.assetPrice(assetName);
     uint256 newPrice = (1e18 * _vUsdNewPoolSize) / _vAssetNewPoolSize;
 
     int256 currentDifference = int256(oraclePrice) - int256(currentPrice);

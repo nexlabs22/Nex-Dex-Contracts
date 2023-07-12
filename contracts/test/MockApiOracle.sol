@@ -101,7 +101,7 @@ contract MockApiOracle is ChainlinkRequestInterface, LinkTokenReceiver {
    * @param _data1 The data to return to the consuming contract
    * @param _data2 The data to return to the consuming contract
    */
-  function fulfillOracleFundingRateRequest(bytes32 _requestId, bytes32 _data1, bytes32 _data2, bytes32 _data3)
+  function fulfillOracleFundingRateRequest(bytes32 _requestId, bytes32 _data1, bytes32 _data2, bytes32 _data3, bytes32 _data4, bytes32 _data5)
     external
     isValidRequest(_requestId)
     returns (bool)
@@ -113,7 +113,33 @@ contract MockApiOracle is ChainlinkRequestInterface, LinkTokenReceiver {
     // callback(addr+functionId) as it is untrusted.
     // See: https://solidity.readthedocs.io/en/develop/security-considerations.html#use-the-checks-effects-interactions-pattern
     (bool success, ) = req.callbackAddr.call(
-      abi.encodeWithSelector(req.callbackFunctionId, _requestId, _data1, _data2, _data3)
+      abi.encodeWithSelector(req.callbackFunctionId, _requestId, _data1, _data2, _data3, _data4, _data5)
+    ); // solhint-disable-line avoid-low-level-calls
+    return success;
+  }
+
+
+  /**
+   * @notice Called by the Chainlink node to fulfill requests
+   * @dev Given params must hash back to the commitment stored from `oracleRequest`.
+   * Will call the callback address' callback function without bubbling up error
+   * checking in a `require` so that the node can get paid.
+   * @param _requestId The fulfillment request ID that must match the requester's
+   * @param _data The data to return to the consuming contract
+   */
+  function fulfillOracleOjectRequest(bytes32 _requestId, bytes32 _data)
+    external
+    isValidRequest(_requestId)
+    returns (bool)
+  {
+    Request memory req = commitments[_requestId];
+    delete commitments[_requestId];
+    require(gasleft() >= MINIMUM_CONSUMER_GAS_LIMIT, "Must provide consumer enough gas");
+    // All updates to the oracle's fulfillment should come before calling the
+    // callback(addr+functionId) as it is untrusted.
+    // See: https://solidity.readthedocs.io/en/develop/security-considerations.html#use-the-checks-effects-interactions-pattern
+    (bool success, ) = req.callbackAddr.call(
+      abi.encodeWithSelector(req.callbackFunctionId, _requestId, _data)
     ); // solhint-disable-line avoid-low-level-calls
     return success;
   }

@@ -74,6 +74,7 @@ export interface ExchangeInterface extends utils.Interface {
     "removeLiquidationFee(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "saveLevelMargin()": FunctionFragment;
+    "setAssetName(string)": FunctionFragment;
     "setExchangeInfo(address)": FunctionFragment;
     "setFundingRate()": FunctionFragment;
     "setSwapFee(uint8)": FunctionFragment;
@@ -294,6 +295,10 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "saveLevelMargin",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAssetName",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "setExchangeInfo",
@@ -540,6 +545,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "saveLevelMargin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAssetName",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1015,6 +1024,11 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<[number]>;
 
+    setAssetName(
+      _assetName: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setExchangeInfo(
       _exchangeInfo: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1307,6 +1321,11 @@ export interface Exchange extends BaseContract {
 
   saveLevelMargin(overrides?: CallOverrides): Promise<number>;
 
+  setAssetName(
+    _assetName: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setExchangeInfo(
     _exchangeInfo: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -1596,6 +1615,8 @@ export interface Exchange extends BaseContract {
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     saveLevelMargin(overrides?: CallOverrides): Promise<number>;
+
+    setAssetName(_assetName: string, overrides?: CallOverrides): Promise<void>;
 
     setExchangeInfo(
       _exchangeInfo: string,
@@ -2035,6 +2056,11 @@ export interface Exchange extends BaseContract {
 
     saveLevelMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setAssetName(
+      _assetName: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setExchangeInfo(
       _exchangeInfo: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -2339,6 +2365,11 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     saveLevelMargin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setAssetName(
+      _assetName: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     setExchangeInfo(
       _exchangeInfo: string,

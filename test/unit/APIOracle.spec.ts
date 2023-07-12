@@ -81,5 +81,42 @@ describe("GameOracle Unit Tests", async function () {
         
       });
 
+
+      it("test api oracle", async () => {
+        
+        
+        const transaction: ContractTransaction = await exchangeInfo.requestObject();
+        
+        const transactionReceipt: ContractReceipt = await transaction.wait(1);
+        if (!transactionReceipt.events) return
+        const requestId: string = transactionReceipt.events[0].topics[1]
+
+        const object = { id: "1", name: "John" };
+        const abiCoder = new ethers.utils.AbiCoder;
+        let data = abiCoder.encode(["uint", "string"], ["1", "MNM"]);
+
+        // // Convert object to JSON string
+        // const jsonString = JSON.stringify(object);
+
+        // // Encode JSON string to bytes
+        // const encoder = new TextEncoder();
+        // const bytes = encoder.encode(jsonString);
+        // Encode object to bytes
+        const encodedBytes = ethers.utils.defaultAbiCoder.encode(
+          ["uint256"],
+          ["2"]
+        );
+        const data1 = "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000034848480000000000000000000000000000000000000000000000000000000000"
+        await mockOracle.fulfillOracleOjectRequest(requestId, encodedBytes);
+        // console.log("data", await exchangeInfo.ddata());
+        const student = await exchangeInfo.allStudents()
+        console.log("Oject output", Number(student));
+        // const volume = await gameOracle.getGamesResolved(requestId, 0)
+        // assert.equal(Number(await exchange.oraclePrice()), latestPrice);
+        // assert.equal(Number(await exchange.lastFundingRateTime()), timestamp);
+        // assert.equal(Number(await exchange.lastFundingRateAmount()), latestFundingRate);
+        
+      });
+
       
     })
