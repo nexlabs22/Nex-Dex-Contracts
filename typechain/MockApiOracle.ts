@@ -22,7 +22,7 @@ export interface MockApiOracleInterface extends utils.Interface {
   functions: {
     "EXPIRY_TIME()": FunctionFragment;
     "cancelOracleRequest(bytes32,uint256,bytes4,uint256)": FunctionFragment;
-    "fulfillOracleFundingRateRequest(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)": FunctionFragment;
+    "fulfillOracleFundingRateRequest(bytes32,bytes,bytes,bytes,bytes,bytes)": FunctionFragment;
     "fulfillOracleOjectRequest(bytes32,bytes32)": FunctionFragment;
     "fulfillOracleStatusRequest(bytes32,string)": FunctionFragment;
     "getChainlinkToken()": FunctionFragment;

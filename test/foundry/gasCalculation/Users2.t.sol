@@ -50,18 +50,19 @@ contract Users2 is Test, ExchangeDeployer {
         uint marketPrice = exchange.marketPrice();
         uint oraclePrice = exchange.oraclePrice();
 
-        int fundingFraction = (int(marketPrice)-int(oraclePrice)/int(oraclePrice));
+        int fundingFraction = (int(marketPrice)-int(oraclePrice))*10**18/int(oraclePrice);
 
         //updating fundingRate
         bytes32 requestId = exchangeInfo.requestFundingRate();
         uint[] memory price = new uint[](1);
         price[0] = (oraclePrice);
         int[] memory fundingRate = new int[](1);
-        fundingRate[0] = fundingFraction*10*18;
+        fundingRate[0] = fundingFraction;
         string[] memory emptyString = new string[](1);
-        emptyString[0] = "";
-        oracle.fulfillOracleFundingRateRequest(requestId, uintArrayToBytes32(price), intArrayToBytes32(fundingRate), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString), stringArrayToBytes32(emptyString));
-        // oracle.fulfillOracleFundingRateRequest(requestId, uintToBytes32(oraclePrice), uintToBytes32(block.timestamp), intToBytes32(fundingFraction*10*18));
+        emptyString[0] = "M";
+        address[] memory addresses = new address[](1);
+        addresses[0] = address(exchange);
+        oracle.fulfillOracleFundingRateRequest(requestId, price, fundingRate, emptyString, emptyString, addresses);
     }
 
 

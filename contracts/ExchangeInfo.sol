@@ -27,7 +27,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     uint public lastUpdateTime;
     
     string baseUrl = "https://app.nexlabs.io/api/allFundingRates";
-    string urlParams = "?multiplyFunc=10&timesNegFund=true&arrays=true";
+    string urlParams = "?multiplyFunc=18&timesNegFund=true&arrays=true";
 
     bytes32 private externalJobId;
     uint256 private oraclePayment;
@@ -56,7 +56,7 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     }
 
   
-  function setFundingRateUsed(string memory _name, bool _bool) public onlyOwner {
+  function setFundingRateUsed(string memory _name, bool _bool) public {
       assetInfo[_name].fundingRateUsed = _bool;
   }
 
@@ -112,18 +112,23 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     return sendChainlinkRequestTo(chainlinkOracleAddress(), req, oraclePayment);
   }
 
-
+  uint public pp;
+  string public name;
   function fulfillFundingRate(bytes32 requestId, uint256[] memory _prices, int256[] memory _fundingfractionaverages, string[] memory _names, string[] memory _contracts, address[] memory _addresses)
+  /**function fulfillFundingRate(bytes32 requestId, uint[] memory _pp, int[] memory _ll, string[] memory _name)*/
     public
     recordChainlinkFulfillment(requestId)
   {
+    // assetInfo["M"].assetPrice = _pp[0] + uint(_ll[0]);
+    // pp = uint(_ll[0]);
+    // name = _name[0];
     uint[] memory prices0 = _prices;
     int[] memory fundingfractionaverages0 = _fundingfractionaverages;
     string[] memory names0 = _names;
     string[] memory contracts0 = _contracts;
     address[] memory addresses0 = _addresses;
 
-    //save mappings
+    // //save mappings
     for(uint i =0; i < names0.length; i++){
         assetInfo[names0[i]].assetPrice = prices0[i];
         assetInfo[names0[i]].assetFundingfractionaverage = fundingfractionaverages0[i];

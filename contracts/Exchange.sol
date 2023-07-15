@@ -18,7 +18,7 @@ import "./ExchangeInfo.sol";
 contract Exchange is Ownable, ReentrancyGuard, Pausable {
   using SafeMath for uint256;
   
-  string assetName;
+  string public assetName;
   ExchangeInfo public exchangeInfo;
 
   address public usdc;

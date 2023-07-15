@@ -92,16 +92,8 @@ contract MockApiOracle is ChainlinkRequestInterface, LinkTokenReceiver {
     );
   }
 
-  /**
-   * @notice Called by the Chainlink node to fulfill requests
-   * @dev Given params must hash back to the commitment stored from `oracleRequest`.
-   * Will call the callback address' callback function without bubbling up error
-   * checking in a `require` so that the node can get paid.
-   * @param _requestId The fulfillment request ID that must match the requester's
-   * @param _data1 The data to return to the consuming contract
-   * @param _data2 The data to return to the consuming contract
-   */
-  function fulfillOracleFundingRateRequest(bytes32 _requestId, bytes32 _data1, bytes32 _data2, bytes32 _data3, bytes32 _data4, bytes32 _data5)
+  
+  function fulfillOracleFundingRateRequest(bytes32 _requestId, uint256[] memory _prices, int256[] memory _fundingfractionaverages, string[] memory _names, string[] memory _contracts, address[] memory _addresses)
     external
     isValidRequest(_requestId)
     returns (bool)
@@ -112,12 +104,107 @@ contract MockApiOracle is ChainlinkRequestInterface, LinkTokenReceiver {
     // All updates to the oracle's fulfillment should come before calling the
     // callback(addr+functionId) as it is untrusted.
     // See: https://solidity.readthedocs.io/en/develop/security-considerations.html#use-the-checks-effects-interactions-pattern
+    uint[] memory price = new uint[](1);
+    price[0] = (1000e18);
+    int[] memory fundingRate = new int[](1);
+    fundingRate[0] = (2000e18);
+    string[] memory strings = new string[](1);
+    strings[0] = "Morteza";
     (bool success, ) = req.callbackAddr.call(
-      abi.encodeWithSelector(req.callbackFunctionId, _requestId, _data1, _data2, _data3, _data4, _data5)
+      // abi.encodeWithSelector(req.callbackFunctionId, _requestId, _data1, _data2, _data3, _data4, _data5)
+      // abi.encodeWithSelector(req.callbackFunctionId, _requestId, convertUintToBytes32(price), convertIntToBytes32Array(fundingRate), convertStringToBytes32Array(strings))
+      abi.encodeWithSelector(req.callbackFunctionId, _requestId, _prices, _fundingfractionaverages, _names, _contracts, _addresses)
     ); // solhint-disable-line avoid-low-level-calls
     return success;
   }
 
+  function uintToBytes32(uint myUint) public pure returns (bytes32 myBytes32) {
+        myBytes32 = bytes32(myUint);
+    }
+  function convertToBytes(uint256 value) public pure returns (bytes memory) {
+        bytes memory byteArray = abi.encodePacked(value);
+        
+        return byteArray;
+    }
+    function convertUintToBytes32(uint[] memory uintArray) public pure returns (bytes32[] memory) {
+        uint length = uintArray.length;
+        require(length > 0, "Array is empty");
+
+        uint numChunks = (length + 31) / 32;
+        bytes32[] memory result = new bytes32[](numChunks);
+
+        for (uint i = 0; i < numChunks; i++) {
+            uint startIndex = i * 32;
+            uint endIndex = startIndex + 32;
+            if (endIndex > length) {
+                endIndex = length;
+            }
+            uint[] memory chunk = new uint[](endIndex - startIndex);
+            for (uint j = startIndex; j < endIndex; j++) {
+                chunk[j - startIndex] = uintArray[j];
+            }
+            bytes32 chunkBytes = bytes32ArrayFromUintArray(chunk);
+            result[i] = chunkBytes;
+        }
+
+        return result;
+    }
+
+    function bytes32ArrayFromUintArray(uint[] memory uintArray) private pure returns (bytes32) {
+        bytes memory byteArray = new bytes(uintArray.length * 32);
+        for (uint i = 0; i < uintArray.length; i++) {
+            assembly {
+                mstore(add(byteArray, add(32, mul(i, 32))), mload(add(uintArray, add(32, mul(i, 32)))))
+            }
+        }
+        bytes32 result;
+        assembly {
+            result := mload(add(byteArray, 32))
+        }
+        return result;
+    }
+    function convertIntToBytes32Array(int256[] memory intArray) public pure returns (bytes32[] memory) {
+        bytes memory byteArray = abi.encodePacked(intArray);
+        uint256 length = intArray.length;
+        require(length > 0, "Array is empty");
+
+        require(byteArray.length % 32 == 0, "Invalid array length");
+
+        bytes32[] memory bytes32Array = new bytes32[](length);
+        for (uint256 i = 0; i < length; i++) {
+            bytes32Array[i] = bytes32FromIntAtIndex(byteArray, i);
+        }
+
+        return bytes32Array;
+    }
+
+    function bytes32FromIntAtIndex(bytes memory byteArray, uint256 index) private pure returns (bytes32) {
+        bytes32 result;
+        assembly {
+            result := mload(add(byteArray, add(32, mul(index, 32))))
+        }
+        return result;
+    }
+
+    function convertStringToBytes32Array(string[] memory stringArray) public pure returns (bytes32[] memory) {
+        uint256 length = stringArray.length;
+        require(length > 0, "Array is empty");
+
+        bytes32[] memory bytes32Array = new bytes32[](length);
+        for (uint256 i = 0; i < length; i++) {
+            bytes32Array[i] = stringToBytes32(stringArray[i]);
+        }
+
+        return bytes32Array;
+    }
+
+    function stringToBytes32(string memory str) private pure returns (bytes32) {
+        bytes32 result;
+        assembly {
+            result := mload(add(str, 32))
+        }
+        return result;
+    }
 
   /**
    * @notice Called by the Chainlink node to fulfill requests
