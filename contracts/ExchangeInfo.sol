@@ -112,16 +112,12 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
     return sendChainlinkRequestTo(chainlinkOracleAddress(), req, oraclePayment);
   }
 
-  uint public pp;
-  string public name;
+
   function fulfillFundingRate(bytes32 requestId, uint256[] memory _prices, int256[] memory _fundingfractionaverages, string[] memory _names, string[] memory _contracts, address[] memory _addresses)
-  /**function fulfillFundingRate(bytes32 requestId, uint[] memory _pp, int[] memory _ll, string[] memory _name)*/
     public
     recordChainlinkFulfillment(requestId)
   {
-    // assetInfo["M"].assetPrice = _pp[0] + uint(_ll[0]);
-    // pp = uint(_ll[0]);
-    // name = _name[0];
+    
     uint[] memory prices0 = _prices;
     int[] memory fundingfractionaverages0 = _fundingfractionaverages;
     string[] memory names0 = _names;

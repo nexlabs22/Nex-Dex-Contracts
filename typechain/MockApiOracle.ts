@@ -22,12 +22,17 @@ export interface MockApiOracleInterface extends utils.Interface {
   functions: {
     "EXPIRY_TIME()": FunctionFragment;
     "cancelOracleRequest(bytes32,uint256,bytes4,uint256)": FunctionFragment;
-    "fulfillOracleFundingRateRequest(bytes32,bytes,bytes,bytes,bytes,bytes)": FunctionFragment;
+    "convertIntToBytes32Array(int256[])": FunctionFragment;
+    "convertStringToBytes32Array(string[])": FunctionFragment;
+    "convertToBytes(uint256)": FunctionFragment;
+    "convertUintToBytes32(uint256[])": FunctionFragment;
+    "fulfillOracleFundingRateRequest(bytes32,uint256[],int256[],string[],string[],address[])": FunctionFragment;
     "fulfillOracleOjectRequest(bytes32,bytes32)": FunctionFragment;
     "fulfillOracleStatusRequest(bytes32,string)": FunctionFragment;
     "getChainlinkToken()": FunctionFragment;
     "onTokenTransfer(address,uint256,bytes)": FunctionFragment;
     "oracleRequest(address,uint256,bytes32,address,bytes4,uint256,uint256,bytes)": FunctionFragment;
+    "uintToBytes32(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -39,8 +44,31 @@ export interface MockApiOracleInterface extends utils.Interface {
     values: [BytesLike, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "convertIntToBytes32Array",
+    values: [BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "convertStringToBytes32Array",
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "convertToBytes",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "convertUintToBytes32",
+    values: [BigNumberish[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "fulfillOracleFundingRateRequest",
-    values: [BytesLike, BytesLike, BytesLike, BytesLike, BytesLike, BytesLike]
+    values: [
+      BytesLike,
+      BigNumberish[],
+      BigNumberish[],
+      string[],
+      string[],
+      string[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "fulfillOracleOjectRequest",
@@ -71,6 +99,10 @@ export interface MockApiOracleInterface extends utils.Interface {
       BytesLike
     ]
   ): string;
+  encodeFunctionData(
+    functionFragment: "uintToBytes32",
+    values: [BigNumberish]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "EXPIRY_TIME",
@@ -78,6 +110,22 @@ export interface MockApiOracleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "cancelOracleRequest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "convertIntToBytes32Array",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "convertStringToBytes32Array",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "convertToBytes",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "convertUintToBytes32",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -102,6 +150,10 @@ export interface MockApiOracleInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "oracleRequest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "uintToBytes32",
     data: BytesLike
   ): Result;
 
@@ -187,13 +239,33 @@ export interface MockApiOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    convertIntToBytes32Array(
+      intArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
+    convertStringToBytes32Array(
+      stringArray: string[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
+    convertToBytes(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    convertUintToBytes32(
+      uintArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
     fulfillOracleFundingRateRequest(
       _requestId: BytesLike,
-      _data1: BytesLike,
-      _data2: BytesLike,
-      _data3: BytesLike,
-      _data4: BytesLike,
-      _data5: BytesLike,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -229,6 +301,11 @@ export interface MockApiOracle extends BaseContract {
       _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    uintToBytes32(
+      myUint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string] & { myBytes32: string }>;
   };
 
   EXPIRY_TIME(overrides?: CallOverrides): Promise<BigNumber>;
@@ -241,13 +318,33 @@ export interface MockApiOracle extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  convertIntToBytes32Array(
+    intArray: BigNumberish[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  convertStringToBytes32Array(
+    stringArray: string[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  convertToBytes(
+    value: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  convertUintToBytes32(
+    uintArray: BigNumberish[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
   fulfillOracleFundingRateRequest(
     _requestId: BytesLike,
-    _data1: BytesLike,
-    _data2: BytesLike,
-    _data3: BytesLike,
-    _data4: BytesLike,
-    _data5: BytesLike,
+    _prices: BigNumberish[],
+    _fundingfractionaverages: BigNumberish[],
+    _names: string[],
+    _contracts: string[],
+    _addresses: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -284,6 +381,11 @@ export interface MockApiOracle extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  uintToBytes32(
+    myUint: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   callStatic: {
     EXPIRY_TIME(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -295,13 +397,33 @@ export interface MockApiOracle extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    convertIntToBytes32Array(
+      intArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    convertStringToBytes32Array(
+      stringArray: string[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    convertToBytes(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    convertUintToBytes32(
+      uintArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
     fulfillOracleFundingRateRequest(
       _requestId: BytesLike,
-      _data1: BytesLike,
-      _data2: BytesLike,
-      _data3: BytesLike,
-      _data4: BytesLike,
-      _data5: BytesLike,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -337,6 +459,11 @@ export interface MockApiOracle extends BaseContract {
       _data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    uintToBytes32(
+      myUint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
   };
 
   filters: {
@@ -382,13 +509,33 @@ export interface MockApiOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    convertIntToBytes32Array(
+      intArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    convertStringToBytes32Array(
+      stringArray: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    convertToBytes(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    convertUintToBytes32(
+      uintArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     fulfillOracleFundingRateRequest(
       _requestId: BytesLike,
-      _data1: BytesLike,
-      _data2: BytesLike,
-      _data3: BytesLike,
-      _data4: BytesLike,
-      _data5: BytesLike,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -424,6 +571,11 @@ export interface MockApiOracle extends BaseContract {
       _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    uintToBytes32(
+      myUint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -437,13 +589,33 @@ export interface MockApiOracle extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    convertIntToBytes32Array(
+      intArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    convertStringToBytes32Array(
+      stringArray: string[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    convertToBytes(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    convertUintToBytes32(
+      uintArray: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     fulfillOracleFundingRateRequest(
       _requestId: BytesLike,
-      _data1: BytesLike,
-      _data2: BytesLike,
-      _data3: BytesLike,
-      _data4: BytesLike,
-      _data5: BytesLike,
+      _prices: BigNumberish[],
+      _fundingfractionaverages: BigNumberish[],
+      _names: string[],
+      _contracts: string[],
+      _addresses: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -478,6 +650,11 @@ export interface MockApiOracle extends BaseContract {
       _dataVersion: BigNumberish,
       _data: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    uintToBytes32(
+      myUint: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

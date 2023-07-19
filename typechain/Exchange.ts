@@ -31,6 +31,7 @@ export interface ExchangeInterface extends utils.Interface {
     "_userNewMargin(address,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
+    "assetName()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "closePosition(uint256,uint256)": FunctionFragment;
     "closePositionComplete(uint256)": FunctionFragment;
@@ -136,6 +137,7 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "activeUsers",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "assetName", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "calculatePartialLiquidateValue",
     values: [string]
@@ -393,6 +395,7 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "activeUsers",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "assetName", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "calculatePartialLiquidateValue",
     data: BytesLike
@@ -858,6 +861,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    assetName(overrides?: CallOverrides): Promise<[string]>;
+
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -1161,6 +1166,8 @@ export interface Exchange extends BaseContract {
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+  assetName(overrides?: CallOverrides): Promise<string>;
+
   calculatePartialLiquidateValue(
     _user: string,
     overrides?: CallOverrides
@@ -1454,6 +1461,8 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    assetName(overrides?: CallOverrides): Promise<string>;
 
     calculatePartialLiquidateValue(
       _user: string,
@@ -1900,6 +1909,8 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    assetName(overrides?: CallOverrides): Promise<BigNumber>;
+
     calculatePartialLiquidateValue(
       _user: string,
       overrides?: CallOverrides
@@ -2190,6 +2201,8 @@ export interface Exchange extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    assetName(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     calculatePartialLiquidateValue(
       _user: string,

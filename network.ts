@@ -7,7 +7,7 @@ export const maycAssetName = 'mayc'
 export const goldAssetName = 'gold'
 
 
-const goerliExchangeInfoAddress = '0x2aa3abB7b6a1680540861009F61eAf912416c3af'
+const goerliExchangeInfoAddress = '0x9868aC22a25b4634283965B55741B2D4ad8336A4'
 
 const goerliBaycExchangeAddress = '0xd027D642ED36E2f08FF2Aa3077402CFEF73fFf39'
 const goerliMaycExchangeAddress = '0xeF621F20010953b615c618dE232BF14D897d6cD4'
@@ -19,6 +19,7 @@ const goerliGoldExchangeAddress = '0x4ca07071a8BB0f26A6834b82157a86770b810Ca8'
 
 
 const goerliUsdtAddress = '0x636b346942ee09Ee6383C22290e89742b55797c5'
+
 const goerliLinkAddress = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
 const goerliOracleAdress = '0x58c31F5CDe37608DCb4d60322B6933b4376A622b'
 const goerliExternalJobId = "98aaf34077ec4d0fa4b2d3c5dabf5e65"
