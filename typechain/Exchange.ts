@@ -26,8 +26,9 @@ export interface ExchangeInterface extends utils.Interface {
     "_getNewPNL(address,uint256,uint256)": FunctionFragment;
     "_getNewPositionNotional(address,uint256,uint256)": FunctionFragment;
     "_isHardLiquidatable(address,uint256,uint256)": FunctionFragment;
-    "_isNewMarginLiquidatable(address,uint256,uint256,uint256)": FunctionFragment;
+    "_isNewMarginLiquidatable(address,uint256,uint256)": FunctionFragment;
     "_isPartialLiquidatable(address,uint256,uint256)": FunctionFragment;
+    "_newMargin(address,uint256,uint256)": FunctionFragment;
     "_userNewMargin(address,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
@@ -119,10 +120,14 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "_isNewMarginLiquidatable",
-    values: [string, BigNumberish, BigNumberish, BigNumberish]
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "_isPartialLiquidatable",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_newMargin",
     values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -383,6 +388,7 @@ export interface ExchangeInterface extends utils.Interface {
     functionFragment: "_isPartialLiquidatable",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "_newMargin", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "_userNewMargin",
     data: BytesLike
@@ -831,7 +837,6 @@ export interface Exchange extends BaseContract {
 
     _isNewMarginLiquidatable(
       _user: string,
-      _usdAmount: BigNumberish,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
@@ -843,6 +848,13 @@ export interface Exchange extends BaseContract {
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    _newMargin(
+      _user: string,
+      _vAssetNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     _userNewMargin(
       _user: string,
@@ -1139,7 +1151,6 @@ export interface Exchange extends BaseContract {
 
   _isNewMarginLiquidatable(
     _user: string,
-    _usdAmount: BigNumberish,
     _vAssetNewPoolSize: BigNumberish,
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
@@ -1151,6 +1162,13 @@ export interface Exchange extends BaseContract {
     _vUsdNewPoolSize: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  _newMargin(
+    _user: string,
+    _vAssetNewPoolSize: BigNumberish,
+    _vUsdNewPoolSize: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   _userNewMargin(
     _user: string,
@@ -1435,7 +1453,6 @@ export interface Exchange extends BaseContract {
 
     _isNewMarginLiquidatable(
       _user: string,
-      _usdAmount: BigNumberish,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
@@ -1447,6 +1464,13 @@ export interface Exchange extends BaseContract {
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    _newMargin(
+      _user: string,
+      _vAssetNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     _userNewMargin(
       _user: string,
@@ -1879,13 +1903,19 @@ export interface Exchange extends BaseContract {
 
     _isNewMarginLiquidatable(
       _user: string,
-      _usdAmount: BigNumberish,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     _isPartialLiquidatable(
+      _user: string,
+      _vAssetNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    _newMargin(
       _user: string,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
@@ -2172,13 +2202,19 @@ export interface Exchange extends BaseContract {
 
     _isNewMarginLiquidatable(
       _user: string,
-      _usdAmount: BigNumberish,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     _isPartialLiquidatable(
+      _user: string,
+      _vAssetNewPoolSize: BigNumberish,
+      _vUsdNewPoolSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    _newMargin(
       _user: string,
       _vAssetNewPoolSize: BigNumberish,
       _vUsdNewPoolSize: BigNumberish,

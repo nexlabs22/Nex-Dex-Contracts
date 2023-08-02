@@ -303,7 +303,6 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
     bool isNewMarginHardLiquidatable = _isNewMarginLiquidatable(
       msg.sender,
-      _usdAmount,
       newvAssetPoolSize,
       newvUsdPoolSize
     );
@@ -323,8 +322,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 userAsset = pool.vAssetPoolSize - newvAssetPoolSize;
     require(userAsset >= _minimumAssetAmountOut, "INSUFFICIENT_OUTPUT_AMOUNT");
     //update Asset and usd balance of user
-    virtualBalances[msg.sender].uservAssetBalance += int256(userAsset);
-    virtualBalances[msg.sender].uservUsdBalance -= int256(_usdAmount);
+    virtualBalances[msg.sender].uservAssetBalance += int(userAsset);
+    virtualBalances[msg.sender].uservUsdBalance -= int(_usdAmount);
 
     //add user to the active user list
     _addActiveUser(msg.sender);
@@ -359,7 +358,6 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
     bool isNewMarginHardLiquidatable = _isNewMarginLiquidatable(
       msg.sender,
-      _usdAmount,
       newvAssetPoolSize,
       newvUsdPoolSize
     );
@@ -693,7 +691,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 _vUsdNewPoolSize
   ) public view returns (bool) {
     int256 userMargin = _userNewMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
-    if (userMargin != 0 && userMargin <= int8(AutoCloseMargin)) {
+    if (userMargin != 0 && userMargin <= int8(AutoCloseMargin) && msg.sender != _user) {
       return true;
     } else {
       return false;
@@ -702,20 +700,52 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   function _isNewMarginLiquidatable(
     address _user,
-    uint256 _usdAmount,
     uint256 _vAssetNewPoolSize,
     uint256 _vUsdNewPoolSize
   ) public view returns (bool) {
-    int256 accountValue = _getNewAccountValue(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
-    uint256 positionNotional = _getNewPositionNotional(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
-    uint256 newPositionNotional = positionNotional + _usdAmount;
-    int256 newMargin = (100 * (accountValue)) / int256(newPositionNotional);
+    int256 newMargin = _newMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
     if (newMargin != 0 && newMargin <= int8(saveLevelMargin)) {
       return true;
     } else {
       return false;
     }
   }
+
+
+  function _newMargin(
+    address _user,
+    uint256 _vAssetNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) public view returns (int) {
+    //calculate new position notional
+    int userNewAssetBalance = virtualBalances[_user].uservAssetBalance + int(pool.vAssetPoolSize) - int(_vAssetNewPoolSize);
+    int userNewUsdBalance = virtualBalances[_user].uservUsdBalance + int(pool.vUsdPoolSize) - int(_vUsdNewPoolSize);
+    uint256 newPositionNotional;
+    int pnl;
+    if(userNewAssetBalance>0){
+      uint256 k = _vAssetNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvAssetPoolSize = _vAssetNewPoolSize + uint(userNewAssetBalance);
+      uint256 newvUsdPoolSize = k/newvAssetPoolSize;
+      newPositionNotional = _vUsdNewPoolSize - newvUsdPoolSize;
+      pnl = int(newPositionNotional) - absoluteInt(userNewUsdBalance);
+    }else{
+      uint256 k = _vAssetNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvAssetPoolSize = _vAssetNewPoolSize - positive(userNewAssetBalance);
+      uint256 newvUsdPoolSize = k/newvAssetPoolSize;
+      newPositionNotional = newvUsdPoolSize - _vUsdNewPoolSize;
+      pnl = absoluteInt(userNewUsdBalance) - int(newPositionNotional);
+    }
+    //account value
+    int256 accountValue = int256(collateral[usdc][_user]) + pnl + virtualBalances[_user].virtualCollateral;
+    int256 newMargin;
+    if(newPositionNotional>0){
+      newMargin = (100*accountValue) / int256(newPositionNotional);
+    }
+    return int(newMargin);
+  }
+
+
+  
 
   function isPartialLiquidatable(address _user) public view returns (bool) {
     int256 userMargin = userMargin(_user);
@@ -734,7 +764,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   ) public view returns (bool) {
     int256 userMargin = _userNewMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
     // if ( 40 < userMargin < 50 ) => user is partial liquidatable
-    if (int8(AutoCloseMargin) <= userMargin && userMargin <= int8(maintenanceMargin)) {
+    if (int8(AutoCloseMargin) <= userMargin && userMargin <= int8(maintenanceMargin) && msg.sender != _user) {
       return true;
     } else {
       return false;

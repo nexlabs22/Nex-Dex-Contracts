@@ -9,9 +9,9 @@ export const goldAssetName = 'gold'
 
 const goerliExchangeInfoAddress = '0x9868aC22a25b4634283965B55741B2D4ad8336A4'
 
-const goerliBaycExchangeAddress = '0xd027D642ED36E2f08FF2Aa3077402CFEF73fFf39'
-const goerliMaycExchangeAddress = '0xeF621F20010953b615c618dE232BF14D897d6cD4'
-const goerliGoldExchangeAddress = '0x4ca07071a8BB0f26A6834b82157a86770b810Ca8'
+const goerliBaycExchangeAddress = '0xFFF09aF118Cc5746b35f4C23F3C3bd60d08ecab5'
+const goerliMaycExchangeAddress = '0x12072ae003167a7c637811da74F43ccA16EB4798'
+const goerliGoldExchangeAddress = '0xfe2D6D656812e5fD9b3385DC730E0ab2fee7Ac49'
 
 
 
