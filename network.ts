@@ -5,6 +5,7 @@
 export const baycAssetName = 'boredapeyachtclub'
 export const maycAssetName = 'mayc'
 export const goldAssetName = 'gold'
+export const antiInflationAssetName = 'antiinflation'
 
 
 const goerliExchangeInfoAddress = '0x9868aC22a25b4634283965B55741B2D4ad8336A4'
@@ -12,6 +13,7 @@ const goerliExchangeInfoAddress = '0x9868aC22a25b4634283965B55741B2D4ad8336A4'
 const goerliBaycExchangeAddress = '0xFFF09aF118Cc5746b35f4C23F3C3bd60d08ecab5'
 const goerliMaycExchangeAddress = '0x12072ae003167a7c637811da74F43ccA16EB4798'
 const goerliGoldExchangeAddress = '0xfe2D6D656812e5fD9b3385DC730E0ab2fee7Ac49'
+const goerliAntiInflationExchangeAddress = '0xA1C3663293c69fBF2F748149C08D308b962C118E'
 
 
 

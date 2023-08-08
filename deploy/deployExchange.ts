@@ -2,7 +2,7 @@ import { ethers, network } from "hardhat"
 require("dotenv").config()
 import "@nomiclabs/hardhat-ethers"
 const hre = require("hardhat")
-import { baycAssetName, goldAssetName, maycAssetName, networks } from "../network";
+import { antiInflationAssetName, baycAssetName, goldAssetName, maycAssetName, networks } from "../network";
 /**
  verify command
  npx hardhat verify --contract contracts/Index-contracts/IndexName.sol:IndexName –network goerli <deployedContractAddress> <oracleAddress> <ethusd oracle address> <goerli usdt address>
@@ -21,7 +21,7 @@ async function main() {
   const exchange = await Exchange.deploy(
     networks[chainId].usdtAddress,
     networks[chainId].exchangeInfoAddress,
-    goldAssetName
+    antiInflationAssetName
   )
 
   console.log(`Exchange contract deployed by address ${exchange.address}`)
