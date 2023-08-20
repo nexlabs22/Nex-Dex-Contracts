@@ -2481,8 +2481,8 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1689394673858,
-      "contentHash": "8d81d1d8679c41a878988e3b8cf29b8f",
+      "lastModificationDate": 1692364872666,
+      "contentHash": "63236372c0020dfe80114447fa713195",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {

@@ -137,6 +137,8 @@ contract FundingRate is Test, ExchangeDeployer {
        int add3FundingFee = exchange.virtualCollateral(add3);
        int add4FundingFee = exchange.virtualCollateral(add4);
        assertEq(add1FundingFee + add2FundingFee, -(add3FundingFee + add4FundingFee));
+       //check bools and times
+       assertEq(exchangeInfo.isFundingRateUsed(exchange.assetName()), true);
     }
 
 }
