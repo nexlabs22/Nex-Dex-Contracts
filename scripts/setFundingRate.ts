@@ -16,24 +16,18 @@ async function setFundingRateForExchange({ exchangeAddress, exchangeInfoAddress 
 	const provider = new ethers.providers.JsonRpcProvider(infuraUrl)
 	const exchangeContract = new ethers.Contract(exchangeAddress, exchangeAbi, provider)
 	const exchangeInfoContract = new ethers.Contract(exchangeInfoAddress, exchangeInfoAbi, provider)
-    //test a call function
+
+    //call variables from contracts
     const assetName = await exchangeContract.assetName()
     const isFundingRateUsed = await exchangeInfoContract.isFundingRateUsed(assetName);
     const lastFundingRateUpdateTime = await exchangeInfoContract.lastUpdateTime();
     const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
 
-    console.log("is funding rate used :", isFundingRateUsed)
-    
-    // return;
-    console.log("lastupdateTime", Number(lastFundingRateUpdateTime))
-    console.log("currentTimestamp", currentTimestampInSeconds)
-    console.log("is Ok ?", currentTimestampInSeconds - Number(lastFundingRateUpdateTime) < 60*60)
-    console.log("all Ok ?", !isFundingRateUsed && (currentTimestampInSeconds - Number(lastFundingRateUpdateTime) < 60*60))
-    // return;
+   
     if(!isFundingRateUsed && (currentTimestampInSeconds - Number(lastFundingRateUpdateTime) < 60*60) ){
 	// Assuming setFundingRate is a transaction, you'd need a signer:
 	const signer = new ethers.Wallet(process.env.PRIVATE_KEY_CHAINLINKM1 as string, provider);
-	const tx = await exchangeContract.connect(signer).setFundingRate()
+	const tx = await exchangeContract.connect(signer).setFundingRate({gasLimit: 2000000})
 	const receipt = await tx.wait()
     if(receipt.status == 1){
         console.log("success")

@@ -180,6 +180,8 @@ contract MinMargin is Test, ExchangeDeployer {
        console.logInt(exchange.userMargin(add1));
        
     }
+
+    
     
     
 }

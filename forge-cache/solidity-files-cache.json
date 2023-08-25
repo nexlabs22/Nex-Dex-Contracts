@@ -2765,10 +2765,105 @@
         }
       }
     },
-    "test/foundry/MinMargin.sol": {
-      "lastModificationDate": 1690985150886,
-      "contentHash": "f75b9866c32092b415e95fd99ceacde9",
-      "sourceName": "test/foundry/MinMargin.sol",
+    "test/foundry/MaxPositionAmount.t.sol": {
+      "lastModificationDate": 1692988570667,
+      "contentHash": "0beb4008529b1d8f5d93d204ec1cf21c",
+      "sourceName": "test/foundry/MaxPositionAmount.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/Exchange.sol",
+        "contracts/ExchangeInfo.sol",
+        "contracts/Token.sol",
+        "contracts/test/LinkToken.sol",
+        "contracts/test/MockApiOracle.sol",
+        "contracts/test/MockV3Aggregator.sol",
+        "contracts/test/libs/LinkTokenReceiver.sol",
+        "contracts/test/libs/SafeMathChainlink.sol",
+        "lib/forge-std/lib/ds-test/src\\test.sol",
+        "lib/forge-std/src/Common.sol",
+        "lib/forge-std/src/Components.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src\\Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/AutomationBase.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/AutomationCompatible.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/Chainlink.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/ChainlinkClient.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV2V3Interface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/AggregatorV3Interface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/AutomationCompatibleInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/interfaces/LinkTokenInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol",
+        "node_modules/@chainlink\\contracts/src/v0.8/tests/MockV3Aggregator.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol",
+        "node_modules/@chainlink/contracts/src/v0.8/vendor/ENSResolver.sol",
+        "node_modules/@openzeppelin\\contracts/access/Ownable.sol",
+        "node_modules/@openzeppelin\\contracts/security/Pausable.sol",
+        "node_modules/@openzeppelin\\contracts/security/ReentrancyGuard.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/ERC20.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/IERC20.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol",
+        "node_modules/@openzeppelin\\contracts/token/ERC20/utils/SafeERC20.sol",
+        "node_modules/@openzeppelin/contracts/utils/Address.sol",
+        "node_modules/@openzeppelin/contracts/utils/Context.sol",
+        "node_modules/@openzeppelin\\contracts/utils/math/SafeMath.sol",
+        "test/foundry\\ExchangeDeployer.sol",
+        "test/foundry\\helper.sol"
+      ],
+      "versionRequirement": "^0.8.17",
+      "artifacts": {
+        "MaxPositionAmount": {
+          "0.8.17+commit.8df45f5f.Windows.msvc": "MaxPositionAmount.t.sol\\MaxPositionAmount.json"
+        }
+      }
+    },
+    "test/foundry/MinMargin.t.sol": {
+      "lastModificationDate": 1692685962307,
+      "contentHash": "7509e3ef18a97f377883d48b0475057a",
+      "sourceName": "test/foundry/MinMargin.t.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -2856,7 +2951,7 @@
       "versionRequirement": "^0.8.17",
       "artifacts": {
         "MinMargin": {
-          "0.8.17+commit.8df45f5f.Windows.msvc": "MinMargin.sol\\MinMargin.json"
+          "0.8.17+commit.8df45f5f.Windows.msvc": "MinMargin.t.sol\\MinMargin.json"
         }
       }
     },
