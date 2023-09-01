@@ -35,8 +35,14 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   uint8 public swapFee = 10; //=> 10/10000 = 0.1%
   uint256 public latestFeeUpdate;
 
-  uint lastSetFundingRateTime;
-  bool tradingLimit;
+  uint public lastSetFundingRateTime;
+  bool public tradingLimit;
+
+  int public allLongvAssetBalances;
+  int public allShortvAssetBalances;
+
+  int public allLongvUsdBalances;
+  int public allShortvUsdBalances;
 
   struct Pool {
     uint256 vAssetPoolSize;
@@ -153,6 +159,55 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
           isUserActive[_user] = false;
           delete activeUsers[i];
         }
+      }
+    }
+  }
+
+  function _updateAllvAssetBalances(int currentBalance, int changeAmount) internal {
+    if(currentBalance > 0){
+      if(currentBalance + changeAmount >= 0){
+        allLongvAssetBalances += changeAmount;
+      }else{
+        allLongvAssetBalances -= currentBalance;
+        allShortvAssetBalances += currentBalance + changeAmount;
+      }
+    }else if(currentBalance < 0){
+      if(currentBalance + changeAmount <= 0){
+        allShortvAssetBalances += changeAmount;
+      }else{
+        allShortvAssetBalances -= currentBalance;
+        allLongvAssetBalances += currentBalance + changeAmount;
+      }
+    }else{
+      if(changeAmount > 0){
+        allLongvAssetBalances += changeAmount;
+      }else{
+        allShortvAssetBalances += changeAmount;
+      }
+    }
+  }
+
+
+  function _updateAllvUsdBalances(int currentBalance, int changeAmount) internal {
+    if(currentBalance > 0){
+      if(currentBalance + changeAmount >= 0){
+        allShortvUsdBalances += changeAmount;
+      }else{
+        allShortvUsdBalances -= currentBalance;
+        allLongvUsdBalances += currentBalance + changeAmount;
+      }
+    }else if(currentBalance < 0){
+      if(currentBalance + changeAmount <= 0){
+        allLongvUsdBalances += changeAmount;
+      }else{
+        allLongvUsdBalances -= currentBalance;
+        allShortvUsdBalances += currentBalance + changeAmount;
+      }
+    }else{
+      if(changeAmount > 0){
+        allShortvUsdBalances += changeAmount;
+      }else{
+        allLongvUsdBalances += changeAmount;
       }
     }
   }
@@ -321,6 +376,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     newvAssetPoolSize = k / newvUsdPoolSize;
     uint256 userAsset = pool.vAssetPoolSize - newvAssetPoolSize;
     require(userAsset >= _minimumAssetAmountOut, "INSUFFICIENT_OUTPUT_AMOUNT");
+    //update total balances
+    _updateAllvAssetBalances(virtualBalances[msg.sender].uservAssetBalance, int(userAsset));
+    _updateAllvUsdBalances(virtualBalances[msg.sender].uservUsdBalance, -int(_usdAmount));
     //update Asset and usd balance of user
     virtualBalances[msg.sender].uservAssetBalance += int(userAsset);
     virtualBalances[msg.sender].uservUsdBalance -= int(_usdAmount);
@@ -376,6 +434,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     newvAssetPoolSize = k / newvUsdPoolSize;
     uint256 userAsset = newvAssetPoolSize - pool.vAssetPoolSize;
     require(userAsset >= _minimumAssetAmountOut, "INSUFFICIENT_OUTPUT_AMOUNT");
+    //update total balances
+    _updateAllvAssetBalances(virtualBalances[msg.sender].uservAssetBalance, -int256(userAsset));
+    _updateAllvUsdBalances(virtualBalances[msg.sender].uservUsdBalance, int256(_usdAmount));
     //update Asset and usd balance of user
     virtualBalances[msg.sender].uservAssetBalance -= int256(userAsset);
     virtualBalances[msg.sender].uservUsdBalance += int256(_usdAmount);
@@ -435,6 +496,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     if (realizeVirtualCollAmount != 0) {
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
     }
+    //update total balances
+    _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -int256(_assetSize));
+    _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, absoluteInt(userPartialvUsdBalance));
     //update user balance
     virtualBalances[_user].uservAssetBalance -= int256(_assetSize);
     virtualBalances[_user].uservUsdBalance += absoluteInt(userPartialvUsdBalance);
@@ -498,6 +562,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     if (realizeVirtualCollAmount != 0) {
       _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
     }
+    //update total balances
+    _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, int256(_assetSize));
+    _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -absoluteInt(userPartialvUsdBalance));
     //update user balance
     virtualBalances[_user].uservAssetBalance += int256(_assetSize);
     virtualBalances[_user].uservUsdBalance -= absoluteInt(userPartialvUsdBalance);
@@ -802,6 +869,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       if (realizeVirtualCollAmount != 0) {
         _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -virtualBalances[_user].uservAssetBalance);
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -virtualBalances[_user].uservUsdBalance);
       //update user balance
       virtualBalances[_user].uservAssetBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -834,6 +904,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       if (realizeVirtualCollAmount != 0) {
         _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -virtualBalances[_user].uservAssetBalance);
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -virtualBalances[_user].uservUsdBalance);
       //update user balance
       virtualBalances[_user].uservAssetBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -876,6 +949,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
       collateral[usdc][_user] = 0;
       virtualBalances[_user].virtualCollateral = 0;
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -virtualBalances[_user].uservAssetBalance);
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -virtualBalances[_user].uservUsdBalance);
       //update user balance
       virtualBalances[_user].uservAssetBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -892,13 +968,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
       emit Price(marketPrice(), _assetSize, block.timestamp, pool.vAssetPoolSize, pool.vUsdPoolSize);
       // reduce short users virtual collateral
-      int256 allShortAssetBalance = getAllShortvAssetBalance();
+      (, int256 allShortAssetBalance,,) = getTotalBalances();
       for (uint256 i = 0; i < activeUsers.length; i++) {
         address user = activeUsers[i];
-        if (virtualBalances[_user].uservAssetBalance < 0) {
+        if (virtualBalances[user].uservAssetBalance < 0) {
           uint256 liquidationCover = (uint256(negativeValue) *
-            positive(virtualBalances[_user].uservAssetBalance)) / positive(allShortAssetBalance);
-          virtualBalances[_user].virtualCollateral -= int256(liquidationCover);
+            positive(virtualBalances[user].uservAssetBalance)) / positive(allShortAssetBalance);
+          virtualBalances[user].virtualCollateral -= int256(liquidationCover);
         }
       }
     } else if (virtualBalances[_user].uservAssetBalance < 0) {
@@ -907,7 +983,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
       collateral[usdc][_user] = 0;
       virtualBalances[_user].virtualCollateral = 0;
-
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -virtualBalances[_user].uservAssetBalance);
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -virtualBalances[_user].uservUsdBalance);
       //update user balance
       virtualBalances[_user].uservAssetBalance = 0;
       virtualBalances[_user].uservUsdBalance = 0;
@@ -924,13 +1002,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
       emit Price(marketPrice(), _assetSize, block.timestamp, pool.vAssetPoolSize, pool.vUsdPoolSize); 
       // reduce long users virtual collateral
-      int256 allLongvAssetBalance = getAllLongvAssetBalance();
+      (int256 allLongvAssetBalance,,,) = getTotalBalances();
       for (uint256 i = 0; i < activeUsers.length; i++) {
         address user = activeUsers[i];
-        if (virtualBalances[_user].uservAssetBalance > 0) {
+        if (virtualBalances[user].uservAssetBalance > 0) {
           uint256 liquidationCover = (uint256(negativeValue) *
-            uint256(virtualBalances[_user].uservAssetBalance)) / uint256(allLongvAssetBalance);
-          virtualBalances[_user].virtualCollateral -= int256(liquidationCover);
+            uint256(virtualBalances[user].uservAssetBalance)) / uint256(allLongvAssetBalance);
+          virtualBalances[user].virtualCollateral -= int256(liquidationCover);
         }
       }
     }
@@ -1013,6 +1091,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       if (realizeVirtualCollAmount != 0) {
         _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, -int256(AssetLiquidateAmount));
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, absoluteInt(userPartialvUsdBalance));
       //update user balance
       virtualBalances[_user].uservAssetBalance -= int256(AssetLiquidateAmount);
       virtualBalances[_user].uservUsdBalance += absoluteInt(userPartialvUsdBalance);
@@ -1052,6 +1133,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       if (realizeVirtualCollAmount != 0) {
         _realizevirtualCollateral(_user, absoluteInt(realizeVirtualCollAmount));
       }
+      //update total balances
+      _updateAllvAssetBalances(virtualBalances[_user].uservAssetBalance, int256(AssetLiquidateAmount));
+      _updateAllvUsdBalances(virtualBalances[_user].uservUsdBalance, -absoluteInt(userPartialvUsdBalance));
       //update user balance
       virtualBalances[_user].uservAssetBalance += int256(AssetLiquidateAmount);
       virtualBalances[_user].uservUsdBalance -= absoluteInt(userPartialvUsdBalance);
@@ -1136,29 +1220,48 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
   }
 
-  function getAllLongvAssetBalance() public view returns (int256) {
+  function getTotalBalances() public view returns (int256, int256, int256, int256) {
     int256 allLongAssetBalance;
+    int256 allShortAssetBalance;
+    int256 allLongUsdBalance;
+    int256 allShortUsdBalance;
     for (uint256 i; i < activeUsers.length; i++) {
       address user = activeUsers[i];
       int256 vAssetBalance = virtualBalances[user].uservAssetBalance;
+      int256 vUsdBalance = virtualBalances[user].uservUsdBalance;
+      //calculate asset balances
       if (vAssetBalance > 0) {
         allLongAssetBalance += vAssetBalance;
-      }
-    }
-    return allLongAssetBalance;
-  }
-
-  function getAllShortvAssetBalance() public view returns (int256) {
-    int256 allShortAssetBalance;
-    for (uint256 i; i < activeUsers.length; i++) {
-      address user = activeUsers[i];
-      int256 vAssetBalance = virtualBalances[user].uservAssetBalance;
-      if (vAssetBalance < 0) {
+      }else{
         allShortAssetBalance += vAssetBalance;
       }
+      //calculate asset balances
+      if (vUsdBalance > 0) {
+        allShortUsdBalance += vUsdBalance;
+      }else{
+        allLongUsdBalance += vUsdBalance;
+      }
     }
-    return allShortAssetBalance;
+    
+    return (
+      allLongAssetBalance,
+      allShortAssetBalance,
+      allLongUsdBalance,
+      allShortUsdBalance
+    );
   }
+
+  // function getAllShortvAssetBalance() public view returns (int256) {
+  //   int256 allShortAssetBalance;
+  //   for (uint256 i; i < activeUsers.length; i++) {
+  //     address user = activeUsers[i];
+  //     int256 vAssetBalance = virtualBalances[user].uservAssetBalance;
+  //     if (vAssetBalance < 0) {
+  //       allShortAssetBalance += vAssetBalance;
+  //     }
+  //   }
+  //   return allShortAssetBalance;
+  // }
 
   function setFundingRate() external {
     uint fundingFractionTime = exchangeInfo.lastUpdateTime();
@@ -1170,9 +1273,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     require(fundingFraction != 0, "Funding fraction should not be zero");
     require(oraclePrice != 0, "Oracle price should not be zero");
     //first the contract check actual vAsset positions balance of users
-    int256 allLongvAssetBalance = getAllLongvAssetBalance();
-    int256 allShortAssetBalance = getAllShortvAssetBalance();
-
+    // (int256 allLongvAssetBalance, int256 allShortAssetBalance,,) = getTotalBalances();
+    int256 allLongvAssetBalance = allLongvAssetBalances;
+    int256 allShortAssetBalance = allShortvAssetBalances;
     //check if we dont have one side(long or short balance = 0) this funding action will not run
     if (allLongvAssetBalance > 0 && allShortAssetBalance < 0) {
       if (fundingFraction > 0) {
@@ -1182,7 +1285,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
             : absoluteInt(allLongvAssetBalance)
         );
         // uint256 difference = currentPrice - oraclePrice;
-        uint256 fundingFee = (uint256(minOpenInterest) * uint(fundingFraction))/1e18 / 24e18;
+        uint256 fundingFee = (uint256(minOpenInterest) * uint(fundingFraction))/1e18/24;
         for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (virtualBalances[user].uservAssetBalance > 0) {
@@ -1204,7 +1307,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
             : absoluteInt(allLongvAssetBalance)
         );
         // uint256 difference = oraclePrice - currentPrice;
-        uint256 fundingFee = (uint256(minOpenInterest) * positive(fundingFraction))/1e18 / 24e18;
+        uint256 fundingFee = (uint256(minOpenInterest) * positive(fundingFraction))/1e18/24;
         for (uint256 i = 0; i < activeUsers.length; i++) {
           address user = activeUsers[i];
           if (virtualBalances[user].uservAssetBalance > 0) {
@@ -1224,7 +1327,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       exchangeInfo.setFundingRateUsed(assetName, true);
     }
   }
-
+ 
   //return positive int
   function absoluteInt(int256 _value) public pure returns (int256) {
     if (_value < 0) {

@@ -88,14 +88,15 @@ contract Users100 is Test, ExchangeDeployer {
             exchange.depositCollateral(1000e18);
             assertEq(usdc.balanceOf(address(users[i])), 0);
             assertEq(exchange.collateral(address(usdc), address(users[i])), 1000e18);
-            if(shouldBeShort == true){
+            
+            if(i<30){
                 exchange.openShortPosition(1500e18, 0);
                 if(startPrice > exchange.marketPrice() && (startPrice - exchange.marketPrice())*100/startPrice >= 50){
                     shouldBeLong = true;
                     shouldBeShort = false;
                     // startPrice = exchange.marketPrice();
                 }
-            }else if(shouldBeLong == true){
+            }else{
                 exchange.openLongPosition(1500e18, 0);
                 if(startPrice < exchange.marketPrice() &&(exchange.marketPrice() - startPrice)*100/startPrice >= 50){
                     shouldBeLong = false;
@@ -111,7 +112,19 @@ contract Users100 is Test, ExchangeDeployer {
             exchange.setFundingRate();
         }
 
-        
+        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
+        console.log("all Long asset balance");
+        console.logInt(allLongAssetBalance);
+        console.logInt(exchange.allLongvAssetBalances());
+        console.log("all Short asset balance");
+        console.logInt(allShortAssetBalance);
+        console.logInt(exchange.allShortvAssetBalances());
+        console.log("all Long usd balance");
+        console.logInt(allLongUsdBalance);
+        console.logInt(exchange.allLongvUsdBalances());
+        console.log("all Short usd balance");
+        console.logInt(allShortUsdBalance);
+        console.logInt(exchange.allShortvUsdBalances());
 
         
         for(uint i; i < 100; i++) {
@@ -127,6 +140,7 @@ contract Users100 is Test, ExchangeDeployer {
             vm.stopPrank();
         }
 
+        
         
         
     }

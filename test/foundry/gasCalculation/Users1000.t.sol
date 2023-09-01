@@ -111,21 +111,28 @@ contract Users1000 is Test, ExchangeDeployer  {
             exchange.setFundingRate();
         }
 
-        
+        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
+        assertEq(allLongAssetBalance, exchange.allLongvAssetBalances());
+        assertEq(allShortAssetBalance, exchange.allShortvAssetBalances());
+        assertEq(allLongUsdBalance, exchange.allLongvUsdBalances());
+        assertEq(allShortUsdBalance, exchange.allShortvUsdBalances());
 
         
         for(uint i; i < 1000; i++) {
-            console.log("***");
-            console.log("index", i);
-            console.log("user margin", exchange.positive(exchange.userMargin(users[i])));
-            console.log("Asset balance", exchange.positive(exchange.uservAssetBalance(users[i]))/1e16);
-            console.log("usd balance", exchange.positive(exchange.uservUsdBalance(users[i]))/1e16);
-            // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
-            console.log("***");
+            // console.log("***");
+            // console.log("index", i);
+            // console.log("user margin", exchange.positive(exchange.userMargin(users[i])));
+            // console.log("Asset balance", exchange.positive(exchange.uservAssetBalance(users[i]))/1e16);
+            // console.log("usd balance", exchange.positive(exchange.uservUsdBalance(users[i]))/1e16);
+            // // console.log("usd poolsize", (exchange.vUsdPoolSize())/1e16);
+            // console.log("***");
             vm.startPrank(users[i]);
             exchange.closePositionComplete(0);
             vm.stopPrank();
         }
+
+        
+        
 
         
         

@@ -331,7 +331,7 @@ contract MaxPositionAmount is Test, ExchangeDeployer {
        int newUsdPool = int(k)/(int(baycPool) + (baycB));
        int x = (100*(int(collateral) + vCollateral - 40*int(usdPool)/100 + 40*newUsdPool/100 - (usdB)))/60;
        //
-      //  int x =(int(collateral) + vCollateral)*100/60; 
+       //  int x =(int(collateral) + vCollateral)*100/60; 
 
        //new pools
        k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();

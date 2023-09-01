@@ -32,6 +32,10 @@ export interface ExchangeInterface extends utils.Interface {
     "_userNewMargin(address,uint256,uint256)": FunctionFragment;
     "absoluteInt(int256)": FunctionFragment;
     "activeUsers(uint256)": FunctionFragment;
+    "allLongvAssetBalances()": FunctionFragment;
+    "allLongvUsdBalances()": FunctionFragment;
+    "allShortvAssetBalances()": FunctionFragment;
+    "allShortvUsdBalances()": FunctionFragment;
     "assetName()": FunctionFragment;
     "calculatePartialLiquidateValue(address)": FunctionFragment;
     "closePosition(uint256,uint256)": FunctionFragment;
@@ -59,8 +63,10 @@ export interface ExchangeInterface extends utils.Interface {
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
     "isUserActive(address)": FunctionFragment;
+    "kfundingFee()": FunctionFragment;
     "lastFundingRateAmount()": FunctionFragment;
     "lastFundingRateTime()": FunctionFragment;
+    "lastSetFundingRateTime()": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "liquidationFee()": FunctionFragment;
     "maintenanceMargin()": FunctionFragment;
@@ -82,6 +88,7 @@ export interface ExchangeInterface extends utils.Interface {
     "setSwapFee(uint8)": FunctionFragment;
     "setTradingLimit(bool)": FunctionFragment;
     "swapFee()": FunctionFragment;
+    "tradingLimit()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "usdc()": FunctionFragment;
     "userMargin(address)": FunctionFragment;
@@ -141,6 +148,22 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "activeUsers",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allLongvAssetBalances",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allLongvUsdBalances",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allShortvAssetBalances",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allShortvUsdBalances",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "assetName", values?: undefined): string;
   encodeFunctionData(
@@ -245,11 +268,19 @@ export interface ExchangeInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
+    functionFragment: "kfundingFee",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "lastFundingRateAmount",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "lastFundingRateTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastSetFundingRateTime",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -325,6 +356,10 @@ export interface ExchangeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "swapFee", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "tradingLimit",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
@@ -399,6 +434,22 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "activeUsers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allLongvAssetBalances",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allLongvUsdBalances",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allShortvAssetBalances",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allShortvUsdBalances",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "assetName", data: BytesLike): Result;
@@ -501,11 +552,19 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "kfundingFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "lastFundingRateAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "lastFundingRateTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastSetFundingRateTime",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -574,6 +633,10 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "swapFee", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tradingLimit",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -873,6 +936,14 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    allLongvAssetBalances(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    allLongvUsdBalances(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    allShortvAssetBalances(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    allShortvUsdBalances(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     assetName(overrides?: CallOverrides): Promise<[string]>;
 
     calculatePartialLiquidateValue(
@@ -984,9 +1055,13 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
+    kfundingFee(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     lastFundingRateAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    lastSetFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -1066,6 +1141,8 @@ export interface Exchange extends BaseContract {
     ): Promise<ContractTransaction>;
 
     swapFee(overrides?: CallOverrides): Promise<[number]>;
+
+    tradingLimit(overrides?: CallOverrides): Promise<[boolean]>;
 
     transferOwnership(
       newOwner: string,
@@ -1184,6 +1261,14 @@ export interface Exchange extends BaseContract {
 
   activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+  allLongvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+  allLongvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+  allShortvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+  allShortvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
   assetName(overrides?: CallOverrides): Promise<string>;
 
   calculatePartialLiquidateValue(
@@ -1289,9 +1374,13 @@ export interface Exchange extends BaseContract {
 
   isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+  kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
+
   lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
   lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+  lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1371,6 +1460,8 @@ export interface Exchange extends BaseContract {
   ): Promise<ContractTransaction>;
 
   swapFee(overrides?: CallOverrides): Promise<number>;
+
+  tradingLimit(overrides?: CallOverrides): Promise<boolean>;
 
   transferOwnership(
     newOwner: string,
@@ -1486,6 +1577,14 @@ export interface Exchange extends BaseContract {
 
     activeUsers(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+    allLongvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allLongvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allShortvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allShortvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
     assetName(overrides?: CallOverrides): Promise<string>;
 
     calculatePartialLiquidateValue(
@@ -1594,9 +1693,13 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
+    kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
+
     lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1666,6 +1769,8 @@ export interface Exchange extends BaseContract {
     ): Promise<void>;
 
     swapFee(overrides?: CallOverrides): Promise<number>;
+
+    tradingLimit(overrides?: CallOverrides): Promise<boolean>;
 
     transferOwnership(
       newOwner: string,
@@ -1939,6 +2044,14 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    allLongvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allLongvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allShortvAssetBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
+    allShortvUsdBalances(overrides?: CallOverrides): Promise<BigNumber>;
+
     assetName(overrides?: CallOverrides): Promise<BigNumber>;
 
     calculatePartialLiquidateValue(
@@ -2047,9 +2160,13 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
+
     lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
 
     lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2122,6 +2239,8 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     swapFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tradingLimit(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
@@ -2235,6 +2354,22 @@ export interface Exchange extends BaseContract {
 
     activeUsers(
       arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    allLongvAssetBalances(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    allLongvUsdBalances(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    allShortvAssetBalances(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    allShortvUsdBalances(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2361,11 +2496,17 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    kfundingFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     lastFundingRateAmount(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     lastFundingRateTime(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lastSetFundingRateTime(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -2440,6 +2581,8 @@ export interface Exchange extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     swapFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tradingLimit(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,

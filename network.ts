@@ -10,10 +10,10 @@ export const antiInflationAssetName = 'antiinflation'
 
 const goerliExchangeInfoAddress = '0x9868aC22a25b4634283965B55741B2D4ad8336A4'
 
-const goerliBaycExchangeAddress = '0xFFF09aF118Cc5746b35f4C23F3C3bd60d08ecab5'
-const goerliMaycExchangeAddress = '0x12072ae003167a7c637811da74F43ccA16EB4798'
-const goerliGoldExchangeAddress = '0xfe2D6D656812e5fD9b3385DC730E0ab2fee7Ac49'
-const goerliAntiInflationExchangeAddress = '0x91A072c719f9c6FDE36669cc8214C2a9d721e36b'
+const goerliBaycExchangeAddress = '0xcbc0A84E9f26a319AB8ca9Ff4b998613f3b5Ed0e'
+const goerliMaycExchangeAddress = '0xDD6058353036cDae1EA332bFb1aebc6CD1b02a02'
+const goerliGoldExchangeAddress = '0xC85509a19eC3fcca7f7907CB5a0601318F5B7bb8'
+const goerliAntiInflationExchangeAddress = '0xC191056a11df7D65a8478E47563853F7b732d935'
 
 
 

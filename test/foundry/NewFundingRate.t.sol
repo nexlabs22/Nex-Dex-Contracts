@@ -58,9 +58,28 @@ contract FundingRate is Test, ExchangeDeployer {
     function updateFundingFraction() public {
         uint marketPrice = exchange.marketPrice();
         uint oraclePrice = exchange.oraclePrice();
-       console.log("marketPrice: ", marketPrice);
        console.log("oraclePrice0: ", oraclePrice);
-        int fundingFraction = ((int(marketPrice)-int(oraclePrice))*10**18)/int(oraclePrice);
+        int fundingFraction = (int(marketPrice)-int(oraclePrice))*10**18/int(oraclePrice);
+
+        //updating fundingRate
+        bytes32 requestId = exchangeInfo.requestFundingRate();
+        uint[] memory price = new uint[](1);
+        price[0] = (oraclePrice);
+        int[] memory fundingRate = new int[](1);
+        fundingRate[0] = fundingFraction;
+        string[] memory emptyString = new string[](1);
+        emptyString[0] = "M";
+        address[] memory addresses = new address[](1);
+        addresses[0] = address(exchange);
+        oracle.fulfillOracleFundingRateRequest(requestId, price, fundingRate, emptyString, emptyString, addresses);
+    }
+
+
+    function updateNewFundingFraction(int fundingFraction) public {
+        uint marketPrice = exchange.marketPrice();
+        uint oraclePrice = exchange.oraclePrice();
+        // console.log("oraclePrice0: ", oraclePrice);
+        // int fundingFraction = (int(marketPrice)-int(oraclePrice))*10**18/int(oraclePrice);
 
         //updating fundingRate
         bytes32 requestId = exchangeInfo.requestFundingRate();
@@ -78,10 +97,7 @@ contract FundingRate is Test, ExchangeDeployer {
     
 
     function testFundingRewards() public {
-    //    uint oraclePrice = exchange.oraclePrice();
-    //    console.log("oraclePrice: ", oraclePrice);
-    //    updateFundingFraction();
-    //    return;
+    
        uint startvAssetPoolSize = exchange.vAssetPoolSize();
        uint startvUsdPoolSize = exchange.vUsdPoolSize();
        //add1 add collateral
@@ -115,11 +131,11 @@ contract FundingRate is Test, ExchangeDeployer {
 
        //add1 opens a long position
        vm.startPrank(add1);
-       exchange.openLongPosition(1500e18, 0);
+       exchange.openLongPosition(1000e18, 0);
        vm.stopPrank();
        //add2 opens a short position
        vm.startPrank(add2);
-       exchange.openLongPosition(1500e18, 0);
+       exchange.openLongPosition(1000e18, 0);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add3);
@@ -130,29 +146,24 @@ contract FundingRate is Test, ExchangeDeployer {
        exchange.openShortPosition(1000e18, 0);
        vm.stopPrank();
        //update funding fee
-       updateFundingFraction();
+       updateNewFundingFraction(-1e16);
        // runs fundingRate function
        exchange.setFundingRate();
        int add1FundingFee = exchange.virtualCollateral(add1);
        int add2FundingFee = exchange.virtualCollateral(add2);
        int add3FundingFee = exchange.virtualCollateral(add3);
        int add4FundingFee = exchange.virtualCollateral(add4);
-       assertEq(add1FundingFee + add2FundingFee, -(add3FundingFee + add4FundingFee));
-
+    //    assertFalse(add1FundingFee ==0);
        console.logInt(add1FundingFee);
        console.logInt(add2FundingFee);
        console.logInt(add3FundingFee);
        console.logInt(add4FundingFee);
        console.logInt(exchangeInfo.assetFundingfractionaverage("M"));
        console.log("FundingFee", exchange.kfundingFee());
+
+       assertEq(add1FundingFee + add2FundingFee, -(add3FundingFee + add4FundingFee));
        //check bools and times
        assertEq(exchangeInfo.isFundingRateUsed(exchange.assetName()), true);
-
-       (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
-       assertEq(allLongAssetBalance, exchange.allLongvAssetBalances());
-       assertEq(allShortAssetBalance, exchange.allShortvAssetBalances());
-       assertEq(allLongUsdBalance, exchange.allLongvUsdBalances());
-       assertEq(allShortUsdBalance, exchange.allShortvUsdBalances());
     }
 
 }
