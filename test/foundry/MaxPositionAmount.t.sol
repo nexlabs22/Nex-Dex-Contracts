@@ -208,6 +208,12 @@ contract MaxPositionAmount is Test, ExchangeDeployer {
        );
       //  console.logInt(x/1e18);
        console.logInt(isG);
+       console.log("open long position:");
+       console.logInt(exchange.uservUsdBalance(address(add1)));
+       console.logInt(exchange.userMargin(address(add1)));
+       exchange.openLongPosition(uint(x), 0);
+       console.logInt(exchange.uservUsdBalance(address(add1)));
+       console.logInt(exchange.userMargin(address(add1)));
        
       //  //get new margin
       //  //check minimum amount

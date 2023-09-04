@@ -64,13 +64,22 @@ contract MinMargin is Test, ExchangeDeployer {
        assertEq(usdc.balanceOf(address(add1)), 0);
        
        int accountValue = exchange.getAccountValue(address(add1));
-       int newPositionNotional = accountValue*100/61;
-
+       int newPositionNotional = accountValue*100/60;
+       
+       uint k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();
+       uint collateral = exchange.collateral(address(usdc), address(add1));
+       int vCollateral = exchange.virtualCollateral(address(add1));
+       uint usdPool = exchange.vUsdPoolSize();
+       uint baycPool = exchange.vAssetPoolSize();
+       int usdB = exchange.uservUsdBalance(address(add1));
+       int baycB = exchange.uservAssetBalance(address(add1));
+       int newUsdPool = int(k)/(int(baycPool) + helper.absoluteInt(baycB));
+       int x = (100*(int(collateral) + vCollateral - 160*int(usdPool)/100 + 160*newUsdPool/100 + helper.absoluteInt(usdB)))/60;
        
        //get new margin
        //check minimum amount
-       uint256 k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();
-       uint256 newvUsdPoolSize = exchange.vUsdPoolSize() - uint(newPositionNotional);
+       k = exchange.vAssetPoolSize() * exchange.vUsdPoolSize();
+       uint256 newvUsdPoolSize = exchange.vUsdPoolSize() - uint(x);
        uint256 newvAssetPoolSize = k / newvUsdPoolSize;
        int isG = exchange._newMargin(
         address(add1),
@@ -82,7 +91,7 @@ contract MinMargin is Test, ExchangeDeployer {
     //    vm.expectRevert("Insufficient margin to open position with requested size.");
     //    exchange.openLongPosition(uint(newPositionNotional+1), 0);
        
-       exchange.openLongPosition(uint(newPositionNotional), 0);
+       exchange.openLongPosition(uint(x), 0);
        console.logInt(exchange.userMargin(add1));
     }
 

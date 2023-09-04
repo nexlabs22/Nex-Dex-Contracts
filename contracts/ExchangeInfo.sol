@@ -153,6 +153,41 @@ contract ExchangeInfo is Ownable, ChainlinkClient {
         return string(bytes.concat(bytes(a), bytes(b)));
     }
   
+  function getTotalBalances(address _exchangeAddress) public view returns (int256, int256, int256, int256) {
+    Exchange exchange = Exchange(_exchangeAddress);
+
+    int256 allLongAssetBalance;
+    int256 allShortAssetBalance;
+    int256 allLongUsdBalance;
+    int256 allShortUsdBalance;
+
+    address[] memory activeUsers = exchange.getAllActiveUsers();
+
+    for (uint256 i; i < activeUsers.length; i++) {
+      address user = activeUsers[i];
+      int256 vAssetBalance = exchange.uservAssetBalance(user);
+      int256 vUsdBalance = exchange.uservUsdBalance(user);
+      //calculate asset balances
+      if (vAssetBalance > 0) {
+        allLongAssetBalance += vAssetBalance;
+      }else{
+        allShortAssetBalance += vAssetBalance;
+      }
+      //calculate asset balances
+      if (vUsdBalance > 0) {
+        allShortUsdBalance += vUsdBalance;
+      }else{
+        allLongUsdBalance += vUsdBalance;
+      }
+    }
+    
+    return (
+      allLongAssetBalance,
+      allShortAssetBalance,
+      allLongUsdBalance,
+      allShortUsdBalance
+    );
+  }
 
   //get minimum long Asset amount that user receives
   function getMinimumLongAssetOut(address _exchangeAddress, uint256 _usdAmount) public view returns (uint256) {

@@ -47,9 +47,6 @@ export interface ExchangeInterface extends utils.Interface {
     "exchangeInfo()": FunctionFragment;
     "getAccountValue(address)": FunctionFragment;
     "getAllActiveUsers()": FunctionFragment;
-    "getAllLongvAssetBalance()": FunctionFragment;
-    "getAllShortvAssetBalance()": FunctionFragment;
-    "getCurrentExchangePrice()": FunctionFragment;
     "getLongAssetAmountOut(uint256)": FunctionFragment;
     "getLongVusdAmountOut(uint256)": FunctionFragment;
     "getPNL(address)": FunctionFragment;
@@ -63,9 +60,6 @@ export interface ExchangeInterface extends utils.Interface {
     "isPriceIntheRightRange(uint256,uint256)": FunctionFragment;
     "isShortInRightRange(uint256)": FunctionFragment;
     "isUserActive(address)": FunctionFragment;
-    "kfundingFee()": FunctionFragment;
-    "lastFundingRateAmount()": FunctionFragment;
-    "lastFundingRateTime()": FunctionFragment;
     "lastSetFundingRateTime()": FunctionFragment;
     "latestFeeUpdate()": FunctionFragment;
     "liquidationFee()": FunctionFragment;
@@ -207,18 +201,6 @@ export interface ExchangeInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getAllLongvAssetBalance",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAllShortvAssetBalance",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getCurrentExchangePrice",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "getLongAssetAmountOut",
     values: [BigNumberish]
   ): string;
@@ -266,18 +248,6 @@ export interface ExchangeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "isUserActive",
     values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "kfundingFee",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastFundingRateAmount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastFundingRateTime",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "lastSetFundingRateTime",
@@ -491,18 +461,6 @@ export interface ExchangeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAllLongvAssetBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllShortvAssetBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getCurrentExchangePrice",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getLongAssetAmountOut",
     data: BytesLike
   ): Result;
@@ -549,18 +507,6 @@ export interface ExchangeInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isUserActive",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "kfundingFee",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "lastFundingRateAmount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "lastFundingRateTime",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -684,6 +630,7 @@ export interface ExchangeInterface extends utils.Interface {
     "PartialLiquidate(address,uint256,uint256,uint256,uint256)": EventFragment;
     "Paused(address)": EventFragment;
     "Price(uint256,uint256,uint256,uint256,uint256)": EventFragment;
+    "SetFundingRate(uint256,uint256,int256,int256,int256,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
     "Withdraw(address,address,uint256,uint256)": EventFragment;
   };
@@ -699,6 +646,7 @@ export interface ExchangeInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "PartialLiquidate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Price"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetFundingRate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
@@ -822,6 +770,20 @@ export type PriceEvent = TypedEvent<
 
 export type PriceEventFilter = TypedEventFilter<PriceEvent>;
 
+export type SetFundingRateEvent = TypedEvent<
+  [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    marketPrice: BigNumber;
+    oraclePrice: BigNumber;
+    fundingRate: BigNumber;
+    allLongAssetBalance: BigNumber;
+    allShortAssetBalance: BigNumber;
+    time: BigNumber;
+  }
+>;
+
+export type SetFundingRateEventFilter = TypedEventFilter<SetFundingRateEvent>;
+
 export type UnpausedEvent = TypedEvent<[string], { account: string }>;
 
 export type UnpausedEventFilter = TypedEventFilter<UnpausedEvent>;
@@ -861,7 +823,7 @@ export interface Exchange extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    AutoCloseMargin(overrides?: CallOverrides): Promise<[number]>;
+    AutoCloseMargin(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     _calculatePartialLiquidateValue(
       _user: string,
@@ -973,7 +935,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    discountRate(overrides?: CallOverrides): Promise<[number]>;
+    discountRate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     doesUserExist(_user: string, overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -985,12 +947,6 @@ export interface Exchange extends BaseContract {
     ): Promise<[BigNumber]>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<[string[]]>;
-
-    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1055,19 +1011,13 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-    kfundingFee(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     lastSetFundingRateTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     liquidationFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    maintenanceMargin(overrides?: CallOverrides): Promise<[number]>;
+    maintenanceMargin(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     marketPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -1114,7 +1064,7 @@ export interface Exchange extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    saveLevelMargin(overrides?: CallOverrides): Promise<[number]>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     setAssetName(
       _assetName: string,
@@ -1189,7 +1139,7 @@ export interface Exchange extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
+  AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
   _calculatePartialLiquidateValue(
     _user: string,
@@ -1298,7 +1248,7 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  discountRate(overrides?: CallOverrides): Promise<number>;
+  discountRate(overrides?: CallOverrides): Promise<BigNumber>;
 
   doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
 
@@ -1307,12 +1257,6 @@ export interface Exchange extends BaseContract {
   getAccountValue(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
-
-  getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   getLongAssetAmountOut(
     _vUsdAmount: BigNumberish,
@@ -1374,19 +1318,13 @@ export interface Exchange extends BaseContract {
 
   isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-  kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-  lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
-
   lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
   liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-  maintenanceMargin(overrides?: CallOverrides): Promise<number>;
+  maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
   marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1433,7 +1371,7 @@ export interface Exchange extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  saveLevelMargin(overrides?: CallOverrides): Promise<number>;
+  saveLevelMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
   setAssetName(
     _assetName: string,
@@ -1505,7 +1443,7 @@ export interface Exchange extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    AutoCloseMargin(overrides?: CallOverrides): Promise<number>;
+    AutoCloseMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
     _calculatePartialLiquidateValue(
       _user: string,
@@ -1614,7 +1552,7 @@ export interface Exchange extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    discountRate(overrides?: CallOverrides): Promise<number>;
+    discountRate(overrides?: CallOverrides): Promise<BigNumber>;
 
     doesUserExist(_user: string, overrides?: CallOverrides): Promise<boolean>;
 
@@ -1626,12 +1564,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<string[]>;
-
-    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
@@ -1693,19 +1625,13 @@ export interface Exchange extends BaseContract {
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-    kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
-
     lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     latestFeeUpdate(overrides?: CallOverrides): Promise<BigNumber>;
 
     liquidationFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    maintenanceMargin(overrides?: CallOverrides): Promise<number>;
+    maintenanceMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
     marketPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1750,7 +1676,7 @@ export interface Exchange extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    saveLevelMargin(overrides?: CallOverrides): Promise<number>;
+    saveLevelMargin(overrides?: CallOverrides): Promise<BigNumber>;
 
     setAssetName(_assetName: string, overrides?: CallOverrides): Promise<void>;
 
@@ -1951,6 +1877,23 @@ export interface Exchange extends BaseContract {
       vUsdPoolSize?: null
     ): PriceEventFilter;
 
+    "SetFundingRate(uint256,uint256,int256,int256,int256,uint256)"(
+      marketPrice?: null,
+      oraclePrice?: null,
+      fundingRate?: null,
+      allLongAssetBalance?: null,
+      allShortAssetBalance?: null,
+      time?: null
+    ): SetFundingRateEventFilter;
+    SetFundingRate(
+      marketPrice?: null,
+      oraclePrice?: null,
+      fundingRate?: null,
+      allLongAssetBalance?: null,
+      allShortAssetBalance?: null,
+      time?: null
+    ): SetFundingRateEventFilter;
+
     "Unpaused(address)"(account?: null): UnpausedEventFilter;
     Unpaused(account?: null): UnpausedEventFilter;
 
@@ -2094,12 +2037,6 @@ export interface Exchange extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getAllLongvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getAllShortvAssetBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getCurrentExchangePrice(overrides?: CallOverrides): Promise<BigNumber>;
-
     getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -2159,12 +2096,6 @@ export interface Exchange extends BaseContract {
     ): Promise<BigNumber>;
 
     isUserActive(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    kfundingFee(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateAmount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     lastSetFundingRateTime(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2418,18 +2349,6 @@ export interface Exchange extends BaseContract {
 
     getAllActiveUsers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getAllLongvAssetBalance(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getAllShortvAssetBalance(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getCurrentExchangePrice(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getLongAssetAmountOut(
       _vUsdAmount: BigNumberish,
       overrides?: CallOverrides
@@ -2493,16 +2412,6 @@ export interface Exchange extends BaseContract {
 
     isUserActive(
       arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    kfundingFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    lastFundingRateAmount(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    lastFundingRateTime(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

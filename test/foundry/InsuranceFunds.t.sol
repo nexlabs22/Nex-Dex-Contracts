@@ -148,14 +148,14 @@ contract liquidationFee is Test, ExchangeDeployer {
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add3);
-       exchange.openShortPosition(1400e18, 0);
+       exchange.openShortPosition(1500e18, 0);
        vm.stopPrank();
        //add3 opens a short position
        vm.startPrank(add4);
        exchange.openShortPosition(1600e18, 0);
-       assertEq(exchange.userMargin(add1) > 60, true);
+       assertEq(exchange.userMargin(add1) > 60e18, true);
        vm.stopPrank();
-
+       
        uint liquidationFee = exchange.liquidationFee();
        exchange.removeLiquidationFee(liquidationFee);
     }

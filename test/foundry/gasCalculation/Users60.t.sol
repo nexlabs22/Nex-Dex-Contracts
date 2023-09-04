@@ -118,7 +118,7 @@ contract Users60 is Test, ExchangeDeployer {
         }
 
         
-        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
+        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchangeInfo.getTotalBalances(address(exchange));
         assertEq(allLongAssetBalance, exchange.allLongvAssetBalances());
         assertEq(allShortAssetBalance, exchange.allShortvAssetBalances());
         assertEq(allLongUsdBalance, exchange.allLongvUsdBalances());

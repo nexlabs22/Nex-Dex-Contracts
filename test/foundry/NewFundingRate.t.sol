@@ -159,7 +159,6 @@ contract FundingRate is Test, ExchangeDeployer {
        console.logInt(add3FundingFee);
        console.logInt(add4FundingFee);
        console.logInt(exchangeInfo.assetFundingfractionaverage("M"));
-       console.log("FundingFee", exchange.kfundingFee());
 
        assertEq(add1FundingFee + add2FundingFee, -(add3FundingFee + add4FundingFee));
        //check bools and times

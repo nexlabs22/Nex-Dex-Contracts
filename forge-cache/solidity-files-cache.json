@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1693596331867,
-      "contentHash": "53eb4a055ff9bb22f7e04e66e4441986",
+      "lastModificationDate": 1693810671944,
+      "contentHash": "ce35bbef74a2248d382d8eba552025d7",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -80,8 +80,8 @@
       }
     },
     "contracts/ExchangeInfo.sol": {
-      "lastModificationDate": 1690900404723,
-      "contentHash": "911237f64c01b19c8f72428887c37eb3",
+      "lastModificationDate": 1693810664998,
+      "contentHash": "093bba7efdf6189107ca5155f3071c39",
       "sourceName": "contracts/ExchangeInfo.sol",
       "solcConfig": {
         "settings": {
@@ -2481,8 +2481,8 @@
       }
     },
     "test/foundry/FundingRate.t.sol": {
-      "lastModificationDate": 1693594597556,
-      "contentHash": "d4fcc56e9125892692f012539d773f6a",
+      "lastModificationDate": 1693810889306,
+      "contentHash": "a9a9cd6f36e67a0456005e278de5c11b",
       "sourceName": "test/foundry/FundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -2576,8 +2576,8 @@
       }
     },
     "test/foundry/InsuranceFunds.t.sol": {
-      "lastModificationDate": 1688476975996,
-      "contentHash": "d049c498af24b5d457c547150fe094ce",
+      "lastModificationDate": 1693804778206,
+      "contentHash": "5acbeb9d9f032e69c29644a7923c9818",
       "sourceName": "test/foundry/InsuranceFunds.t.sol",
       "solcConfig": {
         "settings": {
@@ -2671,8 +2671,8 @@
       }
     },
     "test/foundry/Liquidation.t.sol": {
-      "lastModificationDate": 1689394891939,
-      "contentHash": "48345d9c250c34387660f7fffc9f8496",
+      "lastModificationDate": 1693804831250,
+      "contentHash": "fc9e893b6c474f43976996c2afbc3c63",
       "sourceName": "test/foundry/Liquidation.t.sol",
       "solcConfig": {
         "settings": {
@@ -2766,8 +2766,8 @@
       }
     },
     "test/foundry/MaxPositionAmount.t.sol": {
-      "lastModificationDate": 1693567527299,
-      "contentHash": "b2a0a8e569318a0e698bc52c8910b20e",
+      "lastModificationDate": 1693813091429,
+      "contentHash": "27f0d14e793c62259853e72d77dbc215",
       "sourceName": "test/foundry/MaxPositionAmount.t.sol",
       "solcConfig": {
         "settings": {
@@ -2861,8 +2861,8 @@
       }
     },
     "test/foundry/MinMargin.t.sol": {
-      "lastModificationDate": 1692685962307,
-      "contentHash": "7509e3ef18a97f377883d48b0475057a",
+      "lastModificationDate": 1693807624302,
+      "contentHash": "93aea86af97387fb0219a2b96788f600",
       "sourceName": "test/foundry/MinMargin.t.sol",
       "solcConfig": {
         "settings": {
@@ -2956,8 +2956,8 @@
       }
     },
     "test/foundry/NewFundingRate.t.sol": {
-      "lastModificationDate": 1693485844650,
-      "contentHash": "847a30edb206c42adb157802f45b107d",
+      "lastModificationDate": 1693802353679,
+      "contentHash": "c6f50d94ea06e05622ee41a1a75f13f4",
       "sourceName": "test/foundry/NewFundingRate.t.sol",
       "solcConfig": {
         "settings": {
@@ -3146,8 +3146,8 @@
       }
     },
     "test/foundry/gasCalculation/Users100.t.sol": {
-      "lastModificationDate": 1693595608962,
-      "contentHash": "7d675f02db8ccb6e687d3bd59f98f184",
+      "lastModificationDate": 1693810866720,
+      "contentHash": "36eb03f49de35e32310e6e9b121d93e0",
       "sourceName": "test/foundry/gasCalculation/Users100.t.sol",
       "solcConfig": {
         "settings": {
@@ -3241,8 +3241,8 @@
       }
     },
     "test/foundry/gasCalculation/Users1000.t.sol": {
-      "lastModificationDate": 1693594900500,
-      "contentHash": "76fe585fdb815d57a7b02045365dfaa7",
+      "lastModificationDate": 1693811291459,
+      "contentHash": "cca4fd2ad17b6d1c3f67176207e9b274",
       "sourceName": "test/foundry/gasCalculation/Users1000.t.sol",
       "solcConfig": {
         "settings": {
@@ -3621,8 +3621,8 @@
       }
     },
     "test/foundry/gasCalculation/Users60.t.sol": {
-      "lastModificationDate": 1693595513143,
-      "contentHash": "da7d8354167fd2cfdb4ab6a90c3bebcc",
+      "lastModificationDate": 1693810876088,
+      "contentHash": "cb12921e8d8ce64cd16eeae456cb2237",
       "sourceName": "test/foundry/gasCalculation/Users60.t.sol",
       "solcConfig": {
         "settings": {

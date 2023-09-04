@@ -27,10 +27,10 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   uint256 public liquidationFee;
 
-  uint8 public discountRate = 20; //20%
-  uint8 public saveLevelMargin = 60; //60%
-  uint8 public maintenanceMargin = 50; //50%
-  uint8 public AutoCloseMargin = 40; //40%
+  uint256 public discountRate = 20e18; //20%
+  uint256 public saveLevelMargin = 60e18; //60%
+  uint256 public maintenanceMargin = 50e18; //50%
+  uint256 public AutoCloseMargin = 40e18; //40%
 
   uint8 public swapFee = 10; //=> 10/10000 = 0.1%
   uint256 public latestFeeUpdate;
@@ -78,6 +78,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   event Price(uint price, uint volume, uint timestamp, uint vAssetPoolSize, uint vUsdPoolSize);
 
+  event SetFundingRate(uint marketPrice, uint oraclePrice, int fundingRate, int allLongAssetBalance, int allShortAssetBalance, uint time);
+
+
   constructor(
     address _usdc,
     address _exchangeInfo,
@@ -122,13 +125,13 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     exchangeInfo = ExchangeInfo(_exchangeInfo);
   }
 
-  function lastFundingRateAmount() public view returns (int256) {
-    return exchangeInfo.assetFundingfractionaverage(assetName);
-  }
+  // function lastFundingRateAmount() public view returns (int256) {
+  //   return exchangeInfo.assetFundingfractionaverage(assetName);
+  // }
 
-  function lastFundingRateTime() public view returns (uint256) {
-    return exchangeInfo.lastUpdateTime();
-  }
+  // function lastFundingRateTime() public view returns (uint256) {
+  //   return exchangeInfo.lastUpdateTime();
+  // }
 
   function oraclePrice() public view returns (uint256) {
     return exchangeInfo.assetPrice(assetName);
@@ -256,9 +259,9 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     int256 totalAccountValue = getAccountValue(msg.sender);
     if (totalPositionNotional > 0) {
       int256 newAccountValue = totalAccountValue - int256(_amount);
-      int256 newMargin = (100 * newAccountValue) / int256(totalPositionNotional);
+      int256 newMargin = (100e18 * newAccountValue)/ int256(totalPositionNotional);
       require(
-        newMargin > int8(saveLevelMargin),
+        newMargin >= int(saveLevelMargin),
         "You cannot withdraw because your margin is lower than the saveMargin level"
       );
     }
@@ -339,9 +342,6 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   
 
-  function getCurrentExchangePrice() public view returns (uint256) {
-    return (1e18 * pool.vUsdPoolSize) / pool.vAssetPoolSize;
-  }
   
   
   function openLongPosition(uint256 _usdAmount, uint256 _minimumAssetAmountOut) public {
@@ -634,7 +634,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     if (virtualBalances[_user].uservAssetBalance > 0) {
       uint256 k = _vAssetNewPoolSize * _vUsdNewPoolSize;
       uint256 newvAssetPoolSize = _vAssetNewPoolSize +
-        uint256(virtualBalances[_user].uservAssetBalance);
+      uint256(virtualBalances[_user].uservAssetBalance);
       uint256 newvUsdPoolSize = k / newvAssetPoolSize;
       uint256 currentAssetValue = _vUsdNewPoolSize - newvUsdPoolSize;
       int256 pnl = int256(currentAssetValue) + (virtualBalances[_user].uservUsdBalance);
@@ -719,7 +719,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     int256 accountValue = getAccountValue(_user);
     uint256 positionNotional = getPositionNotional(_user);
     if (accountValue != 0 && positionNotional > 0) {
-      int256 margin = (100 * accountValue) / int256(positionNotional);
+      int256 margin = (100e18 * accountValue) / int256(positionNotional);
       return margin;
     } else {
       return 0;
@@ -735,7 +735,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     int256 accountValue = _getNewAccountValue(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
     uint256 positionNotional = _getNewPositionNotional(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
     if (accountValue != 0 && positionNotional > 0) {
-      int256 margin = (100 * accountValue) / int256(positionNotional);
+      int256 margin = (100e18 * accountValue) / int256(positionNotional);
       return margin;
     } else {
       return 0;
@@ -744,7 +744,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   function isHardLiquidatable(address _user) public view returns (bool) {
     int256 userMargin = userMargin(_user);
-    if (userMargin != 0 && userMargin <= int8(AutoCloseMargin)) {
+    if (userMargin != 0 && userMargin < int(AutoCloseMargin)) {
       return true;
     } else {
       return false;
@@ -758,7 +758,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 _vUsdNewPoolSize
   ) public view returns (bool) {
     int256 userMargin = _userNewMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
-    if (userMargin != 0 && userMargin <= int8(AutoCloseMargin) && msg.sender != _user) {
+    if (userMargin != 0 && userMargin < int(AutoCloseMargin) && msg.sender != _user) {
       return true;
     } else {
       return false;
@@ -771,7 +771,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     uint256 _vUsdNewPoolSize
   ) public view returns (bool) {
     int256 newMargin = _newMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
-    if (newMargin != 0 && newMargin <= int8(saveLevelMargin)) {
+    if (newMargin != 0 && newMargin < int(saveLevelMargin)) {
       return true;
     } else {
       return false;
@@ -806,7 +806,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     int256 accountValue = int256(collateral[usdc][_user]) + pnl + virtualBalances[_user].virtualCollateral;
     int256 newMargin;
     if(newPositionNotional>0){
-      newMargin = (100*accountValue) / int256(newPositionNotional);
+      newMargin = (100e18*accountValue) / int256(newPositionNotional);
     }
     return int(newMargin);
   }
@@ -816,7 +816,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
   function isPartialLiquidatable(address _user) public view returns (bool) {
     int256 userMargin = userMargin(_user);
-    if (int8(AutoCloseMargin) <= userMargin && userMargin <= int8(maintenanceMargin)) {
+    if (int(AutoCloseMargin) < userMargin && userMargin < int(maintenanceMargin)) {
       return true;
     } else {
       return false;
@@ -831,7 +831,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   ) public view returns (bool) {
     int256 userMargin = _userNewMargin(_user, _vAssetNewPoolSize, _vUsdNewPoolSize);
     // if ( 40 < userMargin < 50 ) => user is partial liquidatable
-    if (int8(AutoCloseMargin) <= userMargin && userMargin <= int8(maintenanceMargin) && msg.sender != _user) {
+    if (int(AutoCloseMargin) < userMargin && userMargin < int(maintenanceMargin) && msg.sender != _user) {
       return true;
     } else {
       return false;
@@ -926,7 +926,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
 
     }
     uint256 collateralValue = collateral[usdc][_user];
-    uint256 discountAmount = (discountRate * collateralValue) / 100;
+    uint256 discountAmount = (discountRate * collateralValue) / 100e18;
     collateral[usdc][_user] -= discountAmount;
     liquidationFee += discountAmount;
   }
@@ -968,7 +968,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
       emit Price(marketPrice(), _assetSize, block.timestamp, pool.vAssetPoolSize, pool.vUsdPoolSize);
       // reduce short users virtual collateral
-      (, int256 allShortAssetBalance,,) = getTotalBalances();
+      // (, int256 allShortAssetBalance,,) = getTotalBalances();
+      int256 allShortAssetBalance = allShortvAssetBalances;
       for (uint256 i = 0; i < activeUsers.length; i++) {
         address user = activeUsers[i];
         if (virtualBalances[user].uservAssetBalance < 0) {
@@ -1002,7 +1003,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       emit HardLiquidate(_user, marketPrice(), block.timestamp, _assetSize, positive(negativeValue));
       emit Price(marketPrice(), _assetSize, block.timestamp, pool.vAssetPoolSize, pool.vUsdPoolSize); 
       // reduce long users virtual collateral
-      (int256 allLongvAssetBalance,,,) = getTotalBalances();
+      // (int256 allLongvAssetBalance,,,) = getTotalBalances();
+      int256 allLongvAssetBalance = allLongvAssetBalances;
       for (uint256 i = 0; i < activeUsers.length; i++) {
         address user = activeUsers[i];
         if (virtualBalances[user].uservAssetBalance > 0) {
@@ -1019,10 +1021,10 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     int256 totalAccountValue = getAccountValue(_user);
     uint256 totalPositionNotional = getPositionNotional(_user);
     uint256 numerator = (totalPositionNotional * saveLevelMargin) /
-      100 -
+      100e18 -
       positive(totalAccountValue);
     uint256 denominator = saveLevelMargin - discountRate;
-    x = (numerator * 100) / denominator;
+    x = (numerator * 100e18) / denominator;
   }
 
   //calculate liquidation amount to turn back the user margin to the save level(60%) according to the new price
@@ -1038,10 +1040,10 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       _vUsdNewPoolSize
     );
     uint256 numerator = (totalPositionNotional * saveLevelMargin) /
-      100 -
+      100e18 -
       positive(totalAccountValue);
     uint256 denominator = saveLevelMargin - discountRate;
-    uint256 x = (numerator * 100) / denominator;
+    uint256 x = (numerator * 100e18) / denominator;
     return x;
   }
 
@@ -1156,7 +1158,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       emit PartialLiquidate(msg.sender, marketPrice(), block.timestamp, AssetLiquidateAmount, positive(userPartialvUsdBalance));
       emit Price(marketPrice(), AssetLiquidateAmount, block.timestamp, pool.vAssetPoolSize, pool.vUsdPoolSize);
     }
-    uint256 discountAmount = (liquidateAmount * discountRate) / 100;
+    uint256 discountAmount = (liquidateAmount * discountRate) / 100e18;
     collateral[usdc][_user] -= discountAmount;
     liquidationFee += discountAmount;
   }
@@ -1220,48 +1222,38 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
   }
 
-  function getTotalBalances() public view returns (int256, int256, int256, int256) {
-    int256 allLongAssetBalance;
-    int256 allShortAssetBalance;
-    int256 allLongUsdBalance;
-    int256 allShortUsdBalance;
-    for (uint256 i; i < activeUsers.length; i++) {
-      address user = activeUsers[i];
-      int256 vAssetBalance = virtualBalances[user].uservAssetBalance;
-      int256 vUsdBalance = virtualBalances[user].uservUsdBalance;
-      //calculate asset balances
-      if (vAssetBalance > 0) {
-        allLongAssetBalance += vAssetBalance;
-      }else{
-        allShortAssetBalance += vAssetBalance;
-      }
-      //calculate asset balances
-      if (vUsdBalance > 0) {
-        allShortUsdBalance += vUsdBalance;
-      }else{
-        allLongUsdBalance += vUsdBalance;
-      }
-    }
-    
-    return (
-      allLongAssetBalance,
-      allShortAssetBalance,
-      allLongUsdBalance,
-      allShortUsdBalance
-    );
-  }
-
-  // function getAllShortvAssetBalance() public view returns (int256) {
+  // function getTotalBalances() public view returns (int256, int256, int256, int256) {
+  //   int256 allLongAssetBalance;
   //   int256 allShortAssetBalance;
+  //   int256 allLongUsdBalance;
+  //   int256 allShortUsdBalance;
   //   for (uint256 i; i < activeUsers.length; i++) {
   //     address user = activeUsers[i];
   //     int256 vAssetBalance = virtualBalances[user].uservAssetBalance;
-  //     if (vAssetBalance < 0) {
+  //     int256 vUsdBalance = virtualBalances[user].uservUsdBalance;
+  //     //calculate asset balances
+  //     if (vAssetBalance > 0) {
+  //       allLongAssetBalance += vAssetBalance;
+  //     }else{
   //       allShortAssetBalance += vAssetBalance;
   //     }
+  //     //calculate asset balances
+  //     if (vUsdBalance > 0) {
+  //       allShortUsdBalance += vUsdBalance;
+  //     }else{
+  //       allLongUsdBalance += vUsdBalance;
+  //     }
   //   }
-  //   return allShortAssetBalance;
+    
+  //   return (
+  //     allLongAssetBalance,
+  //     allShortAssetBalance,
+  //     allLongUsdBalance,
+  //     allShortUsdBalance
+  //   );
   // }
+
+  
 
   function setFundingRate() external {
     uint fundingFractionTime = exchangeInfo.lastUpdateTime();
@@ -1270,6 +1262,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     require(isFundingRateUsed == false, "This funding rate is used befor");
     int fundingFraction = exchangeInfo.assetFundingfractionaverage(assetName);
     uint oraclePrice = exchangeInfo.assetPrice(assetName);
+    uint marketPrice = marketPrice();
     require(fundingFraction != 0, "Funding fraction should not be zero");
     require(oraclePrice != 0, "Oracle price should not be zero");
     //first the contract check actual vAsset positions balance of users
@@ -1325,6 +1318,8 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
       }
       lastSetFundingRateTime = block.timestamp;
       exchangeInfo.setFundingRateUsed(assetName, true);
+      emit SetFundingRate(marketPrice, oraclePrice, fundingFraction, allLongvAssetBalance, allShortAssetBalance, block.timestamp);
+
     }
   }
  

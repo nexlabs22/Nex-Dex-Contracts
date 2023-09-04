@@ -144,11 +144,10 @@ contract FundingRate is Test, ExchangeDeployer {
        console.logInt(add3FundingFee);
        console.logInt(add4FundingFee);
        console.logInt(exchangeInfo.assetFundingfractionaverage("M"));
-       console.log("FundingFee", exchange.kfundingFee());
        //check bools and times
        assertEq(exchangeInfo.isFundingRateUsed(exchange.assetName()), true);
 
-       (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
+       (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchangeInfo.getTotalBalances(address(exchange));
        assertEq(allLongAssetBalance, exchange.allLongvAssetBalances());
        assertEq(allShortAssetBalance, exchange.allShortvAssetBalances());
        assertEq(allLongUsdBalance, exchange.allLongvUsdBalances());

@@ -112,7 +112,7 @@ contract Users100 is Test, ExchangeDeployer {
             exchange.setFundingRate();
         }
 
-        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchange.getTotalBalances();
+        (int allLongAssetBalance, int256 allShortAssetBalance, int allLongUsdBalance, int allShortUsdBalance) = exchangeInfo.getTotalBalances(address(exchange));
         console.log("all Long asset balance");
         console.logInt(allLongAssetBalance);
         console.logInt(exchange.allLongvAssetBalances());
