@@ -812,6 +812,40 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
   }
 
 
+  function _newMargin2(
+    address _user,
+    uint256 _vAssetNewPoolSize,
+    uint256 _vUsdNewPoolSize
+  ) public view returns (int) {
+    //calculate new position notional
+    int userNewAssetBalance = virtualBalances[_user].uservAssetBalance + int(pool.vAssetPoolSize) - int(_vAssetNewPoolSize);
+    int userNewUsdBalance = virtualBalances[_user].uservUsdBalance + int(pool.vUsdPoolSize) - int(_vUsdNewPoolSize);
+    int fee = (10*(int(pool.vUsdPoolSize) - int(_vUsdNewPoolSize)))/10000;
+    uint256 newPositionNotional;
+    int pnl;
+    if(userNewAssetBalance>0){
+      uint256 k = _vAssetNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvAssetPoolSize = _vAssetNewPoolSize + uint(userNewAssetBalance);
+      uint256 newvUsdPoolSize = k/newvAssetPoolSize;
+      newPositionNotional = _vUsdNewPoolSize - newvUsdPoolSize;
+      pnl = int(newPositionNotional) - absoluteInt(userNewUsdBalance);
+    }else{
+      uint256 k = _vAssetNewPoolSize * _vUsdNewPoolSize;
+      uint256 newvAssetPoolSize = _vAssetNewPoolSize - positive(userNewAssetBalance);
+      uint256 newvUsdPoolSize = k/newvAssetPoolSize;
+      newPositionNotional = newvUsdPoolSize - _vUsdNewPoolSize;
+      pnl = absoluteInt(userNewUsdBalance) - int(newPositionNotional);
+    }
+    //account value
+    int256 accountValue = int256(collateral[usdc][_user]) + pnl + virtualBalances[_user].virtualCollateral - absoluteInt(fee);
+    int256 newMargin;
+    if(newPositionNotional>0){
+      newMargin = (100e18*accountValue) / int256(newPositionNotional);
+    }
+    return int(newMargin);
+  }
+
+
   
 
   function isPartialLiquidatable(address _user) public view returns (bool) {
@@ -838,6 +872,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     }
   }
 
+  
   //this function is called if user should be liquidated by new price
   function _hardLiquidate(
     address _user,
@@ -1163,6 +1198,7 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     liquidationFee += discountAmount;
   }
 
+  int public liquidatedUser;
   //liquidate users according to the new price (is used only in trade trade functions)
   function _hardLiquidateUsers(uint256 _vAssetNewPoolSize, uint256 _vUsdNewPoolSize)
     internal
@@ -1171,14 +1207,16 @@ contract Exchange is Ownable, ReentrancyGuard, Pausable {
     vAssetNewPoolSize = _vAssetNewPoolSize;
     vUsdNewPoolSize = _vUsdNewPoolSize;
     for (uint256 i = 0; i < activeUsers.length; i++) {
-      if (activeUsers[i] != address(0)) {
+      if (activeUsers[i] != address(0) && msg.sender != activeUsers[i]) {
         bool isLiquidatable = _isHardLiquidatable(
           activeUsers[i],
           vAssetNewPoolSize,
           vUsdNewPoolSize
         );
-        if (isLiquidatable == true) {
+        
+        if (isLiquidatable == true && msg.sender != activeUsers[i]) {
           int256 userMargin = _userNewMargin(activeUsers[i], vAssetNewPoolSize, vUsdNewPoolSize);
+          liquidatedUser = userMargin;
           if (userMargin > 0) {
             (vAssetNewPoolSize, vUsdNewPoolSize) = _hardLiquidate(
               activeUsers[i],

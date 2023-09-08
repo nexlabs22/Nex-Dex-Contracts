@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/Exchange.sol": {
-      "lastModificationDate": 1693810671944,
-      "contentHash": "ce35bbef74a2248d382d8eba552025d7",
+      "lastModificationDate": 1694158007247,
+      "contentHash": "f775f7862c0501f51050c3bc0cda01d9",
       "sourceName": "contracts/Exchange.sol",
       "solcConfig": {
         "settings": {
@@ -80,7 +80,7 @@
       }
     },
     "contracts/ExchangeInfo.sol": {
-      "lastModificationDate": 1693810664998,
+      "lastModificationDate": 1693812728868,
       "contentHash": "093bba7efdf6189107ca5155f3071c39",
       "sourceName": "contracts/ExchangeInfo.sol",
       "solcConfig": {
@@ -2766,8 +2766,8 @@
       }
     },
     "test/foundry/MaxPositionAmount.t.sol": {
-      "lastModificationDate": 1693813091429,
-      "contentHash": "27f0d14e793c62259853e72d77dbc215",
+      "lastModificationDate": 1694169106693,
+      "contentHash": "e824e1135449f544b16b0cae2b95382a",
       "sourceName": "test/foundry/MaxPositionAmount.t.sol",
       "solcConfig": {
         "settings": {
